@@ -251,3 +251,18 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ---
 
 ⭐ ¡No olvides dar una estrella al proyecto si te resulta útil!
+
+## 📅 Planificación de Desarrollo
+
+El proyecto está dividido en **5 sprints estratégicos**:
+
+### 🎓 Periodo Académico (4 semanas)
+- **Sprint 1** (2 sem): Fundación - Auth + Personal básico (6 HU)
+- **Sprint 2** (2 sem): Asistencia básica + Usuarios (6 HU)
+
+### 🏖️ Periodo Vacaciones (8 semanas)  
+- **Sprint 3** (3 sem): Reportes + Permisos + Nómina base (6 HU)
+- **Sprint 4** (3 sem): Nómina completa + Productividad (7 HU)
+- **Sprint 5** (2 sem): Reportes avanzados + Optimización (7 HU)
+
+📋 Ver planificación detallada en [`PLANIFICACION_SPRINTS.md`](PLANIFICACION_SPRINTS.md)
