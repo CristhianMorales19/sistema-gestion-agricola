@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id                Int      @id @default(autoincrement())
+  email             String   @unique
+  password          String
+  nombre            String
+  apellido          String
+  rol               Rol      @default(EMPLEADO)
+  activo            Boolean  @default(true)
+  ultimoAcceso      DateTime?
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Relaciones
+  empleado          Empleado?
+  
+  @@map("usuarios")
+}
+
+model Empleado {
+  id                Int      @id @default(autoincrement())
+  cedula            String   @unique
+  nombre            String
+  apellido          String
+  email             String   @unique
+  telefono          String?
+  direccion         String?
+  fechaNacimiento   DateTime?
+  fechaIngreso      DateTime
+  salarioBase       Decimal  @db.Decimal(10, 2)
+  activo            Boolean  @default(true)
+  fotoUrl           String?
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Claves foráneas
+  cargoId           Int
+  departamentoId    Int
+  usuarioId         Int?     @unique
+
+  // Relaciones
+  cargo             Cargo    @relation(fields: [cargoId], references: [id])
+  departamento      Departamento @relation(fields: [departamentoId], references: [id])
+  usuario           Usuario? @relation(fields: [usuarioId], references: [id])
+  
+  // Relaciones inversas
+  registrosAsistencia RegistroAsistencia[]
+  nominasGeneradas    Nomina[]
+  tareasCompletadas   TareaCompletada[]
+  evaluaciones        EvaluacionRendimiento[]
+  metasAsignadas      Meta[]
+  permisosSolicitados Permiso[]
+
+  @@map("empleados")
+}
+
+model Cargo {
+  id                Int      @id @default(autoincrement())
+  nombre            String   @unique
+  descripcion       String?
+  salarioBase       Decimal  @db.Decimal(10, 2)
+  activo            Boolean  @default(true)
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Relaciones
+  empleados         Empleado[]
+
+  @@map("cargos")
+}
+
+model Departamento {
+  id                Int      @id @default(autoincrement())
+  nombre            String   @unique
+  descripcion       String?
+  activo            Boolean  @default(true)
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Relaciones
+  empleados         Empleado[]
+
+  @@map("departamentos")
+}
+
+model RegistroAsistencia {
+  id                Int      @id @default(autoincrement())
+  fecha             DateTime @db.Date
+  horaEntrada       DateTime?
+  horaSalida        DateTime?
+  horasRegulares    Decimal? @db.Decimal(4, 2)
+  horasExtras       Decimal? @db.Decimal(4, 2)
+  estado            EstadoAsistencia @default(PRESENTE)
+  observaciones     String?
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Claves foráneas
+  empleadoId        Int
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@unique([empleadoId, fecha])
+  @@map("registros_asistencia")
+}
+
+model Permiso {
+  id                Int      @id @default(autoincrement())
+  tipo              TipoPermiso
+  fechaInicio       DateTime @db.Date
+  fechaFin          DateTime @db.Date
+  motivo            String
+  estado            EstadoPermiso @default(PENDIENTE)
+  observaciones     String?
+  fechaSolicitud    DateTime @default(now())
+  fechaRespuesta    DateTime?
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Claves foráneas
+  empleadoId        Int
+  aprobadoPorId     Int?
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@map("permisos")
+}
+
+model Nomina {
+  id                Int      @id @default(autoincrement())
+  periodo           String   // YYYY-MM
+  salarioBase       Decimal  @db.Decimal(10, 2)
+  horasRegulares    Decimal  @db.Decimal(6, 2)
+  horasExtras       Decimal  @db.Decimal(6, 2)
+  valorHorasExtras  Decimal  @db.Decimal(10, 2)
+  bonificaciones    Decimal  @db.Decimal(10, 2) @default(0)
+  deducciones       Decimal  @db.Decimal(10, 2) @default(0)
+  totalBruto        Decimal  @db.Decimal(10, 2)
+  totalNeto         Decimal  @db.Decimal(10, 2)
+  fechaProceso      DateTime @default(now())
+  fechaPago         DateTime?
+  estado            EstadoNomina @default(CALCULADA)
+  observaciones     String?
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Claves foráneas
+  empleadoId        Int
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+  deducciones       DeduccionNomina[]
+
+  @@unique([empleadoId, periodo])
+  @@map("nominas")
+}
+
+model DeduccionNomina {
+  id                Int      @id @default(autoincrement())
+  concepto          String
+  valor             Decimal  @db.Decimal(10, 2)
+  esObligatoria     Boolean  @default(true)
+  fechaCreacion     DateTime @default(now())
+
+  // Claves foráneas
+  nominaId          Int
+
+  // Relaciones
+  nomina            Nomina   @relation(fields: [nominaId], references: [id])
+
+  @@map("deducciones_nomina")
+}
+
+model TareaCompletada {
+  id                Int      @id @default(autoincrement())
+  descripcion       String
+  fechaCompletada   DateTime @default(now())
+  horasInvertidas   Decimal? @db.Decimal(4, 2)
+  calificacion      Int?     // 1-5
+  observaciones     String?
+  fechaCreacion     DateTime @default(now())
+
+  // Claves foráneas
+  empleadoId        Int
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@map("tareas_completadas")
+}
+
+model Meta {
+  id                Int      @id @default(autoincrement())
+  titulo            String
+  descripcion       String
+  fechaInicio       DateTime @db.Date
+  fechaVencimiento  DateTime @db.Date
+  valorObjetivo     Decimal  @db.Decimal(10, 2)
+  valorActual       Decimal  @db.Decimal(10, 2) @default(0)
+  unidadMedida      String
+  estado            EstadoMeta @default(EN_PROGRESO)
+  fechaCreacion     DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+
+  // Claves foráneas
+  empleadoId        Int
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@map("metas")
+}
+
+model EvaluacionRendimiento {
+  id                Int      @id @default(autoincrement())
+  periodo           String   // YYYY-MM
+  puntajeGeneral    Decimal  @db.Decimal(3, 2) // 0.00 - 5.00
+  puntajeAsistencia Decimal  @db.Decimal(3, 2)
+  puntajeProductividad Decimal @db.Decimal(3, 2)
+  puntajeCalidad    Decimal  @db.Decimal(3, 2)
+  observaciones     String?
+  recomendaciones   String?
+  fechaEvaluacion   DateTime @default(now())
+  fechaCreacion     DateTime @default(now())
+
+  // Claves foráneas
+  empleadoId        Int
+  evaluadorId       Int?
+
+  // Relaciones
+  empleado          Empleado @relation(fields: [empleadoId], references: [id])
+
+  @@unique([empleadoId, periodo])
+  @@map("evaluaciones_rendimiento")
+}
+
+// Enums
+enum Rol {
+  ADMIN
+  SUPERVISOR
+  EMPLEADO
+}
+
+enum EstadoAsistencia {
+  PRESENTE
+  AUSENTE
+  TARDANZA
+  PERMISO
+}
+
+enum TipoPermiso {
+  MEDICO
+  PERSONAL
+  VACACIONES
+  CALAMIDAD
+}
+
+enum EstadoPermiso {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+enum EstadoNomina {
+  CALCULADA
+  PAGADA
+  ANULADA
+}
+
+enum EstadoMeta {
+  EN_PROGRESO
+  COMPLETADA
+  VENCIDA
+  CANCELADA
+}
