@@ -5,7 +5,7 @@
 
 ## 🎯 Historias de Usuario (6 HU)
 
-### HU-026: Login de usuario ⭐ **CRÍTICO**
+### HU-0: Login de usuario ⭐ **CRÍTICO**
 **Como** usuario del sistema  
 **Quiero** poder iniciar sesión con mi email y contraseña  
 **Para** acceder a las funcionalidades del sistema
@@ -17,7 +17,7 @@
 - [x] Manejo de errores de autenticación
 - [x] Persistencia de sesión con JWT
 
-### HU-027: Logout de usuario ⭐ **CRÍTICO**
+### HU-0: Logout de usuario ⭐ **CRÍTICO**
 **Como** usuario autenticado  
 **Quiero** poder cerrar mi sesión  
 **Para** proteger mi información al salir del sistema
@@ -28,7 +28,7 @@
 - [x] Redirección a página de login
 - [x] Limpieza del estado de la aplicación
 
-### HU-001: Registro de nuevo empleado ⭐ **CRÍTICO**
+### HU-0: Registro de nuevo empleado ⭐ **CRÍTICO**
 **Como** administrador  
 **Quiero** registrar un nuevo empleado  
 **Para** gestionar el personal de la empresa
