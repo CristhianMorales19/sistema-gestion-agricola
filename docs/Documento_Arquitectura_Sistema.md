@@ -6,16 +6,22 @@
 
 # Documento de la Arquitectura del Sistema
 
-## Sistema de Gestión Agrícola
-**Número de Proyecto:** SGA-2025-001
+## Sistema de Gestión Agrícola - Control y Planificación de Mano de Obra
+**Número de Proyecto:** 13
 
 ### Integrantes:
-- [Nombre del Estudiante 1]
-- [Nombre del Estudiante 2] 
-- [Nombre del Estudiante 3]
-- [Nombre del Estudiante 4]
+- Omar Mendez Chavez
+- Cristhian Morales Abendaño
 
 **Versión 1.0**
+
+---
+
+## Historial de Revisiones
+
+| Fecha | Versión | Descripción | Autor |
+|-------|---------|-------------|-------|
+| 29/07/2025 | 1.0 | Versión inicial del documento de arquitectura del sistema | Omar Mendez, Cristhian Morales |
 
 ---
 
@@ -34,9 +40,10 @@
   - [ESCUELA DE INFORMATICA](#escuela-de-informatica)
     - [Cátedra Ingeniería de Sistemas](#cátedra-ingeniería-de-sistemas)
 - [Documento de la Arquitectura del Sistema](#documento-de-la-arquitectura-del-sistema)
-  - [Sistema de Gestión Agrícola](#sistema-de-gestión-agrícola)
+  - [Sistema de Gestión Agrícola - Control y Planificación de Mano de Obra](#sistema-de-gestión-agrícola---control-y-planificación-de-mano-de-obra)
     - [Integrantes:](#integrantes)
   - [Historial de Revisiones](#historial-de-revisiones)
+  - [Historial de Revisiones](#historial-de-revisiones-1)
   - [Tabla de Contenido](#tabla-de-contenido)
 - [Arquitectura del Sistema](#arquitectura-del-sistema)
   - [1. Introducción](#1-introducción)
@@ -51,6 +58,12 @@
       - [2.3.2 Registro de usuarios nuevos](#232-registro-de-usuarios-nuevos)
       - [2.3.3 Control de acceso de los usuarios y los componentes del sistema](#233-control-de-acceso-de-los-usuarios-y-los-componentes-del-sistema)
       - [2.3.4 Bitácoras de transacciones](#234-bitácoras-de-transacciones)
+    - [2.2 Portabilidad](#22-portabilidad-1)
+    - [2.3 Seguridad](#23-seguridad-1)
+      - [2.3.1 Controles sobre la composición y asignación del password (políticas de seguridad)](#231-controles-sobre-la-composición-y-asignación-del-password-políticas-de-seguridad-1)
+      - [2.3.2 Registro de usuarios nuevos](#232-registro-de-usuarios-nuevos-1)
+      - [2.3.3 Control de acceso de los usuarios y los componentes del sistema](#233-control-de-acceso-de-los-usuarios-y-los-componentes-del-sistema-1)
+      - [2.3.4 Bitácoras de transacciones](#234-bitácoras-de-transacciones-1)
     - [2.4 Confiabilidad/Disponibilidad](#24-confiabilidaddisponibilidad)
     - [2.5 Desempeño](#25-desempeño)
       - [2.5.1 Requisitos de desempeño](#251-requisitos-de-desempeño)
@@ -64,10 +77,6 @@
       - [4.1.1 Organización por Características (Features)](#411-organización-por-características-features)
       - [4.1.2 Flujo de Datos por Característica](#412-flujo-de-datos-por-característica)
       - [4.1.3 Modelo de Datos por Dominio](#413-modelo-de-datos-por-dominio)
-    - [4.2 Vista de desarrollo o implementación](#42-vista-de-desarrollo-o-implementación)
-    - [4.3 Vista de Procesos](#43-vista-de-procesos)
-    - [4.4 Vista Física](#44-vista-física)
-    - [4.5 Vista Escenarios](#45-vista-escenarios)
   - [5. Anexos](#5-anexos)
 
 ---
@@ -122,6 +131,87 @@ El Sistema de Gestión Agrícola se desarrollará utilizando las siguientes tecn
 
 **Herramientas de Desarrollo:**
 - Visual Studio Code como IDE principal
+- Git para control de versiones
+- ESLint y Prettier para calidad de código
+- Jest para testing unitario
+- Nodemon para desarrollo con hot-reload
+
+### 2.2 Portabilidad
+
+El sistema está diseñado para ejecutarse en múltiples plataformas:
+
+**Sistemas Operativos Soportados:**
+- Windows 10/11
+- macOS 10.15+
+- Linux (Ubuntu 18.04+, CentOS 7+)
+
+**Acceso al Sistema:**
+- **Aplicación Web**: Navegadores modernos (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
+- **Dispositivos**: Compatible con desktop, tablet y móvil (responsive design)
+- **Red**: Acceso local (LAN) y potencial para acceso remoto vía VPN
+
+### 2.3 Seguridad
+
+El sistema implementa múltiples capas de seguridad para proteger la información sensible:
+
+#### 2.3.1 Controles sobre la composición y asignación del password (políticas de seguridad)
+
+**Políticas de Contraseña:**
+- Mínimo 8 caracteres, máximo 128 caracteres
+- Debe contener al menos: 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial
+- No puede contener información personal (nombre, apellido, email)
+- Renovación obligatoria cada 90 días para usuarios administrativos
+- Historial de últimas 5 contraseñas para evitar reutilización
+- Bloqueo temporal después de 5 intentos fallidos (15 minutos)
+- Recuperación mediante token de un solo uso vía email
+
+#### 2.3.2 Registro de usuarios nuevos
+
+**Proceso de Registro:**
+- Solo usuarios con rol "Administrador" pueden crear nuevos usuarios
+- Validación de email único en el sistema
+- Asignación de rol específico según el puesto del empleado
+- Generación de contraseña temporal que debe cambiarse en el primer login
+- Activación de cuenta mediante email de confirmación
+- Auditoría completa del proceso de registro
+
+#### 2.3.3 Control de acceso de los usuarios y los componentes del sistema
+
+**Sistema de Roles y Permisos:**
+
+| Módulo | Admin | Gerente RRHH | Sup.Campo | Sup.RRHH | Empleado |
+|--------|-------|--------------|-----------|----------|----------|
+| **Gestión Personal** | | | | | |
+| Crear Trabajador | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Editar Info Personal | ✅ | ✅ | ❌ | Limitado | Solo Propio |
+| Ver Empleados | ✅ | ✅ | Solo Cuadrilla | ✅ | Solo Propio |
+| Eliminar Empleado | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Control Asistencia** | | | | | |
+| Registrar Asistencia | ✅ | ✅ | ✅ | ✅ | Solo Propio |
+| Ver Reportes Asistencia | ✅ | ✅ | Solo Cuadrilla | ✅ | Solo Propio |
+| Aprobar Permisos | ✅ | ✅ | ✅ | ❌ | ❌ |
+| **Gestión Nómina** | | | | | |
+| Configurar Salarios | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Ver Recibos Pago | ✅ | ✅ | ❌ | ✅ | Solo Propio |
+| Generar Nómina | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Productividad** | | | | | |
+| Asignar Tareas | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Registrar Progreso | ✅ | ✅ | ✅ | ❌ | Solo Propio |
+| Ver Indicadores | ✅ | ✅ | Solo Cuadrilla | ✅ | Solo Propio |
+| **Reportes** | | | | | |
+| Reportes Ejecutivos | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Reportes Operativos | ✅ | ✅ | ✅ | ✅ | Solo Propio |
+| Exportar Reportes | ✅ | ✅ | Limitado | ✅ | ❌ |
+
+#### 2.3.4 Bitácoras de transacciones
+
+**Registro de Auditoría:**
+- Todas las operaciones CRUD se registran con: usuario, fecha/hora, IP, acción realizada
+- Logs de acceso exitoso y fallido al sistema  
+- Registro de cambios en información sensible (salarios, datos personales)
+- Backup automático de logs cada 24 horas
+- Retención de logs por 12 meses para auditorías
+- Logs a nivel de aplicación (Winston) y base de datos (triggers)
 - Git para control de versiones
 - ESLint y Prettier para calidad de código
 - Jest para testing
@@ -503,14 +593,170 @@ La aplicación se organiza por características de negocio, donde cada módulo c
 ├─────────────────────────────────────────────────────────────┤
 │ src/caracteristicas/                                        │
 │ ├── autenticacion/                                          │
-│ │   ├── componentes/      (LoginForm, RegisterForm)         │
-│ │   ├── servicios/        (authService, userService)        │
-│ │   ├── hooks/            (useAuth, useLogin)               │
-│ │   └── tipos/            (User, AuthState)                 │
+│ │   ├── componentes/      (LoginForm, ProtectedRoute)       │
+│ │   ├── servicios/        (authService, tokenService)       │
+│ │   ├── hooks/            (useAuth, usePermissions)         │
+│ │   └── tipos/            (User, AuthState, Role)           │
 │ │                                                           │
 │ ├── gestion-personal/                                       │
 │ │   ├── componentes/      (ListaEmpleados, FormEmpleado)    │
 │ │   ├── servicios/        (personalService, cargoService)   │
+│ │   ├── hooks/            (useEmpleados, useCargos)         │
+│ │   └── tipos/            (Empleado, Cargo, Departamento)   │
+│ │                                                           │
+│ ├── control-asistencia/                                     │
+│ │   ├── componentes/      (RegistroAsistencia, Reporte)     │
+│ │   ├── servicios/        (asistenciaService)               │
+│ │   ├── hooks/            (useAsistencia, useReportes)      │
+│ │   └── tipos/            (Asistencia, Horario)             │
+│ │                                                           │
+│ ├── gestion-nomina/                                         │
+│ │   ├── componentes/      (CalculoNomina, ReciboPago)       │
+│ │   ├── servicios/        (nominaService, pagoService)      │
+│ │   ├── hooks/            (useNomina, useDeducciones)       │
+│ │   └── tipos/            (Nomina, Deduccion, Recibo)       │
+│ │                                                           │
+│ ├── control-productividad/                                  │
+│ │   ├── componentes/      (RegistroTareas, Indicadores)     │
+│ │   ├── servicios/        (productividadService)            │
+│ │   ├── hooks/            (useTareas, useProductividad)     │
+│ │   └── tipos/            (Tarea, Meta, Evaluacion)         │
+│ │                                                           │
+│ └── gestion-reportes/                                       │
+│     ├── componentes/      (GeneradorReportes, Exportar)     │
+│     ├── servicios/        (reporteService, exportService)   │
+│     ├── hooks/            (useReportes, useExportacion)     │
+│     └── tipos/            (Reporte, FiltroReporte)          │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ src/infraestructura/                                        │
+│ ├── api/                 (axiosConfig, interceptors)        │
+│ ├── enrutamiento/        (AppRouter, ProtectedRoutes)       │
+│ ├── configuracion/       (constants, environment)           │
+│ └── utilidades/          (helpers, validations)             │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ src/compartido/                                             │
+│ ├── componentes/         (Button, Modal, Table)             │
+│ ├── hooks/               (useApi, useLocalStorage)          │
+│ ├── tipos/               (ApiResponse, CommonTypes)         │
+│ └── utilidades/          (formatters, validators)           │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                      BACKEND NODE.JS                        │
+├─────────────────────────────────────────────────────────────┤
+│ src/caracteristicas/                                        │
+│ ├── auth/                                                   │
+│ │   ├── controladores/    (authController, userController)  │
+│ │   ├── servicios/        (authService, jwtService)         │
+│ │   ├── repositorios/     (userRepository, roleRepository)  │
+│ │   ├── middlewares/      (authMiddleware, roleMiddleware)   │
+│ │   └── rutas/            (authRoutes, userRoutes)          │
+│ │                                                           │
+│ ├── personal/                                               │
+│ │   ├── controladores/    (empleadoController)              │
+│ │   ├── servicios/        (empleadoService, cargoService)   │
+│ │   ├── repositorios/     (empleadoRepository)              │
+│ │   └── rutas/            (empleadoRoutes)                  │
+│ │                                                           │
+│ ├── asistencia/                                             │
+│ │   ├── controladores/    (asistenciaController)            │
+│ │   ├── servicios/        (asistenciaService)               │
+│ │   ├── repositorios/     (asistenciaRepository)            │
+│ │   └── rutas/            (asistenciaRoutes)                │
+│ │                                                           │
+│ ├── nomina/                                                 │
+│ │   ├── controladores/    (nominaController)                │
+│ │   ├── servicios/        (calculoService, pagoService)     │
+│ │   ├── repositorios/     (nominaRepository)                │
+│ │   └── rutas/            (nominaRoutes)                    │
+│ │                                                           │
+│ ├── productividad/                                          │
+│ │   ├── controladores/    (tareaController)                 │
+│ │   ├── servicios/        (productividadService)            │
+│ │   ├── repositorios/     (tareaRepository)                 │
+│ │   └── rutas/            (productividadRoutes)             │
+│ │                                                           │
+│ └── reportes/                                               │
+│     ├── controladores/    (reporteController)               │
+│     ├── servicios/        (reporteService, exportService)   │
+│     ├── repositorios/     (reporteRepository)               │
+│     └── rutas/            (reporteRoutes)                   │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ src/infraestructura/                                        │
+│ ├── base-datos/          (conexion, migraciones)            │
+│ ├── middleware/          (cors, helmet, compression)        │
+│ ├── configuracion/       (environment, database)            │
+│ └── logs/                (winston, logMiddleware)           │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│ src/compartido/                                             │
+│ ├── utilidades/          (helpers, validators)              │
+│ ├── errores/             (customErrors, errorHandler)       │
+│ ├── tipos/               (interfaces, types)                │
+│ └── constantes/          (messages, statusCodes)            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 4.1.2 Flujo de Datos por Característica
+
+**Patrón de Flujo Unidireccional por Dominio:**
+
+```
+Frontend Component → Hook → Service → API Call
+                                         ↓
+Backend Route → Controller → Service → Repository → Database
+                     ↓
+                Response ← Response ← Response ← Response
+```
+
+**Ejemplo: Flujo de Registro de Asistencia**
+```
+RegistroAsistencia.tsx → useAsistencia() → asistenciaService.registrarEntrada()
+                                                    ↓
+POST /api/asistencia/entrada → asistenciaController.registrarEntrada()
+                                        ↓
+                              asistenciaService.registrarEntrada()
+                                        ↓
+                              asistenciaRepository.crear()
+                                        ↓
+                              INSERT INTO registros_asistencia
+```
+
+#### 4.1.3 Modelo de Datos por Dominio
+
+**Entidades Principales del Sistema:**
+
+**Dominio de Autenticación:**
+- `Usuario` (id, email, password_hash, rol_id, activo)
+- `Rol` (id, nombre, permisos, descripcion)
+- `Sesion` (id, usuario_id, token, expira_en)
+
+**Dominio de Personal:**
+- `Empleado` (id, cedula, nombre, apellido, cargo_id, departamento_id)
+- `Cargo` (id, nombre, salario_base, descripcion)
+- `Departamento` (id, nombre, presupuesto, supervisor_id)
+
+**Dominio de Asistencia:**
+- `RegistroAsistencia` (id, empleado_id, fecha, hora_entrada, hora_salida)
+- `Permiso` (id, empleado_id, tipo_permiso_id, fecha_inicio, fecha_fin)
+- `TipoPermiso` (id, nombre, remunerado, requiere_aprobacion)
+
+**Dominio de Nómina:**
+- `Nomina` (id, empleado_id, periodo, salario_base, horas_extras, deducciones)
+- `Deduccion` (id, nombre, tipo, monto, obligatoria)
+- `ReciboPago` (id, nomina_id, fecha_generacion, monto_total)
+
+**Dominio de Productividad:**
+- `Tarea` (id, nombre, descripcion, meta_diaria, tipo_cultivo_id)
+- `TareaCompletada` (id, empleado_id, tarea_id, fecha, cantidad, calidad)
+- `Meta` (id, empleado_id, tarea_id, objetivo, periodo)
+
+**Dominio de Reportes:**
+- `Reporte` (id, tipo, parametros, fecha_generacion, usuario_id)
+- `ReporteGenerado` (id, reporte_id, formato, ruta_archivo)
 │ │   ├── hooks/            (useEmpleados, useCargos)         │
 │ │   └── tipos/            (Empleado, Cargo)                 │
 │ │                                                           │
