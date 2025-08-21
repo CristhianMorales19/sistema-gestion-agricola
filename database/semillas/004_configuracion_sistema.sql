@@ -63,45 +63,17 @@ INSERT INTO configuracion_reportes (nombre_reporte, descripcion, tipo_reporte, c
  '["total_nomina", "total_aportes", "total_deducciones", "costo_total"]',
  '["mes", "año", "departamento_id"]', 'excel');
 
--- Tipos de permiso predefinidos
-INSERT INTO tipos_permiso (nombre, descripcion, requiere_aprobacion, maximo_dias_año, con_descuento) VALUES
-('Vacaciones', 'Vacaciones anuales del empleado', TRUE, 15, FALSE),
-('Enfermedad', 'Permiso por enfermedad', FALSE, 30, FALSE),
-('Calamidad Doméstica', 'Permiso por calamidad doméstica', TRUE, 5, FALSE),
-('Maternidad', 'Permiso de maternidad', FALSE, 84, FALSE),
-('Paternidad', 'Permiso de paternidad', FALSE, 10, FALSE),
-('Personal', 'Permiso personal sin goce de sueldo', TRUE, 10, TRUE),
-('Capacitación', 'Permiso para capacitación laboral', TRUE, 20, FALSE),
-('Cita Médica', 'Permiso para cita médica', FALSE, 12, FALSE);
+-- Tipos de permiso predefinidos (ya insertados en otras semillas)
+-- Los tipos de permiso están siendo insertados por otro archivo de semillas
 
--- Tipos de tarea predefinidos
-INSERT INTO tipos_tarea (nombre, descripcion, categoria, tiempo_estimado_horas) VALUES
-('Siembra', 'Actividades de siembra de cultivos', 'campo', 6),
-('Riego', 'Riego de plantaciones', 'campo', 4),
-('Cosecha', 'Recolección de productos', 'campo', 8),
-('Fumigación', 'Aplicación de pesticidas o fertilizantes', 'campo', 3),
-('Mantenimiento', 'Mantenimiento de herramientas y equipos', 'mantenimiento', 2),
-('Clasificación', 'Clasificación y empaque de productos', 'procesamiento', 6),
-('Transporte', 'Transporte de productos o materiales', 'logistica', 4),
-('Supervisión', 'Supervisión de actividades de campo', 'supervision', 8),
-('Capacitación', 'Actividades de capacitación del personal', 'capacitacion', 3),
-('Administración', 'Actividades administrativas', 'administracion', 8);
+-- Tipos de tarea predefinidos (tabla no existe - podría estar en categorias_tareas)
+-- Los tipos de tareas están siendo manejados por la tabla categorias_tareas
 
--- Configuración de deducciones estándar
-INSERT INTO deducciones (nombre, descripcion, tipo, valor, aplicar_todos) VALUES
-('IESS', 'Descuento IESS empleado', 'porcentaje', 9.45, TRUE),
-('Impuesto a la Renta', 'Impuesto a la renta (cuando aplique)', 'porcentaje', 0, FALSE),
-('Préstamo Empresa', 'Descuento por préstamo de la empresa', 'fijo', 0, FALSE),
-('Uniforme', 'Descuento por uniforme de trabajo', 'fijo', 25.00, FALSE),
-('Alimentación', 'Descuento por alimentación', 'fijo', 30.00, FALSE);
+-- Configuración de deducciones estándar (tabla no existe - se maneja en nomina_detalles)
+-- Las deducciones se manejan directamente en nomina_detalles
 
--- Configuración de bonificaciones estándar
-INSERT INTO bonificaciones (nombre, descripcion, tipo, valor, aplicar_todos) VALUES
-('Productividad', 'Bonificación por cumplimiento de metas', 'porcentaje', 10, FALSE),
-('Puntualidad', 'Bonificación por puntualidad mensual', 'fijo', 20.00, FALSE),
-('Antigüedad', 'Bonificación por años de servicio', 'fijo', 0, FALSE),
-('Horas Extras', 'Pago de horas extras trabajadas', 'porcentaje', 50, FALSE),
-('Comisión Ventas', 'Comisión por ventas realizadas', 'porcentaje', 5, FALSE);
+-- Configuración de bonificaciones estándar (tabla no existe - se maneja en nomina_detalles)
+-- Las bonificaciones se manejan directamente en nomina_detalles
 
 -- Notificaciones iniciales del sistema
 INSERT INTO notificaciones (usuario_id, titulo, mensaje, tipo) VALUES

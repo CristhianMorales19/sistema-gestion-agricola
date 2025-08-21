@@ -73,27 +73,11 @@ FROM INFORMATION_SCHEMA.TABLES
 WHERE TABLE_SCHEMA = 'gestion_agricola';
 
 -- Credenciales por defecto
-SELECT 'admin@sistema.com / Admin123!' as 'Usuario Administrador';
-SELECT 'supervisor@sistema.com / Super123!' as 'Usuario Supervisor';
-SELECT 'empleado@sistema.com / Emp123!' as 'Usuario Empleado';
+SELECT 'admin@gestionagricola.com / Admin123!' as 'Usuario Administrador';
 
--- Paso 2: Crear tablas (ejecutar en orden)
-SOURCE migraciones/001_crear_tablas_usuarios.sql;
-SOURCE migraciones/002_crear_tablas_personal.sql;
-SOURCE migraciones/003_crear_tablas_asistencia.sql;
-SOURCE migraciones/004_crear_tablas_nomina.sql;
-SOURCE migraciones/005_crear_tablas_productividad.sql;
-
--- Paso 3: Insertar datos iniciales (ejecutar en orden)
-SOURCE semillas/001_roles_permisos.sql;
-SOURCE semillas/002_departamentos_cargos.sql;
-SOURCE semillas/003_datos_iniciales.sql;
-
--- Mostrar resumen de la instalación
-SELECT 'Base de datos creada exitosamente' as estado;
-SELECT COUNT(*) as total_tablas FROM information_schema.tables WHERE table_schema = 'gestion_agricola';
-SELECT 'Datos iniciales insertados' as estado;
-SELECT COUNT(*) as total_roles FROM roles;
-SELECT COUNT(*) as total_departamentos FROM departamentos;
-SELECT COUNT(*) as total_cargos FROM cargos;
-SELECT COUNT(*) as total_usuarios FROM usuarios;
+-- Resumen final de la instalación
+SELECT '✅ BASE DE DATOS COMPLETADA' as 'ESTADO FINAL';
+SELECT COUNT(*) as 'TABLAS CREADAS' FROM information_schema.tables WHERE table_schema = 'gestion_agricola';
+SELECT COUNT(*) as 'USUARIOS CREADOS' FROM usuarios;
+SELECT COUNT(*) as 'DEPARTAMENTOS' FROM departamentos;
+SELECT COUNT(*) as 'CARGOS' FROM cargos;
