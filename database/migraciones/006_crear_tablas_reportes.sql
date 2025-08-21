@@ -76,7 +76,7 @@ CREATE TABLE reportes_favoritos (
 );
 
 -- Índices adicionales para optimización de reportes
-CREATE INDEX idx_empleados_activo_departamento ON empleados(activo, departamento_id);
+CREATE INDEX idx_empleados_activo_cargo ON empleados(activo, cargo_id);
 CREATE INDEX idx_asistencia_fecha_empleado ON registros_asistencia(fecha, empleado_id);
 CREATE INDEX idx_nomina_periodo_empleado ON nominas(año, mes, empleado_id);
 CREATE INDEX idx_tareas_fecha_empleado ON tareas_completadas(fecha_completada, empleado_id);

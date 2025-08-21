@@ -64,10 +64,10 @@ INSERT INTO configuracion_reportes (nombre_reporte, descripcion, tipo_reporte, c
  '["mes", "año", "departamento_id"]', 'excel');
 
 -- Tipos de permiso predefinidos
-INSERT INTO tipos_permiso (nombre, descripcion, requiere_aprobacion, maximo_dias_año, con_descuento) VALUES
-('Vacaciones', 'Vacaciones anuales del empleado', TRUE, 15, FALSE),
-('Enfermedad', 'Permiso por enfermedad', FALSE, 30, FALSE),
-('Calamidad Doméstica', 'Permiso por calamidad doméstica', TRUE, 5, FALSE),
+INSERT INTO tipos_permisos (nombre, descripcion, requiere_aprobacion, dias_maximos, remunerado) VALUES
+('Vacaciones', 'Vacaciones anuales del empleado', TRUE, 15, TRUE),
+('Enfermedad', 'Permiso por enfermedad', FALSE, 30, TRUE),
+('Calamidad Doméstica', 'Permiso por calamidad doméstica', TRUE, 5, TRUE),
 ('Maternidad', 'Permiso de maternidad', FALSE, 84, FALSE),
 ('Paternidad', 'Permiso de paternidad', FALSE, 10, FALSE),
 ('Personal', 'Permiso personal sin goce de sueldo', TRUE, 10, TRUE),
