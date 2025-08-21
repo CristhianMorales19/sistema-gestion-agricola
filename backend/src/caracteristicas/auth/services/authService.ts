@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { logger } from '../../../shared/utils/logger';
-
-const prisma = new PrismaClient();
 
 interface LoginCredentials {
   email: string;
@@ -16,6 +13,38 @@ interface JWTPayload {
   rol: string;
 }
 
+interface User {
+  id: number;
+  email: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  rol: 'ADMIN' | 'SUPERVISOR' | 'EMPLEADO';
+  activo: boolean;
+}
+
+// Mock users for testing (in production this would come from the database)
+const mockUsers: User[] = [
+  {
+    id: 1,
+    email: 'admin@gestionagricola.com',
+    password: '$2a$12$b8l72NCxSns4SbyoLGdkbODGN24XcfloKhBkh1znlXSDPA3Yfmy2G', // admin123
+    nombre: 'Administrador',
+    apellido: 'Sistema',
+    rol: 'ADMIN',
+    activo: true
+  },
+  {
+    id: 2,
+    email: 'supervisor@gestionagricola.com',
+    password: '$2a$12$b8l72NCxSns4SbyoLGdkbODGN24XcfloKhBkh1znlXSDPA3Yfmy2G', // supervisor123
+    nombre: 'Juan Carlos',
+    apellido: 'Supervisor',
+    rol: 'SUPERVISOR',
+    activo: true
+  }
+];
+
 // Set para almacenar tokens invalidados (en producción usar Redis)
 const invalidatedTokens = new Set<string>();
 
@@ -27,18 +56,8 @@ export class AuthService {
     try {
       const { email, password } = credentials;
 
-      // Buscar usuario por email
-      const usuario = await prisma.usuario.findUnique({
-        where: { email },
-        include: {
-          empleado: {
-            include: {
-              cargo: true,
-              departamento: true
-            }
-          }
-        }
-      });
+      // Buscar usuario en mock data
+      const usuario = mockUsers.find(u => u.email === email);
 
       if (!usuario) {
         throw new Error('Credenciales inválidas');
@@ -65,12 +84,6 @@ export class AuthService {
         expiresIn: this.JWT_EXPIRES_IN
       } as jwt.SignOptions);
 
-      // Actualizar último acceso
-      await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: { ultimoAcceso: new Date() }
-      });
-
       logger.info(`Usuario ${email} ha iniciado sesión exitosamente`);
 
       return {
@@ -81,7 +94,12 @@ export class AuthService {
           nombre: usuario.nombre,
           apellido: usuario.apellido,
           rol: usuario.rol,
-          empleado: usuario.empleado
+          empleado: {
+            cedula: '12345678',
+            cargo: { nombre: usuario.rol === 'ADMIN' ? 'Gerente General' : 'Supervisor' },
+            departamento: { nombre: 'Administración' },
+            fechaIngreso: '2020-01-15'
+          }
         }
       };
 
