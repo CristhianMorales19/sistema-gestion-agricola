@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,279 +7,587 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id                Int      @id @default(autoincrement())
-  email             String   @unique
-  password          String
-  nombre            String
-  apellido          String
-  rol               Rol      @default(EMPLEADO)
-  activo            Boolean  @default(true)
-  ultimoAcceso      DateTime?
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model moh_trabajador_historial {
+  historial_id    Int      @id @default(autoincrement())
+  trabajador_id   Int
+  cambio_tipo     String   @db.VarChar(80)
+  datos_previos   String?  @db.Text
+  datos_nuevos    String?  @db.Text
+  usuario_accion  Int?
+  fecha_accion_at DateTime @db.DateTime(0)
+  created_at      DateTime @db.DateTime(0)
 
-  // Relaciones
-  empleado          Empleado?
-  
-  @@map("usuarios")
+  @@index([trabajador_id], map: "FK_MOH_TRABAJADOR_HISTORIAL_RELATION_MOM_TRABAJADOR")
 }
 
-model Empleado {
-  id                Int      @id @default(autoincrement())
-  cedula            String   @unique
-  nombre            String
-  apellido          String
-  email             String   @unique
-  telefono          String?
-  direccion         String?
-  fechaNacimiento   DateTime?
-  fechaIngreso      DateTime
-  salarioBase       Decimal  @db.Decimal(10, 2)
-  activo            Boolean  @default(true)
-  fotoUrl           String?
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Claves foráneas
-  cargoId           Int
-  departamentoId    Int
-  usuarioId         Int?     @unique
-
-  // Relaciones
-  cargo             Cargo    @relation(fields: [cargoId], references: [id])
-  departamento      Departamento @relation(fields: [departamentoId], references: [id])
-  usuario           Usuario? @relation(fields: [usuarioId], references: [id])
-  
-  // Relaciones inversas
-  registrosAsistencia RegistroAsistencia[]
-  nominasGeneradas    Nomina[]
-  tareasCompletadas   TareaCompletada[]
-  evaluaciones        EvaluacionRendimiento[]
-  metasAsignadas      Meta[]
-  permisosSolicitados Permiso[]
-
-  @@map("empleados")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mol_audit_log {
+  log_id        BigInt   @id @default(autoincrement())
+  entidad       String   @db.VarChar(120)
+  entidad_id    Int?
+  accion        String   @db.VarChar(50)
+  datos_antes   String?  @db.Text
+  datos_despues String?  @db.Text
+  usuario_id    Int?
+  fecha_at      DateTime @db.DateTime(0)
+  ip_origen     String?  @db.VarChar(100)
 }
 
-model Cargo {
-  id                Int      @id @default(autoincrement())
-  nombre            String   @unique
-  descripcion       String?
-  salarioBase       Decimal  @db.Decimal(10, 2)
-  activo            Boolean  @default(true)
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Relaciones
-  empleados         Empleado[]
-
-  @@map("cargos")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_bonificacion {
+  bonificacion_id        Int       @id @default(autoincrement())
+  codigo                 String?   @db.VarChar(50)
+  nombre                 String    @unique(map: "nombre") @db.VarChar(120)
+  descripcion            String?   @db.Text
+  tipo                   String?   @db.VarChar(50)
+  monto_fijo             Decimal?  @db.Decimal(13, 2)
+  porcentaje             Decimal?  @db.Decimal(7, 4)
+  base_calculo           String?   @db.VarChar(120)
+  condiciones_aplicacion String?   @db.Text
+  limite_maximo          Decimal?  @db.Decimal(13, 2)
+  limite_minimo          Decimal?  @db.Decimal(13, 2)
+  estado                 String    @default("activa") @db.VarChar(50)
+  is_activa              Boolean   @default(true)
+  created_at             DateTime  @db.DateTime(0)
+  updated_at             DateTime? @db.DateTime(0)
+  created_by             Int
+  updated_by             Int?
+  deleted_at             DateTime? @db.DateTime(0)
 }
 
-model Departamento {
-  id                Int      @id @default(autoincrement())
-  nombre            String   @unique
-  descripcion       String?
-  activo            Boolean  @default(true)
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Relaciones
-  empleados         Empleado[]
-
-  @@map("departamentos")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_cuadrilla {
+  cuadrilla_id         Int       @id @default(autoincrement())
+  codigo_identificador String    @unique(map: "codigo_identificador") @db.VarChar(50)
+  nombre               String    @db.VarChar(120)
+  descripcion          String?   @db.Text
+  area_trabajo         String?   @db.VarChar(150)
+  fecha_creacion_at    DateTime  @db.DateTime(0)
+  is_activa            Boolean   @default(true)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
 }
 
-model RegistroAsistencia {
-  id                Int      @id @default(autoincrement())
-  fecha             DateTime @db.Date
-  horaEntrada       DateTime?
-  horaSalida        DateTime?
-  horasRegulares    Decimal? @db.Decimal(4, 2)
-  horasExtras       Decimal? @db.Decimal(4, 2)
-  estado            EstadoAsistencia @default(PRESENTE)
-  observaciones     String?
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Claves foráneas
-  empleadoId        Int
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-
-  @@unique([empleadoId, fecha])
-  @@map("registros_asistencia")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_cultivo {
+  cultivo_id              Int       @id @default(autoincrement())
+  nombre                  String    @unique(map: "nombre") @db.VarChar(120)
+  descripcion             String?   @db.Text
+  unidad_medida_principal String?   @db.VarChar(40)
+  temporada_tipica        String?   @db.VarChar(80)
+  imagen_path             String?   @db.VarChar(250)
+  is_activo               Boolean   @default(true)
+  created_at              DateTime  @db.DateTime(0)
+  updated_at              DateTime? @db.DateTime(0)
+  created_by              Int
+  updated_by              Int?
+  deleted_at              DateTime? @db.DateTime(0)
 }
 
-model Permiso {
-  id                Int      @id @default(autoincrement())
-  tipo              TipoPermiso
-  fechaInicio       DateTime @db.Date
-  fechaFin          DateTime @db.Date
-  motivo            String
-  estado            EstadoPermiso @default(PENDIENTE)
-  observaciones     String?
-  fechaSolicitud    DateTime @default(now())
-  fechaRespuesta    DateTime?
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Claves foráneas
-  empleadoId        Int
-  aprobadoPorId     Int?
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-
-  @@map("permisos")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_deduccion_especial_tipo {
+  deduccion_tipo_id Int       @id @default(autoincrement())
+  codigo            String?   @db.VarChar(50)
+  nombre            String    @unique(map: "nombre") @db.VarChar(120)
+  descripcion       String?   @db.Text
+  is_activo         Boolean   @default(true)
+  created_at        DateTime  @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+  created_by        Int
+  updated_by        Int?
+  deleted_at        DateTime? @db.DateTime(0)
 }
 
-model Nomina {
-  id                Int      @id @default(autoincrement())
-  periodo           String   // YYYY-MM
-  salarioBase       Decimal  @db.Decimal(10, 2)
-  horasRegulares    Decimal  @db.Decimal(6, 2)
-  horasExtras       Decimal  @db.Decimal(6, 2)
-  valorHorasExtras  Decimal  @db.Decimal(10, 2)
-  bonificaciones    Decimal  @db.Decimal(10, 2) @default(0)
-  deducciones       Decimal  @db.Decimal(10, 2) @default(0)
-  totalBruto        Decimal  @db.Decimal(10, 2)
-  totalNeto         Decimal  @db.Decimal(10, 2)
-  fechaProceso      DateTime @default(now())
-  fechaPago         DateTime?
-  estado            EstadoNomina @default(CALCULADA)
-  observaciones     String?
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Claves foráneas
-  empleadoId        Int
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-  deducciones       DeduccionNomina[]
-
-  @@unique([empleadoId, periodo])
-  @@map("nominas")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_esquema_pago {
+  esquema_id               Int       @id @default(autoincrement())
+  codigo                   String?   @db.VarChar(50)
+  nombre                   String    @unique(map: "nombre") @db.VarChar(120)
+  tipo                     String    @db.VarChar(50)
+  descripcion              String?   @db.Text
+  fecha_creacion_at        DateTime  @db.DateTime(0)
+  fecha_vigencia_inicio_at DateTime? @db.DateTime(0)
+  fecha_vigencia_fin_at    DateTime? @db.DateTime(0)
+  estado                   String    @default("activo") @db.VarChar(50)
+  is_activo                Boolean   @default(true)
+  created_at               DateTime  @db.DateTime(0)
+  updated_at               DateTime? @db.DateTime(0)
+  created_by               Int
+  updated_by               Int?
+  deleted_at               DateTime? @db.DateTime(0)
 }
 
-model DeduccionNomina {
-  id                Int      @id @default(autoincrement())
-  concepto          String
-  valor             Decimal  @db.Decimal(10, 2)
-  esObligatoria     Boolean  @default(true)
-  fechaCreacion     DateTime @default(now())
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_formula_pago {
+  formula_id           Int       @id @default(autoincrement())
+  esquema_id           Int
+  formula              String    @db.Text
+  variables_utilizadas String?   @db.Text
+  ejemplo_calculo      String?   @db.Text
+  fecha_creacion_at    DateTime  @db.DateTime(0)
+  usuario_creacion     Int
+  is_activa            Boolean   @default(true)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
 
-  // Claves foráneas
-  nominaId          Int
-
-  // Relaciones
-  nomina            Nomina   @relation(fields: [nominaId], references: [id])
-
-  @@map("deducciones_nomina")
+  @@index([esquema_id], map: "FK_MOM_FORMULA_PAGO_RELATION_MOM_ESQUEMA_PAGO")
 }
 
-model TareaCompletada {
-  id                Int      @id @default(autoincrement())
-  descripcion       String
-  fechaCompletada   DateTime @default(now())
-  horasInvertidas   Decimal? @db.Decimal(4, 2)
-  calificacion      Int?     // 1-5
-  observaciones     String?
-  fechaCreacion     DateTime @default(now())
-
-  // Claves foráneas
-  empleadoId        Int
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-
-  @@map("tareas_completadas")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_parcela {
+  parcela_id            Int       @id @default(autoincrement())
+  nombre                String    @unique(map: "nombre") @db.VarChar(120)
+  ubicacion_descripcion String?   @db.VarChar(250)
+  area_hectareas        Decimal?  @db.Decimal(10, 2)
+  tipo_terreno          String?   @db.VarChar(80)
+  descripcion           String?   @db.Text
+  estado                String    @default("disponible") @db.VarChar(50)
+  is_activa             Boolean   @default(true)
+  created_at            DateTime  @db.DateTime(0)
+  updated_at            DateTime? @db.DateTime(0)
+  created_by            Int
+  updated_by            Int?
+  deleted_at            DateTime? @db.DateTime(0)
 }
 
-model Meta {
-  id                Int      @id @default(autoincrement())
-  titulo            String
-  descripcion       String
-  fechaInicio       DateTime @db.Date
-  fechaVencimiento  DateTime @db.Date
-  valorObjetivo     Decimal  @db.Decimal(10, 2)
-  valorActual       Decimal  @db.Decimal(10, 2) @default(0)
-  unidadMedida      String
-  estado            EstadoMeta @default(EN_PROGRESO)
-  fechaCreacion     DateTime @default(now())
-  fechaActualizacion DateTime @updatedAt
-
-  // Claves foráneas
-  empleadoId        Int
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-
-  @@map("metas")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_periodo_nomina {
+  periodo_id           Int       @id @default(autoincrement())
+  codigo_identificador String    @unique(map: "codigo_identificador") @db.VarChar(80)
+  fecha_inicio_at      DateTime  @db.DateTime(0)
+  fecha_fin_at         DateTime  @db.DateTime(0)
+  tipo_nomina          String?   @default("regular") @db.VarChar(50)
+  alcance              String?   @db.VarChar(200)
+  estado               String    @default("iniciado") @db.VarChar(50)
+  fecha_creacion_at    DateTime  @db.DateTime(0)
+  usuario_creacion     Int
+  is_activo            Boolean   @default(true)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
 }
 
-model EvaluacionRendimiento {
-  id                Int      @id @default(autoincrement())
-  periodo           String   // YYYY-MM
-  puntajeGeneral    Decimal  @db.Decimal(3, 2) // 0.00 - 5.00
-  puntajeAsistencia Decimal  @db.Decimal(3, 2)
-  puntajeProductividad Decimal @db.Decimal(3, 2)
-  puntajeCalidad    Decimal  @db.Decimal(3, 2)
-  observaciones     String?
-  recomendaciones   String?
-  fechaEvaluacion   DateTime @default(now())
-  fechaCreacion     DateTime @default(now())
-
-  // Claves foráneas
-  empleadoId        Int
-  evaluadorId       Int?
-
-  // Relaciones
-  empleado          Empleado @relation(fields: [empleadoId], references: [id])
-
-  @@unique([empleadoId, periodo])
-  @@map("evaluaciones_rendimiento")
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_permiso {
+  permiso_id  Int       @id @default(autoincrement())
+  codigo      String?   @db.VarChar(50)
+  nombre      String    @db.VarChar(100)
+  categoria   String?   @db.VarChar(100)
+  descripcion String?   @db.Text
+  is_activo   Boolean   @default(true)
+  created_at  DateTime  @db.DateTime(0)
+  updated_at  DateTime? @db.DateTime(0)
+  created_by  Int
+  updated_by  Int?
+  deleted_at  DateTime? @db.DateTime(0)
 }
 
-// Enums
-enum Rol {
-  ADMIN
-  SUPERVISOR
-  EMPLEADO
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_rol {
+  rol_id            Int       @id @default(autoincrement())
+  codigo            String    @unique(map: "codigo") @db.VarChar(50)
+  nombre            String    @unique(map: "nombre") @db.VarChar(100)
+  descripcion       String?   @db.Text
+  fecha_creacion_at DateTime  @db.DateTime(0)
+  is_critico        Boolean   @default(false)
+  is_activo         Boolean   @default(true)
+  created_at        DateTime  @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+  created_by        Int
+  updated_by        Int?
+  deleted_at        DateTime? @db.DateTime(0)
 }
 
-enum EstadoAsistencia {
-  PRESENTE
-  AUSENTE
-  TARDANZA
-  PERMISO
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_tarea {
+  tarea_id             Int       @id @default(autoincrement())
+  cultivo_id           Int
+  nombre               String    @db.VarChar(150)
+  descripcion          String?   @db.Text
+  unidad_medicion      String?   @db.VarChar(50)
+  rendimiento_estandar Decimal?  @db.Decimal(10, 4)
+  instrucciones        String?   @db.Text
+  niveles_dificultad   String?   @db.VarChar(100)
+  is_activo            Boolean   @default(true)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
+
+  @@index([cultivo_id], map: "FK_MOM_TAREA_RELATION_MOM_CULTIVO")
 }
 
-enum TipoPermiso {
-  MEDICO
-  PERSONAL
-  VACACIONES
-  CALAMIDAD
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mom_trabajador {
+  trabajador_id       Int       @id @default(autoincrement())
+  documento_identidad String    @unique(map: "documento_identidad") @db.VarChar(50)
+  nombre_completo     String    @db.VarChar(150)
+  fecha_nacimiento    DateTime  @db.Date
+  telefono            String?   @db.VarChar(20)
+  email               String?   @db.VarChar(100)
+  is_activo           Boolean   @default(true)
+  fecha_registro_at   DateTime  @db.DateTime(0)
+  created_at          DateTime  @db.DateTime(0)
+  updated_at          DateTime? @db.DateTime(0)
+  created_by          Int
+  updated_by          Int?
+  deleted_at          DateTime? @db.DateTime(0)
+
+  @@index([documento_identidad], map: "idx_mom_trabajador_documento")
+  @@index([nombre_completo], map: "idx_mom_trabajador_nombre")
 }
 
-enum EstadoPermiso {
-  PENDIENTE
-  APROBADO
-  RECHAZADO
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_asignacion_cuadrilla {
+  asignacion_id       Int       @id @default(autoincrement())
+  cuadrilla_id        Int
+  trabajador_id       Int
+  fecha_asignacion_at DateTime  @db.DateTime(0)
+  usuario_asignacion  Int
+  fecha_retiro_at     DateTime? @db.DateTime(0)
+  usuario_retiro      Int?
+  is_activa           Boolean   @default(true)
+  created_at          DateTime  @db.DateTime(0)
+  updated_at          DateTime? @db.DateTime(0)
+  created_by          Int
+  updated_by          Int?
+  deleted_at          DateTime? @db.DateTime(0)
+
+  @@index([cuadrilla_id], map: "FK_MOT_ASIGNACION_CUADRILLA_RELATION_MOM_CUADRILLA")
+  @@index([trabajador_id], map: "FK_MOT_ASIGNACION_CUADRILLA_RELATION_MOM_TRABAJADOR")
 }
 
-enum EstadoNomina {
-  CALCULADA
-  PAGADA
-  ANULADA
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_asignacion_cultivo_parcela {
+  asignacion_cultivo_id        Int       @id @default(autoincrement())
+  parcela_id                   Int
+  cultivo_id                   Int
+  fecha_inicio_at              DateTime  @db.DateTime(0)
+  temporada                    String?   @db.VarChar(80)
+  caracteristicas_particulares String?   @db.Text
+  fecha_fin_at                 DateTime? @db.DateTime(0)
+  usuario_asignacion           Int
+  is_activa                    Boolean   @default(true)
+  created_at                   DateTime  @db.DateTime(0)
+  updated_at                   DateTime? @db.DateTime(0)
+  created_by                   Int
+  updated_by                   Int?
+  deleted_at                   DateTime? @db.DateTime(0)
+
+  @@index([cultivo_id], map: "FK_MOT_ASIGNACION_CULTIVO_PARCELA_RELATION_MOM_CULTIVO")
+  @@index([parcela_id], map: "FK_MOT_ASIGNACION_CULTIVO_PARCELA_RELATION_MOM_PARCELA")
 }
 
-enum EstadoMeta {
-  EN_PROGRESO
-  COMPLETADA
-  VENCIDA
-  CANCELADA
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_asignacion_tarea {
+  asignacion_tarea_id Int       @id @default(autoincrement())
+  tarea_programada_id Int
+  cuadrilla_id        Int?
+  trabajador_id       Int?
+  fecha_asignacion_at DateTime  @db.DateTime(0)
+  usuario_asignacion  Int
+  estado              String    @default("pendiente") @db.VarChar(50)
+  created_at          DateTime  @db.DateTime(0)
+  updated_at          DateTime? @db.DateTime(0)
+  created_by          Int
+  updated_by          Int?
+  deleted_at          DateTime? @db.DateTime(0)
+
+  @@index([cuadrilla_id], map: "FK_MOT_ASIGNACION_TAREA_RELATION_MOM_CUADRILLA")
+  @@index([trabajador_id], map: "FK_MOT_ASIGNACION_TAREA_RELATION_MOM_TRABAJADOR")
+  @@index([tarea_programada_id], map: "FK_MOT_ASIGNACION_TAREA_RELATION_MOT_TAREA_PROGRAMADA")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_asistencia {
+  asistencia_id        Int       @id @default(autoincrement())
+  trabajador_id        Int
+  fecha_at             DateTime  @db.Date
+  hora_entrada_at      DateTime  @db.DateTime(0)
+  ubicacion_entrada    String?   @db.VarChar(150)
+  hora_salida_at       DateTime? @db.DateTime(0)
+  horas_trabajadas     Decimal?  @db.Decimal(5, 2)
+  observaciones_salida String?   @db.Text
+  estado               String    @default("completa") @db.VarChar(30)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
+
+  @@index([trabajador_id, fecha_at], map: "idx_mot_asistencia_trabajador_fecha")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_ausencia_justificada {
+  ausencia_id             Int       @id @default(autoincrement())
+  trabajador_id           Int
+  fecha_at                DateTime  @db.Date
+  motivo                  String    @db.Text
+  tipo_ausencia           String?   @db.VarChar(80)
+  documento_respaldo_path String?   @db.VarChar(250)
+  estado_aprobacion       String    @default("pendiente") @db.VarChar(50)
+  usuario_registro        Int
+  created_at              DateTime  @db.DateTime(0)
+  updated_at              DateTime? @db.DateTime(0)
+  created_by              Int
+  updated_by              Int?
+  deleted_at              DateTime? @db.DateTime(0)
+
+  @@index([trabajador_id], map: "FK_MOT_AUSENCIA_JUSTIFICADA_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_concepto_liquidacion {
+  concepto_id      Int       @id @default(autoincrement())
+  liquidacion_id   Int
+  tipo             String    @db.VarChar(50)
+  descripcion      String?   @db.VarChar(250)
+  monto            Decimal   @db.Decimal(13, 2)
+  formula_aplicada String?   @db.Text
+  referencia_id    Int?
+  referencia_tipo  String?   @db.VarChar(100)
+  created_at       DateTime  @db.DateTime(0)
+  updated_at       DateTime? @db.DateTime(0)
+  created_by       Int
+  updated_by       Int?
+  deleted_at       DateTime? @db.DateTime(0)
+
+  @@index([liquidacion_id], map: "FK_MOT_CONCEPTO_LIQUIDACION_RELATION_MOT_LIQUIDACION")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_condiciones_trabajo {
+  condicion_id      Int       @id @default(autoincrement())
+  fecha_at          DateTime  @db.DateTime(0)
+  condicion_general String?   @db.VarChar(150)
+  nivel_dificultad  String?   @db.VarChar(80)
+  observaciones     String?   @db.Text
+  usuario_registro  Int
+  created_at        DateTime  @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+  created_by        Int
+  updated_by        Int?
+  deleted_at        DateTime? @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_deduccion_especial {
+  deduccion_id                Int       @id @default(autoincrement())
+  trabajador_id               Int
+  tipo_id                     Int?
+  tipo                        String?   @db.VarChar(100)
+  monto                       Decimal   @db.Decimal(13, 2)
+  es_porcentual               Boolean   @default(false)
+  base_calculo                String?   @db.VarChar(120)
+  periodicidad                String?   @db.VarChar(80)
+  cuotas_totales              Int?
+  cuotas_restantes            Int?
+  fecha_inicio_at             DateTime? @db.DateTime(0)
+  fecha_fin_at                DateTime? @db.DateTime(0)
+  justificacion               String?   @db.Text
+  documento_autorizacion_path String?   @db.VarChar(250)
+  estado                      String    @default("activa") @db.VarChar(50)
+  created_at                  DateTime  @db.DateTime(0)
+  updated_at                  DateTime? @db.DateTime(0)
+  created_by                  Int
+  updated_by                  Int?
+  deleted_at                  DateTime? @db.DateTime(0)
+
+  @@index([tipo_id], map: "FK_MOT_DEDUCCION_ESPECIAL_RELATION_MOM_DEDUCCION_TIPO")
+  @@index([trabajador_id], map: "FK_MOT_DEDUCCION_ESPECIAL_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_info_laboral {
+  info_laboral_id               Int       @id @default(autoincrement())
+  trabajador_id                 Int
+  cargo                         String    @db.VarChar(100)
+  fecha_ingreso_at              DateTime  @db.DateTime(0)
+  tipo_contrato                 String    @db.VarChar(50)
+  salario_base                  Decimal   @db.Decimal(13, 2)
+  fecha_ultima_actualizacion_at DateTime  @db.DateTime(0)
+  usuario_ultima_actualizacion  Int
+  created_at                    DateTime  @db.DateTime(0)
+  updated_at                    DateTime? @db.DateTime(0)
+  created_by                    Int
+  updated_by                    Int?
+  deleted_at                    DateTime? @db.DateTime(0)
+
+  @@index([trabajador_id], map: "FK_MOT_INFO_LABORAL_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_liquidacion {
+  liquidacion_id      Int       @id @default(autoincrement())
+  periodo_id          Int
+  trabajador_id       Int
+  total_bruto         Decimal?  @default(0.00) @db.Decimal(13, 2)
+  total_deducciones   Decimal?  @default(0.00) @db.Decimal(13, 2)
+  total_neto          Decimal?  @default(0.00) @db.Decimal(13, 2)
+  estado              String    @default("preliminar") @db.VarChar(50)
+  fecha_generacion_at DateTime  @db.DateTime(0)
+  usuario_generacion  Int
+  created_at          DateTime  @db.DateTime(0)
+  updated_at          DateTime? @db.DateTime(0)
+  created_by          Int
+  updated_by          Int?
+  deleted_at          DateTime? @db.DateTime(0)
+
+  @@index([periodo_id], map: "FK_MOT_LIQUIDACION_RELATION_MOM_PERIODO_NOMINA")
+  @@index([trabajador_id], map: "FK_MOT_LIQUIDACION_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_recibo {
+  recibo_id            Int       @id @default(autoincrement())
+  liquidacion_id       Int       @unique(map: "liquidacion_id")
+  codigo_identificador String    @unique(map: "codigo_identificador") @db.VarChar(120)
+  fecha_generacion_at  DateTime  @db.DateTime(0)
+  usuario_generacion   Int
+  estado               String    @default("pendiente") @db.VarChar(50)
+  archivo_path         String?   @db.VarChar(250)
+  created_at           DateTime  @db.DateTime(0)
+  updated_at           DateTime? @db.DateTime(0)
+  created_by           Int
+  updated_by           Int?
+  deleted_at           DateTime? @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_registro_productividad {
+  productividad_id       Int       @id @default(autoincrement())
+  trabajador_id          Int
+  tarea_id               Int
+  cantidad_producida     Decimal?  @db.Decimal(13, 4)
+  unidad_medida          String?   @db.VarChar(50)
+  fecha_at               DateTime  @db.DateTime(0)
+  rendimiento_calculado  Decimal?  @db.Decimal(13, 4)
+  condiciones_trabajo_id Int?
+  condiciones_trabajo    String?   @db.Text
+  usuario_registro       Int
+  created_at             DateTime  @db.DateTime(0)
+  updated_at             DateTime? @db.DateTime(0)
+  created_by             Int
+  updated_by             Int?
+  deleted_at             DateTime? @db.DateTime(0)
+
+  @@index([tarea_id], map: "FK_MOT_REGISTRO_PRODUCTIVIDAD_RELATION_MOM_TAREA")
+  @@index([trabajador_id, fecha_at], map: "idx_mot_registro_productividad_trabajador_fecha")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_tarea_programada {
+  tarea_programada_id   Int       @id @default(autoincrement())
+  tarea_id              Int
+  parcela_id            Int
+  fecha_at              DateTime  @db.DateTime(0)
+  duracion_estimada     Decimal?  @db.Decimal(7, 2)
+  prioridad             Int?
+  estado                String    @default("pendiente") @db.VarChar(50)
+  bonificacion_asociada Int?
+  created_at            DateTime  @db.DateTime(0)
+  updated_at            DateTime? @db.DateTime(0)
+  created_by            Int
+  updated_by            Int?
+  deleted_at            DateTime? @db.DateTime(0)
+
+  @@index([bonificacion_asociada], map: "FK_MOT_TAREA_PROGRAMADA_RELATION_MOM_BONIFICACION")
+  @@index([parcela_id], map: "FK_MOT_TAREA_PROGRAMADA_RELATION_MOM_PARCELA")
+  @@index([tarea_id], map: "FK_MOT_TAREA_PROGRAMADA_RELATION_MOM_TAREA")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mot_usuario {
+  usuario_id                 Int       @id @default(autoincrement())
+  trabajador_id              Int?
+  username                   String    @unique(map: "username") @db.VarChar(100)
+  password_hash              String    @db.VarChar(255)
+  rol_id                     Int
+  estado                     String    @default("activo") @db.VarChar(50)
+  fecha_ultimo_cambio_rol_at DateTime? @db.DateTime(0)
+  created_at                 DateTime  @db.DateTime(0)
+  updated_at                 DateTime? @db.DateTime(0)
+  created_by                 Int
+  updated_by                 Int?
+  deleted_at                 DateTime? @db.DateTime(0)
+
+  @@index([rol_id], map: "FK_MOT_USUARIO_RELATION_MOM_ROL")
+  @@index([trabajador_id], map: "FK_MOT_USUARIO_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rel_mom_cuadrilla__mom_trabajador {
+  cuadrilla_id        Int
+  trabajador_id       Int
+  fecha_asignacion_at DateTime  @db.DateTime(0)
+  fecha_retiro_at     DateTime? @db.DateTime(0)
+  usuario_asignacion  Int
+  created_at          DateTime  @db.DateTime(0)
+  created_by          Int
+  updated_at          DateTime? @db.DateTime(0)
+  updated_by          Int?
+  deleted_at          DateTime? @db.DateTime(0)
+
+  @@id([cuadrilla_id, trabajador_id])
+  @@index([trabajador_id], map: "FK_REL_MOM_CUADRILLA__MOM_TRABAJADOR_RELATION_MOM_TRABAJADOR")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rel_mom_parcela__mom_cultivo {
+  parcela_id         Int
+  cultivo_id         Int
+  fecha_inicio_at    DateTime  @db.DateTime(0)
+  fecha_fin_at       DateTime? @db.DateTime(0)
+  usuario_asignacion Int
+  created_at         DateTime  @db.DateTime(0)
+  created_by         Int
+  updated_at         DateTime? @db.DateTime(0)
+  updated_by         Int?
+  deleted_at         DateTime? @db.DateTime(0)
+
+  @@id([parcela_id, cultivo_id])
+  @@index([cultivo_id], map: "FK_REL_MOM_PARCELA__MOM_CULTIVO_RELATION_MOM_CULTIVO")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rel_mom_rol__mom_permiso {
+  rol_id     Int
+  permiso_id Int
+  created_at DateTime  @db.DateTime(0)
+  created_by Int
+  updated_at DateTime? @db.DateTime(0)
+  updated_by Int?
+  deleted_at DateTime? @db.DateTime(0)
+
+  @@id([rol_id, permiso_id])
+  @@index([permiso_id], map: "FK_REL_MOM_ROL__MOM_PERMISO_RELATION_MOM_PERMISO")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rel_mom_tarea__mom_esquema_pago {
+  tarea_id                 Int
+  esquema_id               Int
+  fecha_asignacion_at      DateTime  @db.DateTime(0)
+  fecha_vigencia_inicio_at DateTime? @db.DateTime(0)
+  usuario_asignacion       Int
+  estado                   String    @default("activo") @db.VarChar(50)
+  created_at               DateTime  @db.DateTime(0)
+  created_by               Int
+  updated_at               DateTime? @db.DateTime(0)
+  updated_by               Int?
+  deleted_at               DateTime? @db.DateTime(0)
+
+  @@id([tarea_id, esquema_id])
+  @@index([esquema_id], map: "FK_REL_MOM_TAREA__MOM_ESQUEMA_PAGO_RELATION_MOM_ESQUEMA_PAGO")
 }

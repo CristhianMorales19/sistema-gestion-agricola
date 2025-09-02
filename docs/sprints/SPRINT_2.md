@@ -1,11 +1,11 @@
-# Sprint 2 - Control de Asistencia Básico
+# Sprint 2 - Control de Asistencia y Gestión de Cuadrillas
 **Duración**: 2 semanas  
 **Tipo**: Entrega académica  
-**Objetivo**: Implementar sistema básico de control de asistencia y completar gestión de usuarios
+**Objetivo**: Implementar sistema básico de control de asistencia y gestión de cuadrillas de trabajo
 
-## 🎯 Historias de Usuario (6 HU)
+## 🎯 Historias de Usuario (7 HU)
 
-### HU-006: Registro de entrada ⭐ **CRÍTICO**
+### HU-007: Registrar entrada de trabajador ⭐ **CRÍTICO** - **[EN AZURE]**
 **Como** empleado  
 **Quiero** registrar mi hora de entrada  
 **Para** que quede constancia de mi asistencia diaria
@@ -17,7 +17,7 @@
 - [x] Registro automático de fecha/hora
 - [x] Confirmación visual del registro
 
-### HU-007: Registro de salida ⭐ **CRÍTICO**
+### HU-008: Registrar salida de trabajador ⭐ **CRÍTICO** - **[EN AZURE]**
 **Como** empleado  
 **Quiero** registrar mi hora de salida  
 **Para** completar mi jornada laboral
@@ -29,75 +29,94 @@
 - [x] Prevención de múltiples salidas
 - [x] Confirmación del registro
 
-### HU-008: Consulta de asistencia diaria
+### HU-003: Crear cuadrilla de trabajo - **[EN AZURE]**
 **Como** supervisor  
-**Quiero** consultar la asistencia del día  
-**Para** verificar quién está presente
+**Quiero** crear cuadrillas de trabajo  
+**Para** organizar grupos de trabajadores por tareas específicas
 
 **Criterios de Aceptación:**
-- [x] Lista de empleados con estado (presente/ausente)
-- [x] Horarios de entrada y salida
-- [x] Filtro por departamento
-- [x] Indicadores visuales de estado
-- [x] Actualización en tiempo real
+- [x] Formulario para crear cuadrilla con nombre y descripción
+- [x] Asignación de supervisor responsable
+- [x] Definición de capacidad máxima de trabajadores
+- [x] Estado activo/inactivo
+- [x] Guardado en base de datos
 
-### HU-028: Registro de usuario
+### HU-004: Asignar trabajadores a cuadrilla - **[EN AZURE]**
+**Como** supervisor  
+**Quiero** asignar trabajadores a cuadrillas  
+**Para** formar equipos de trabajo organizados
+
+**Criterios de Aceptación:**
+- [x] Selección de trabajadores disponibles
+- [x] Validación de capacidad máxima de cuadrilla
+- [x] Prevención de asignaciones duplicadas
+- [x] Historial de asignaciones
+- [x] Posibilidad de remover trabajadores
+
+### HU-006: Asignar rol a usuario - **[EN AZURE]**
 **Como** administrador  
-**Quiero** registrar nuevos usuarios del sistema  
-**Para** dar acceso a empleados y supervisores
+**Quiero** asignar roles a usuarios  
+**Para** controlar el acceso a diferentes funcionalidades
 
 **Criterios de Aceptación:**
-- [x] Formulario de registro con roles
-- [x] Validación de email único
-- [x] Asignación de rol (empleado/supervisor/admin)
-- [x] Generación de contraseña temporal
-- [x] Envío de credenciales al usuario
+- [x] Lista de usuarios sin rol o con rol actual
+- [x] Selección de rol desde catálogo
+- [x] Validación de permisos del administrador
+- [x] Actualización inmediata de permisos
+- [x] Auditoría de cambios de roles
 
-### HU-029: Gestión de perfil de usuario
-**Como** usuario  
-**Quiero** gestionar mi perfil  
-**Para** mantener mi información actualizada
-
-**Criterios de Aceptación:**
-- [x] Vista de perfil personal
-- [x] Edición de datos básicos
-- [x] Cambio de foto de perfil
-- [x] Historial de actividad
-- [x] Configuraciones personales
-
-### HU-004: Eliminación de empleado
-**Como** administrador  
-**Quiero** eliminar empleados del sistema  
-**Para** mantener la base de datos actualizada
+### HU-009: Registrar productividad de trabajador - **[EN AZURE]**
+**Como** supervisor  
+**Quiero** registrar la productividad de trabajadores  
+**Para** llevar control del rendimiento diario
 
 **Criterios de Aceptación:**
-- [x] Soft delete (marcar como inactivo)
-- [x] Confirmación antes de eliminar
-- [x] Preservar historial de asistencia
-- [x] Opción de reactivar empleado
-- [x] Auditoría de eliminaciones
+- [x] Selección de trabajador y fecha
+- [x] Registro de tareas completadas
+- [x] Cantidad/calidad de trabajo realizado
+- [x] Observaciones adicionales
+- [x] Validación de datos ingresados
+
+### HU-010: Registrar ausencia justificada - **[EN AZURE]**
+**Como** empleado o supervisor  
+**Quiero** registrar ausencias justificadas  
+**Para** mantener registro correcto de asistencia
+
+**Criterios de Aceptación:**
+- [x] Selección de tipo de ausencia (permiso, enfermedad, etc.)
+- [x] Rango de fechas de ausencia
+- [x] Adjunto de documentos justificatorios
+- [x] Estado de aprobación (pendiente/aprobado/rechazado)
+- [x] Notificaciones al supervisor
 
 ## 🛠 Tareas Técnicas Detalladas
 
 ### Backend
 - [ ] **Módulo de Asistencia**
-  - [ ] Modelo RegistroAsistencia
-  - [ ] Controlador de asistencia
-  - [ ] Validaciones de horarios
-  - [ ] Servicios de cálculo de horas
-  - [ ] Endpoints para entrada/salida
+  - [ ] Modelo RegistroAsistencia (entrada/salida)
+  - [ ] Controlador de asistencia con validaciones
+  - [ ] Servicios de cálculo de horas trabajadas
+  - [ ] Endpoints para entrada/salida de trabajadores
+  - [ ] Modelo AusenciaJustificada
 
-- [ ] **Gestión de Usuarios Avanzada**
-  - [ ] Controlador de usuarios completo
-  - [ ] Sistema de roles y permisos
-  - [ ] Middleware de autorización
-  - [ ] Gestión de perfiles
-  - [ ] Soft delete para empleados
+- [ ] **Módulo de Cuadrillas**
+  - [ ] Modelo Cuadrilla con relaciones
+  - [ ] Controlador para CRUD de cuadrillas  
+  - [ ] Asignación de trabajadores a cuadrillas
+  - [ ] Validaciones de capacidad máxima
+  - [ ] Historial de asignaciones
 
-- [ ] **API de Consultas**
-  - [ ] Endpoint de asistencia diaria
-  - [ ] Filtros por departamento/fecha
-  - [ ] Agregaciones y estadísticas básicas
+- [ ] **Gestión de Usuarios y Roles**
+  - [ ] Middleware de autorización por roles
+  - [ ] Endpoint para asignar roles
+  - [ ] Auditoría de cambios de permisos
+  - [ ] Validaciones de permisos de administrador
+
+- [ ] **Módulo de Productividad**
+  - [ ] Modelo RegistroProductividad
+  - [ ] Controlador para registro diario
+  - [ ] Validaciones de datos de productividad
+  - [ ] Relaciones con trabajadores y tareas
   - [ ] Paginación para listas grandes
 
 ### Frontend
@@ -273,3 +292,60 @@ DELETE /api/empleados/:id (soft delete)
 - [ ] Sistema de usuarios robusto
 - [ ] Datos históricos acumulándose
 - [ ] Patrones de desarrollo establecidos
+
+---
+
+## 🔥 Matriz de Riesgo Calórica - Sprint 2
+
+### Metodología de Evaluación
+- **Riesgo Técnico** (1-5): Complejidad de implementación y dependencias
+- **Impacto de Negocio** (1-5): Criticidad operacional
+- **Esfuerzo** (1-5): Story Points y complejidad técnica
+- **Calor Total**: Riesgo × Impacto × Esfuerzo
+
+| HU | User Story | Riesgo Técnico | Impacto Negocio | Esfuerzo | 🔥 Calor | Prioridad |
+|---|---|---|---|---|---|---|
+| **HU-007** | Registrar entrada trabajador | 4 | 5 | 4 | **80** | 🔴 CRÍTICO |
+| **HU-008** | Registrar salida trabajador | 4 | 5 | 4 | **80** | 🔴 CRÍTICO |
+| **HU-009** | Registrar productividad | 4 | 4 | 4 | **64** | 🔴 ALTO |
+| **HU-003** | Crear cuadrilla trabajo | 3 | 4 | 3 | **36** | 🟡 MEDIO |
+| **HU-004** | Asignar trabajadores cuadrilla | 3 | 3 | 4 | **36** | 🟡 MEDIO |
+| **HU-010** | Registrar ausencia justificada | 3 | 3 | 3 | **27** | 🟡 MEDIO |
+| **HU-006** | Asignar rol a usuario | 2 | 3 | 2 | **12** | 🟢 BAJO |
+
+### 🎯 Análisis de Riesgo por Categorías
+
+#### 🔴 **RIESGO CRÍTICO** (Calor > 60)
+- **HU-007/008 (Asistencia)**: Control horario preciso, validaciones temporales, cálculo horas
+- **HU-009 (Productividad)**: Métricas complejas, relaciones múltiples con tareas
+
+#### 🟡 **RIESGO MEDIO** (Calor 20-60)
+- **HU-003/004 (Cuadrillas)**: Gestión de grupos, capacidades máximas
+- **HU-010 (Ausencias)**: Workflow de aprobación, tipos de permisos
+
+#### 🟢 **RIESGO BAJO** (Calor < 20)
+- **HU-006**: Asignación simple de roles existentes
+
+### 🚨 Estrategias de Mitigación
+
+#### Para HU-007/008 (Asistencia) - Calor 80 cada una:
+- [ ] Algoritmo de validación horaria probado primero
+- [ ] Manejo de casos edge (entrada sin salida, múltiples entradas)
+- [ ] Sincronización temporal precisa
+- [ ] Testing con diferentes zonas horarias
+
+#### Para HU-009 (Productividad) - Calor 64:
+- [ ] Definir métricas específicas con stakeholders
+- [ ] Prototipo de cálculos antes de implementación
+- [ ] Validación de datos con supervisores reales
+
+### 📊 Distribución de Calor Total: 335 puntos
+- **Asistencia (HU-007/008)**: 160 puntos (48% del sprint)
+- **Productividad (HU-009)**: 64 puntos (19% del sprint)
+- **Cuadrillas (HU-003/004)**: 72 puntos (21% del sprint)
+- **Otros (HU-006/010)**: 39 puntos (12% del sprint)
+
+### 🔗 Dependencias Críticas
+- HU-007/008 dependen de datos de trabajadores (Sprint 1)
+- HU-009 requiere cuadrillas operativas (HU-003/004)
+- HU-004 necesita HU-003 completada primero
