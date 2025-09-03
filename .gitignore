@@ -46,6 +46,10 @@ coverage/
 *.bak
 *.backup
 
+# Carpetas de backup del proyecto
+backend/backup_antes_limpieza/
+backup_*/
+
 # Archivos específicos del proyecto
 uploads/
 storage/

@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import authTestingRoutes from './routes/auth-testing';
 import authTestRoutes from './routes/auth-test';
+import agroManoTrabajadoresRoutes from './routes/agromano-trabajadores';
+import agroManoAsistenciaRoutes from './routes/agromano-asistencia';
 
 // Cargar variables de entorno PRIMERO
 dotenv.config();
@@ -51,6 +53,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth', authTestRoutes);
 app.use('/api/testing', authTestingRoutes);
 
+// Rutas AgroMano con RBAC granular
+app.use('/api/agromano/trabajadores', agroManoTrabajadoresRoutes);
+app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
+
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {
   res.json({
@@ -90,13 +96,27 @@ app.listen(PORT, () => {
 🔐 Auth0 Domain: ${process.env.AUTH0_DOMAIN || 'No configurado'}
 
 📋 Endpoints disponibles:
-   🟢 GET  /health                      - Estado del servidor
-   🟢 GET  /api/test/public             - Endpoint público (sin auth)
-   🟢 GET  /api/auth/public             - Endpoint público Auth0
-   🔐 GET  /api/auth/protected          - Requiere token Auth0
-   👑 GET  /api/auth/admin              - Requiere permiso admin:access
-   👥 GET  /api/auth/trabajadores       - Requiere permiso trabajadores:read
-   🔍 GET  /api/auth/test-permissions   - Analizar permisos del token
+   🟢 GET  /health                                    - Estado del servidor
+   🟢 GET  /api/test/public                           - Endpoint público (sin auth)
+   🟢 GET  /api/auth/public                           - Endpoint público Auth0
+   🔐 GET  /api/auth/protected                        - Requiere token Auth0
+   👑 GET  /api/auth/admin                            - Requiere permiso admin:access
+   
+🎭 Endpoints AgroMano RBAC:
+   👥 GET  /api/agromano/trabajadores                 - trabajadores:read:all|own
+   👥 POST /api/agromano/trabajadores                 - trabajadores:create
+   👥 PUT  /api/agromano/trabajadores/:id             - trabajadores:update:all|own
+   👥 DEL  /api/agromano/trabajadores/:id             - trabajadores:delete
+   � GET  /api/agromano/trabajadores/export          - trabajadores:export
+   📥 POST /api/agromano/trabajadores/import          - trabajadores:import
+   
+   ⏰ POST /api/agromano/asistencia/marcar            - asistencia:register
+   ⏰ GET  /api/agromano/asistencia                   - asistencia:read:all|own
+   ✅ PUT  /api/agromano/asistencia/:id/aprobar       - asistencia:approve
+   📊 GET  /api/agromano/asistencia/reportes          - asistencia:reports
+   📈 GET  /api/agromano/asistencia/dashboard         - asistencia:dashboard
+   🙏 POST /api/agromano/asistencia/permisos          - permisos:create
+   ✅ PUT  /api/agromano/asistencia/permisos/:id/aprobar - permisos:approve
 
 🔗 Documentación: http://localhost:${PORT}/health
 `);
