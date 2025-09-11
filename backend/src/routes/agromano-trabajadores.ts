@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { checkJwt } from '../config/auth0-simple.config';
-import { hybridAuthMiddleware } from '../middleware/hybrid-auth-corrected.middleware';
+import { hybridAuthMiddleware } from '../middleware/hybrid-auth-final.middleware';
 import { 
     requirePermission, 
     requireAnyPermission, 

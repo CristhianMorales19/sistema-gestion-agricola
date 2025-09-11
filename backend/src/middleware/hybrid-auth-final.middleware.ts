@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// Crear cliente Prisma con logs detallados
+const prisma = new PrismaClient({
+  log: ['error', 'warn'],
+  errorFormat: 'pretty'
+});
 
 /**
  * Middleware híbrido: Auth0 para autenticación + BD local para autorización
@@ -11,8 +15,15 @@ const prisma = new PrismaClient();
  */
 export const hybridAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log('🔄 ===== HYBRID AUTH MIDDLEWARE INICIADO =====');
+    console.log('⏰ Timestamp:', new Date().toISOString());
+    
     // 1. Verificar que existe token Auth0 validado
-    if (!req.auth) {
+    console.log('🔍 Verificando req.auth:', !!req.auth);
+    console.log('🔍 Verificando req.user:', !!req.user);
+    
+    if (!req.auth && !req.user) {
+      console.log('❌ No hay token Auth0 validado');
       return res.status(401).json({
         success: false,
         message: 'Token de autenticación requerido',
@@ -20,38 +31,88 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       });
     }
 
-    // 2. Obtener email del token Auth0
-    const userEmail = (req.auth as any).email || (req.auth as any).sub;
-    if (!userEmail || !userEmail.includes('@')) {
+    // 2. Obtener email del token Auth0 (probamos ambas fuentes)
+    const authData = req.auth || req.user;
+    const userEmail = (authData as any).email || (authData as any).sub;
+    const userSub = (authData as any).sub;
+    
+    console.log('📧 Email extraído:', userEmail);
+    console.log('🆔 Sub extraído:', userSub);
+    console.log('🔍 Auth data completo:', JSON.stringify(authData, null, 2));
+    
+    if (!userEmail) {
+      console.log('❌ No se pudo extraer email del token Auth0');
       return res.status(401).json({
         success: false,
         message: 'Email no encontrado en token Auth0',
         code: 'NO_EMAIL_IN_TOKEN',
-        token_data: req.auth
+        token_data: authData
       });
     }
 
-    console.log(`🔍 Buscando usuario en BD: ${userEmail}`);
+    console.log(`🔍 Buscando usuario en BD por email: ${userEmail}`);
+    console.log(`🔍 También buscando por sub: ${userSub}`);
+    console.log('🔍 Criterios de búsqueda: userSub O userEmail + estado ACTIVO/activo');
 
-    // 3. Buscar usuario en BD local por username (asumiendo que username = email)
-    const user = await prisma.mot_usuario.findFirst({
+    // 3. Buscar usuario en BD local por username (Auth0 sub o email) y estado activo
+    let user = await prisma.mot_usuario.findFirst({
       where: {
-        username: userEmail,
-        estado: 'activo'
+        OR: [
+          { 
+            username: userSub,
+            OR: [
+              { estado: 'ACTIVO' },
+              { estado: 'activo' }
+            ]
+          },
+          { 
+            username: userEmail,
+            OR: [
+              { estado: 'ACTIVO' },
+              { estado: 'activo' }
+            ]
+          }
+        ]
       }
     });
 
     // 4. Si usuario no existe en BD local → RECHAZAR
     if (!user) {
+      console.log('❌ Usuario NO encontrado con los criterios de búsqueda');
+      console.log('🔍 Intentando búsqueda más amplia para debug...');
+      
+      // Debug: buscar cualquier usuario que contenga auth0
+      const debugUser = await prisma.mot_usuario.findFirst({
+        where: {
+          username: {
+            contains: 'auth0'
+          }
+        }
+      });
+      
+      console.log('🔍 Debug - Usuario con auth0:', debugUser ? {
+        id: debugUser.usuario_id,
+        username: debugUser.username,
+        estado: debugUser.estado
+      } : 'No encontrado');
+      
       return res.status(403).json({
         success: false,
         message: 'Usuario no autorizado en el sistema',
         code: 'USER_NOT_AUTHORIZED',
-        email: userEmail
+        searchCriteria: {
+          userEmail,
+          userSub
+        },
+        debugUser: debugUser ? {
+          id: debugUser.usuario_id,
+          username: debugUser.username,
+          estado: debugUser.estado
+        } : null
       });
     }
 
-    console.log(`✅ Usuario encontrado: ID ${user.usuario_id}`);
+    console.log(`✅ Usuario encontrado: ID ${user.usuario_id}, username: ${user.username}, estado: ${user.estado}`);
 
     // 5. Obtener rol del usuario
     const rol = await prisma.mom_rol.findUnique({

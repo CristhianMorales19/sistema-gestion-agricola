@@ -1,23 +1,71 @@
+// ⚠️ CRÍTICO: Cargar variables de entorno ANTES de cualquier importación
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 
-// Importar rutas
+// Importar rutas DESPUÉS de cargar .env
 import authRoutes from './routes/auth';
 import authTestingRoutes from './routes/auth-testing';
 import authTestRoutes from './routes/auth-test';
 import agroManoTrabajadoresRoutes from './routes/agromano-trabajadores';
 import agroManoAsistenciaRoutes from './routes/agromano-asistencia';
+import agroManoDashboardRoutes from './routes/agromano-dashboard';
+import dashboardSimpleRoutes from './routes/dashboard-simple';
+import debugRoutes from './routes/debug-routes';
+import debugPrismaRoutes from './routes/debug-prisma';
 
-// Cargar variables de entorno PRIMERO
-dotenv.config();
+// Función de verificación de conexión a BD
+async function verificarConexionBD() {
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    console.log('🔄 Intentando conectar a la base de datos...');
+    await prisma.$connect();
+    console.log('✅ Conexión a la base de datos exitosa');
+    
+    // Verificar que existe la tabla de usuarios
+    const usuarios = await prisma.mot_usuario.count();
+    console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
+    
+    // Verificar usuario Auth0
+    const usuarioAuth0 = await prisma.mot_usuario.findFirst({
+      where: {
+        username: {
+          contains: 'auth0'
+        }
+      }
+    });
+    
+    if (usuarioAuth0) {
+      console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
+    } else {
+      console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
+    }
+    
+    await prisma.$disconnect();
+    return true;
+  } catch (error) {
+    console.log('❌ Error conectando a la base de datos:', error instanceof Error ? error.message : String(error));
+    return false;
+  }
+}
 
 // Debug de variables de entorno
+console.log('🚀 ===== INICIO DEL SERVIDOR AGROMANO =====');
 console.log('🔍 Variables de entorno cargadas:');
 console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
 console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
+console.log('AUTH0_CLIENT_ID:', process.env.AUTH0_CLIENT_ID ? '✅ Configurado' : '❌ Faltante');
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('DATABASE_URL value:', process.env.DATABASE_URL || 'UNDEFINED!');
+console.log('PORT:', process.env.PORT || 3000);
+
+// Verificar conexión a BD al inicio
+verificarConexionBD();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,6 +104,10 @@ app.use('/api/testing', authTestingRoutes);
 // Rutas AgroMano con RBAC granular
 app.use('/api/agromano/trabajadores', agroManoTrabajadoresRoutes);
 app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
+app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
+app.use('/api/dashboard-simple', dashboardSimpleRoutes);
+app.use('/api/debug', debugRoutes);
+app.use('/api/debug-prisma', debugPrismaRoutes);
 
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {
@@ -117,6 +169,14 @@ app.listen(PORT, () => {
    📈 GET  /api/agromano/asistencia/dashboard         - asistencia:dashboard
    🙏 POST /api/agromano/asistencia/permisos          - permisos:create
    ✅ PUT  /api/agromano/asistencia/permisos/:id/aprobar - permisos:approve
+
+   📊 GET  /api/agromano/dashboard/general            - dashboard:view:basic|advanced
+   📈 GET  /api/agromano/dashboard/stats/tiempo-real  - dashboard:view:basic
+   🌤️ GET  /api/agromano/dashboard/clima             - dashboard:view:basic
+   
+   🧪 GET  /api/dashboard-simple/test                - Solo token Auth0 (debug)
+   🔍 GET  /api/debug-prisma/prisma-connection       - Debug conexión Prisma
+   👤 GET  /api/debug-prisma/auth0-user-search       - Debug búsqueda usuario Auth0
 
 🔗 Documentación: http://localhost:${PORT}/health
 `);
