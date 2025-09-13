@@ -13,9 +13,9 @@ steps:
   displayName: 'Instalar Node.js'
 
 - script: |
-    dir
+    dir /s
     cd backend
     dir
     npm install
     npm run test
-  displayName: 'Listar archivos y ejecutar pruebas'
+  displayName: 'Listar todo el contenido y ejecutar pruebas'
