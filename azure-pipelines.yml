@@ -1,0 +1,18 @@
+trigger:
+- main
+
+pool:
+  name: Default
+  demands:
+    - Agent.Name -equals DESKTOP-NUK01OF
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+  displayName: 'Instalar Node.js'
+
+- script: |
+    npm install
+    npm run test
+  displayName: 'Instalar dependencias y ejecutar pruebas'
