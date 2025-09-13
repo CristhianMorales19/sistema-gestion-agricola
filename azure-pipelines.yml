@@ -11,9 +11,10 @@ steps:
   inputs:
     versionSpec: '16.x'
   displayName: 'Instalar Node.js'
+  workingDirectory: backend
 
 - script: |
-    cd backend
     npm install
     npm run test
   displayName: 'Instalar dependencias y ejecutar pruebas'
+  workingDirectory: backend
