@@ -13,9 +13,11 @@ steps:
   displayName: 'Instalar Node.js'
 
 - script: |
+    echo "Listando contenido del directorio raíz:"
     dir /s
+    echo "Cambiando al directorio backend y listando contenido:"
     cd backend
     dir
     npm install
     npm run test
-  displayName: 'Listar todo el contenido y ejecutar pruebas'
+  displayName: 'Listar contenido y ejecutar pruebas'
