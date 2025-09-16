@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { requireAuth, requirePermission } from '../middleware/auth0-rbac';
+import { authenticateToken, requirePermissions } from '../middleware/rbac.middleware';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -11,12 +11,12 @@ const prisma = new PrismaClient();
  * @access Requiere permiso 'trabajadores:read'
  */
 router.get('/', 
-  requireAuth,
-  requirePermission('trabajadores:read'),
+  authenticateToken,
+  requirePermissions(['trabajadores:read']),
   async (req, res) => {
     try {
       const trabajadores = await prisma.mom_trabajador.findMany({
-        where: { is_activo: 1 },
+        where: { is_activo: true },
         select: {
           trabajador_id: true,
           documento_identidad: true,
@@ -49,8 +49,8 @@ router.get('/',
  * @access Requiere permiso 'trabajadores:create'
  */
 router.post('/',
-  requireAuth,
-  requirePermission('trabajadores:create'),
+  authenticateToken,
+  requirePermissions(['trabajadores:create']),
   async (req, res) => {
     try {
       const {
@@ -76,7 +76,7 @@ router.post('/',
           fecha_nacimiento: new Date(fecha_nacimiento),
           telefono,
           email,
-          is_activo: 1,
+          is_activo: true,
           fecha_registro_at: new Date(),
           created_at: new Date(),
           created_by: 1, // TODO: Obtener del token de Auth0
@@ -115,8 +115,8 @@ router.post('/',
  * @access Requiere permiso 'trabajadores:update'
  */
 router.put('/:id',
-  requireAuth,
-  requirePermission('trabajadores:update'),
+  authenticateToken,
+  requirePermissions(['trabajadores:update']),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -168,8 +168,8 @@ router.put('/:id',
  * @access Requiere permiso 'trabajadores:delete'
  */
 router.delete('/:id',
-  requireAuth,
-  requirePermission('trabajadores:delete'),
+  authenticateToken,
+  requirePermissions(['trabajadores:delete']),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -177,7 +177,7 @@ router.delete('/:id',
       const trabajadorEliminado = await prisma.mom_trabajador.update({
         where: { trabajador_id: parseInt(id) },
         data: {
-          is_activo: 0,
+          is_activo: false,
           deleted_at: new Date(),
           updated_by: 1 // TODO: Obtener del token de Auth0
         }

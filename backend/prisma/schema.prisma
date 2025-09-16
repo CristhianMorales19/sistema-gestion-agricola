@@ -568,6 +568,7 @@ model mot_tarea_programada {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model mot_usuario {
   usuario_id                 Int             @id @default(autoincrement())
+  auth0_user_id              String?         @unique
   trabajador_id              Int?
   username                   String          @unique(map: "username") @db.VarChar(100)
   password_hash              String          @db.VarChar(255)

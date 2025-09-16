@@ -3,7 +3,7 @@
 -- Basado en MATRIZ_ROLES_PERMISOS.md
 -- ================================================================
 
-USE agromano;
+USE agromano; 
 
 -- ================================================================
 -- 1. LIMPIAR CONFIGURACIÓN ANTERIOR (OPCIONAL)
