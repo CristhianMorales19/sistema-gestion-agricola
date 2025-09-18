@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { Auth0User } from '../types/express';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
 
         // 2. Buscar usuario en BD por Auth0 ID o email
         if (auth0Id || email) {
-            usuario = await prisma.mom_usuario.findFirst({
+            usuario = await (prisma as any).mot_usuario.findFirst({
                 where: {
                     OR: [
                         auth0Id ? { auth0_user_id: auth0Id } : {},
@@ -33,15 +34,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                     ]
                 },
                 include: {
-                    mom_rol: {
-                        include: {
-                            mom_rol_permisos: {
-                                include: {
-                                    mom_permiso: true
-                                }
-                            }
-                        }
-                    }
+                    mom_rol: { include: { mom_rol_permisos: { include: { mom_permiso: true } } } }
                 }
             });
         }
@@ -56,7 +49,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                     permissions
                 });
             }
-            usuario = await prisma.mom_usuario.create({
+        usuario = await (prisma as any).mot_usuario.create({
                 data: {
                     auth0_user_id: auth0Id,
                     email: email,
@@ -67,42 +60,26 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                     updated_at: new Date()
                 },
                 include: {
-                    mom_rol: {
-                        include: {
-                            mom_rol_permisos: {
-                                include: {
-                                    mom_permiso: true
-                                }
-                            }
-                        }
-                    }
+            mom_rol: { include: { mom_rol_permisos: { include: { mom_permiso: true } } } }
                 }
             });
         } else if (usuario && auth0Id && !usuario.auth0_user_id) {
             // Si existe pero no tiene auth0_user_id, actualizarlo
-            usuario = await prisma.mom_usuario.update({
+        usuario = await (prisma as any).mot_usuario.update({
                 where: { usuario_id: usuario.usuario_id },
                 data: {
                     auth0_user_id: auth0Id,
                     updated_at: new Date()
                 },
                 include: {
-                    mom_rol: {
-                        include: {
-                            mom_rol_permisos: {
-                                include: {
-                                    mom_permiso: true
-                                }
-                            }
-                        }
-                    }
+            mom_rol: { include: { mom_rol_permisos: { include: { mom_permiso: true } } } }
                 }
             });
         }
 
         // 4. Fallback: Si no hay token Auth0, buscar usuario en BD por email/username
         if (!auth0User && req.body && (req.body.email || req.body.username)) {
-            usuario = await prisma.mom_usuario.findFirst({
+            usuario = await (prisma as any).mot_usuario.findFirst({
                 where: {
                     OR: [
                         req.body.email ? { email: req.body.email } : {},
@@ -126,9 +103,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
         // 5. Si usuario existe y está activo, agregar info al request
         if (usuario && usuario.activo) {
             (req as any).dbUser = usuario;
-            (req as any).userPermissions = usuario.mom_rol.mom_rol_permisos.map(
-                rp => rp.mom_permiso.codigo
-            );
+            (req as any).userPermissions = ((usuario as any).mom_rol?.mom_rol_permisos || []).map((rp: any) => rp.mom_permiso.codigo);
             return next();
         }
 
