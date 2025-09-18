@@ -1,0 +1,23 @@
+trigger:
+- main
+
+pool:
+  name: Default
+  demands:
+    - Agent.Name -equals DESKTOP-NUK01OF
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+  displayName: 'Instalar Node.js'
+
+- script: |
+    echo "Listando contenido del directorio raíz:"
+    dir /s
+    echo "Cambiando al directorio backend y listando contenido:"
+    cd backend
+    dir
+    npm install
+    npm run test
+  displayName: 'Listar contenido y ejecutar pruebas'

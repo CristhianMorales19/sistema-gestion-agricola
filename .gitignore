@@ -46,6 +46,10 @@ coverage/
 *.bak
 *.backup
 
+# Carpetas de backup del proyecto
+backend/backup_antes_limpieza/
+backup_*/
+
 # Archivos específicos del proyecto
 uploads/
 storage/
@@ -57,3 +61,32 @@ frontend/.eslintcache
 # Backend específico
 backend/dist/
 backend/uploads/
+
+
+# ==============================================
+# NUEVAS REGLAS PARA ARCHIVOS JavaScript
+# ==============================================
+
+# Excluir archivos JavaScript compilados
+*.js
+**/*.js
+
+# Pero permitir archivos de configuración JavaScript
+!*.config.js
+!**/*.config.js
+!/**/*.config.js
+
+# Permitir archivos de configuración específicos
+!webpack.config.js
+!rollup.config.js
+!jest.config.js
+!babel.config.js
+!ecosystem.config.js
+
+# Excluir archivos .map
+*.map
+**/*.map
+
+# TypeScript build outputs
+lib/
+types/
