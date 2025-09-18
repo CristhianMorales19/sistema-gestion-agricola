@@ -1,31 +1,39 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { checkJwt } from '../config/auth0.config';
+import { Auth0User, LocalUser } from '../types/express'; // Importar desde el archivo único
 
 const prisma = new PrismaClient();
 
-// Extender el tipo Request para Auth0
-declare global {
-  namespace Express {
-    interface Request {
-      auth0User?: {
-        sub: string; // Auth0 user ID
-        email?: string;
-        nickname?: string;
-        permissions?: string[];
-      };
-      userPermissions?: string[];
-      userRoles?: string[];
-      localUser?: {
-        usuario_id: number;
-        username: string;
-        rol_id: number;
-        trabajador_id?: number;
-        permisos: string[];
-      };
-    }
-  }
-}
+// // Interfaz para el usuario de Auth0
+// interface Auth0User {
+//   sub: string;
+//   email?: string;
+//   nickname?: string;
+//   permissions?: string[];
+// }
+
+// // Interfaz para el usuario local de la base de datos
+// interface LocalUser {
+//   usuario_id: number;
+//   username: string;
+//   rol_id: number;
+//   trabajador_id?: number;
+//   permisos: string[];
+// }
+
+// Extender el tipo Request de Express
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       auth0User?: Auth0User;
+//       userPermissions?: string[];
+//       userRoles?: string[];
+//       localUser?: LocalUser;
+//     }
+//   }
+// }
+
 
 /**
  * Middleware combinado: Auth0 JWT + Permisos de base de datos local
@@ -44,8 +52,9 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
 
       try {
         // 2. Obtener información del usuario de Auth0
-        const auth0UserId = req.user?.sub;
-        const userEmail = req.user?.email;
+        const auth0User = req.user as unknown as Auth0User;
+        const auth0UserId = auth0User?.sub;
+        const userEmail = auth0User?.email;
 
         if (!auth0UserId) {
           return res.status(401).json({
@@ -88,13 +97,14 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
         // 4. Extraer permisos del usuario
         const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso
           .map(rel => rel.mom_permiso.codigo)
-          .filter(Boolean);
+          .filter((codigo): codigo is string => codigo !== null);
+
 
         // 5. Agregar información al request
         req.auth0User = {
           sub: auth0UserId,
           email: userEmail,
-          permissions: req.user?.permissions || []
+          permissions: auth0User?.permissions || []
         };
 
         req.localUser = {

@@ -1,23 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import { LocalUser } from '../types/express'; // Importar desde el archivo único
 
 const prisma = new PrismaClient();
 
 // Extender el tipo Request para incluir usuario autenticado
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        usuario_id: number;
-        username: string;
-        rol_id: number;
-        trabajador_id?: number;
-        permisos?: string[];
-      };
-    }
-  }
-}
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       user?: {
+//         usuario_id: number;
+//         username: string;
+//         rol_id: number;
+//         trabajador_id?: number;
+//         permisos?: string[];
+//       };
+//     }
+//   }
+// }
 
 /**
  * Middleware para verificar JWT y cargar permisos del usuario
@@ -47,10 +48,13 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         mom_rol: {
           include: {
             rel_mom_rol__mom_permiso: {
-              include: {
+              where: {  // where va aquí, no dentro de mom_permiso
                 mom_permiso: {
-                  where: { is_activo: true }
+                  is_activo: true
                 }
+              },
+              include: {
+                mom_permiso: true
               }
             }
           }
@@ -71,7 +75,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     );
 
     // Agregar usuario a la request
-    req.user = {
+    req.localUser = {
       usuario_id: usuario.usuario_id,
       username: usuario.username,
       rol_id: usuario.rol_id,
@@ -96,9 +100,9 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 export const requirePermissions = (requiredPermissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { user } = req;
+      const { localUser } = req;
 
-      if (!user || !user.permisos) {
+      if (!localUser || !localUser.permisos) {
         return res.status(403).json({
           success: false,
           message: 'Usuario no autenticado'
@@ -107,7 +111,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
 
       // Verificar si el usuario tiene al menos uno de los permisos requeridos
       const hasPermission = requiredPermissions.some(permission => 
-        user.permisos!.includes(permission)
+        localUser.permisos!.includes(permission)
       );
 
       if (!hasPermission) {
@@ -115,7 +119,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
           success: false,
           message: 'No tienes permisos para realizar esta acción',
           permisosRequeridos: requiredPermissions,
-          permisosUsuario: user.permisos
+          permisosUsuario: localUser.permisos
         });
       }
 
@@ -137,9 +141,9 @@ export const requirePermissions = (requiredPermissions: string[]) => {
 export const requireAllPermissions = (requiredPermissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { user } = req;
+      const { localUser } = req;
 
-      if (!user || !user.permisos) {
+      if (!localUser || !localUser.permisos) {
         return res.status(403).json({
           success: false,
           message: 'Usuario no autenticado'
@@ -148,7 +152,7 @@ export const requireAllPermissions = (requiredPermissions: string[]) => {
 
       // Verificar si el usuario tiene TODOS los permisos requeridos
       const hasAllPermissions = requiredPermissions.every(permission => 
-        user.permisos!.includes(permission)
+        localUser.permisos!.includes(permission)
       );
 
       if (!hasAllPermissions) {
@@ -156,7 +160,7 @@ export const requireAllPermissions = (requiredPermissions: string[]) => {
           success: false,
           message: 'No tienes todos los permisos necesarios para esta acción',
           permisosRequeridos: requiredPermissions,
-          permisosUsuario: user.permisos
+          permisosUsuario: localUser.permisos
         });
       }
 
@@ -178,9 +182,9 @@ export const requireAllPermissions = (requiredPermissions: string[]) => {
 export const requireRole = (allowedRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { user } = req;
+      const { localUser } = req;
 
-      if (!user) {
+      if (!localUser) {
         return res.status(403).json({
           success: false,
           message: 'Usuario no autenticado'
@@ -189,7 +193,7 @@ export const requireRole = (allowedRoles: string[]) => {
 
       // Obtener el rol del usuario
       const rol = await prisma.mom_rol.findUnique({
-        where: { rol_id: user.rol_id }
+        where: { rol_id: localUser.rol_id }
       });
 
       if (!rol || !allowedRoles.includes(rol.codigo)) {
@@ -217,7 +221,7 @@ export const requireRole = (allowedRoles: string[]) => {
  * @param user - Usuario autenticado
  * @param permission - Permiso a verificar
  */
-export const userHasPermission = (user: Express.Request['user'], permission: string): boolean => {
+export const userHasPermission = (user: LocalUser, permission: string): boolean => {
   return user?.permisos?.includes(permission) || false;
 };
 
@@ -226,7 +230,7 @@ export const userHasPermission = (user: Express.Request['user'], permission: str
  * @param user - Usuario autenticado
  * @param category - Categoría de permisos
  */
-export const getUserPermissionsByCategory = async (user: Express.Request['user'], category?: string) => {
+export const getUserPermissionsByCategory = async (user: LocalUser, category?: string) => {
   if (!user) return [];
 
   const whereClause: any = {

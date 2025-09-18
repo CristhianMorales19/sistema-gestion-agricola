@@ -35,7 +35,7 @@ async function verificarConexionBD() {
     const usuarioAuth0 = await prisma.mot_usuario.findFirst({
       where: {
         username: {
-          contains: 'auth0'
+          contains: 'admin@agromano.com'
         }
       }
     });
@@ -73,7 +73,7 @@ const PORT = process.env.PORT || 3000;
 // Middlewares globales
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
