@@ -15,6 +15,19 @@ const router = Router();
  * @desc Obtener lista de trabajadores
  * @access Requiere permisos: trabajadores:read:all OR trabajadores:read:own
  */
+/**
+ * @swagger
+ * /api/trabajadores:
+ *   get:
+ *     summary: Obtener lista de trabajadores
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Trabajadores
+ *     responses:
+ *       200:
+ *         description: Lista de trabajadores
+ */
 router.get('/', 
     checkJwt,
     hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
@@ -41,6 +54,25 @@ router.get('/',
  * @route POST /api/trabajadores
  * @desc Crear nuevo trabajador
  * @access Requiere permiso: trabajadores:create
+ */
+/**
+ * @swagger
+ * /api/trabajadores:
+ *   post:
+ *     summary: Crear un trabajador
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Trabajadores
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Trabajador creado exitosamente
  */
 router.post('/', 
     checkJwt,

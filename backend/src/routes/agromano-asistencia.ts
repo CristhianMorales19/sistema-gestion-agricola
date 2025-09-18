@@ -12,6 +12,30 @@ const router = Router();
  * @desc Registrar entrada/salida de asistencia
  * @access Requiere permiso: asistencia:register
  */
+/**
+ * @swagger
+ * /api/asistencia/marcar:
+ *   post:
+ *     summary: Registrar entrada/salida de asistencia
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Asistencia
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Asistencia registrada exitosamente
+ */
 router.post('/marcar', 
     checkJwt,
     requirePermission('asistencia:register'),
@@ -34,6 +58,19 @@ router.post('/marcar',
  * @route GET /api/asistencia
  * @desc Obtener registros de asistencia
  * @access Requiere permisos: asistencia:read:all OR asistencia:read:own
+ */
+/**
+ * @swagger
+ * /api/asistencia:
+ *   get:
+ *     summary: Obtener registros de asistencia
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Asistencia
+ *     responses:
+ *       200:
+ *         description: Registros de asistencia
  */
 router.get('/', 
     checkJwt,
@@ -108,6 +145,19 @@ router.get('/reportes',
  * @route GET /api/asistencia/dashboard
  * @desc Obtener dashboard de asistencia
  * @access Requiere permiso: asistencia:dashboard
+ */
+/**
+ * @swagger
+ * /api/asistencia/dashboard:
+ *   get:
+ *     summary: Obtener dashboard de asistencia
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Asistencia
+ *     responses:
+ *       200:
+ *         description: Dashboard de asistencia
  */
 router.get('/dashboard', 
     checkJwt,

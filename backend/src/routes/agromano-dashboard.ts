@@ -13,6 +13,19 @@ const router = Router();
  * @desc Obtener datos generales del dashboard principal (versión simplificada)
  * @access Solo requiere estar autenticado con Auth0
  */
+/**
+ * @swagger
+ * /api/dashboard/general:
+ *   get:
+ *     summary: Obtener datos generales del dashboard principal
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Dashboard
+ *     responses:
+ *       200:
+ *         description: Datos generales del dashboard
+ */
 router.get('/general', 
     checkJwt,
     hybridAuthMiddleware,
@@ -234,6 +247,19 @@ router.get('/general',
  * @desc Obtener estadísticas en tiempo real
  * @access Requiere permiso: dashboard:view:basic
  */
+/**
+ * @swagger
+ * /api/dashboard/stats/tiempo-real:
+ *   get:
+ *     summary: Obtener estadísticas en tiempo real del dashboard
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Dashboard
+ *     responses:
+ *       200:
+ *         description: Estadísticas en tiempo real
+ */
 router.get('/stats/tiempo-real', 
     checkJwt,
     hybridAuthMiddleware,
@@ -272,6 +298,19 @@ router.get('/stats/tiempo-real',
  * @route GET /api/dashboard/clima
  * @desc Obtener condiciones climáticas actuales
  * @access Requiere permiso: dashboard:view:basic
+ */
+/**
+ * @swagger
+ * /api/dashboard/clima:
+ *   get:
+ *     summary: Obtener condiciones climáticas actuales
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Dashboard
+ *     responses:
+ *       200:
+ *         description: Condiciones climáticas obtenidas
  */
 router.get('/clima', 
     checkJwt,
