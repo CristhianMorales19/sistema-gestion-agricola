@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { checkJwt } from '../config/auth0.config';
-import { Auth0User, LocalUser } from '../types/express'; // Importar desde el archivo único
+import { Auth0User, LocalUser } from '../types/express';
 
 const prisma = new PrismaClient();
 
@@ -43,11 +43,7 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
     // 1. Verificar JWT de Auth0
     checkJwt(req, res, async (jwtError: any) => {
       if (jwtError) {
-        return res.status(401).json({
-          success: false,
-          message: 'Token de Auth0 inválido',
-          error: jwtError.message
-        });
+        return res.status(401).json({ success: false, message: 'Token de Auth0 inválido', error: jwtError.message });
       }
 
       try {
@@ -57,85 +53,42 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
         const userEmail = auth0User?.email;
 
         if (!auth0UserId) {
-          return res.status(401).json({
-            success: false,
-            message: 'ID de usuario de Auth0 no encontrado'
-          });
+          return res.status(401).json({ success: false, message: 'ID de usuario de Auth0 no encontrado' });
         }
 
         // 3. Buscar usuario en la base de datos local usando email o Auth0 ID
-        const usuario = await prisma.mot_usuario.findFirst({
+        const usuario: any = await (prisma as any).mot_usuario.findFirst({
           where: {
-            OR: [
-              { username: userEmail },
-              // Puedes agregar un campo auth0_id en el futuro
-              { username: auth0UserId }
-            ],
+            OR: [{ username: userEmail }, { username: auth0UserId }],
             estado: 'activo'
           },
-          include: {
-            mom_rol: {
-              include: {
-                rel_mom_rol__mom_permiso: {
-                  include: {
-                    mom_permiso: true
-                  }
-                }
-              }
-            },
-            mom_trabajador: true
-          }
+          include: { mom_rol: { include: { rel_mom_rol__mom_permiso: { include: { mom_permiso: true } } } }, mom_trabajador: true }
         });
 
         if (!usuario) {
-          return res.status(403).json({
-            success: false,
-            message: 'Usuario no encontrado en el sistema local. Contacte al administrador.'
-          });
+          return res.status(403).json({ success: false, message: 'Usuario no encontrado en el sistema local. Contacte al administrador.' });
         }
 
-        // 4. Extraer permisos del usuario
-        const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso
-          .map(rel => rel.mom_permiso.codigo)
-          .filter((codigo): codigo is string => codigo !== null);
-
+        const permisos: string[] = ((usuario as any).mom_rol?.rel_mom_rol__mom_permiso || []).map((rel: any) => rel.mom_permiso.codigo).filter((c: any) => !!c);
 
         // 5. Agregar información al request
-        req.auth0User = {
-          sub: auth0UserId,
-          email: userEmail,
-          permissions: auth0User?.permissions || []
-        };
-
-        req.localUser = {
-          usuario_id: usuario.usuario_id,
-          username: usuario.username,
-          rol_id: usuario.rol_id,
-          trabajador_id: usuario.trabajador_id || undefined,
-          permisos: permisos
-        };
-
+        req.auth0User = { sub: auth0UserId, email: userEmail, permissions: auth0User?.permissions || [] };
+        req.localUser = { usuario_id: usuario.usuario_id, username: usuario.username, rol_id: usuario.rol_id, trabajador_id: usuario.trabajador_id || undefined, permisos };
         req.userPermissions = permisos;
-        req.userRoles = [usuario.mom_rol.codigo];
+        req.userRoles = [(usuario as any).mom_rol?.codigo];
 
-        console.log(`✅ Usuario autenticado: ${userEmail} (${usuario.mom_rol.nombre})`);
+        console.log(`✅ Usuario autenticado: ${userEmail} (${(usuario as any).mom_rol?.nombre})`);
         next();
 
       } catch (dbError) {
         console.error('Error consultando base de datos:', dbError);
-        return res.status(500).json({
-          success: false,
-          message: 'Error interno del servidor'
-        });
+        return res.status(500).json({ success: false, message: 'Error interno del servidor' });
       }
     });
 
   } catch (error) {
     console.error('Error en autenticación Auth0:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error en el proceso de autenticación'
-    });
+    return res.status(500).json({ success: false, message: 'Error en el proceso de autenticación' });
   }
 };
 

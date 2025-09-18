@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import { LocalUser } from '../types/express'; // Importar desde el archivo único
+import { LocalUser } from '../types/express';
 
 const prisma = new PrismaClient();
 
@@ -39,27 +39,9 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
     // Buscar el usuario y sus permisos en la base de datos
-    const usuario = await prisma.mot_usuario.findUnique({
-      where: {
-        usuario_id: decoded.usuario_id,
-        estado: 'activo'
-      },
-      include: {
-        mom_rol: {
-          include: {
-            rel_mom_rol__mom_permiso: {
-              where: {  // where va aquí, no dentro de mom_permiso
-                mom_permiso: {
-                  is_activo: true
-                }
-              },
-              include: {
-                mom_permiso: true
-              }
-            }
-          }
-        }
-      }
+    const usuario: any = await (prisma as any).mot_usuario.findUnique({
+      where: { usuario_id: decoded.usuario_id, estado: 'activo' },
+      include: { mom_rol: { include: { rel_mom_rol__mom_permiso: { include: { mom_permiso: true } } } } }
     });
 
     if (!usuario) {
@@ -70,9 +52,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 
     // Extraer permisos del usuario
-    const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
-      rp => rp.mom_permiso.codigo!
-    );
+  const permisos = ((usuario as any).mom_rol?.rel_mom_rol__mom_permiso || []).map((rp: any) => rp.mom_permiso.codigo!);
 
     // Agregar usuario a la request
     req.localUser = {
