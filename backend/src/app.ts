@@ -31,19 +31,30 @@ async function verificarConexionBD() {
     const usuarios = await prisma.mot_usuario.count();
     console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
     
-    // Verificar usuario Auth0
-    const usuarioAuth0 = await prisma.mot_usuario.findFirst({
-      where: {
-        username: {
-          contains: 'admin@agromano.com'
+    // Verificar usuario Auth0: usar select explícito para evitar leer columnas que no existen en la BD
+    let usuarioAuth0: any = null;
+    try {
+      usuarioAuth0 = await prisma.mot_usuario.findFirst({
+        where: {
+          username: {
+            contains: 'admin@agromano.com'
+          }
+        },
+        // Seleccionar solo campos mínimos que deben existir en la tabla
+        select: {
+          usuario_id: true,
+          username: true
         }
-      }
-    });
-    
+      });
+    } catch (err) {
+      // Si la columna auth0_user_id u otra no existe, Prisma puede lanzar un error; continuar pero avisar
+      console.warn('⚠️ Aviso: no fue posible consultar mot_usuario completamente. Continuando sin esa verificación. Detalle:', err instanceof Error ? err.message : String(err));
+    }
+
     if (usuarioAuth0) {
       console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
     } else {
-      console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
+      console.log('❌ Usuario Auth0 NO encontrado en la base de datos (o columna faltante)');
     }
     
     await prisma.$disconnect();
