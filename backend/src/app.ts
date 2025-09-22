@@ -31,13 +31,6 @@ async function verificarConexionBD() {
     const usuarios = await prisma.mot_usuario.count();
     console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
     
-    // Verificar usuario Auth0 (manejar caso donde columna adicional en schema de prisma no exista)
-    try {
-      const usuarioAuth0 = await prisma.mot_usuario.findFirst({
-        where: {
-          username: {
-            contains: 'auth0'
-          }
         }
       });
 
@@ -79,7 +72,7 @@ const PORT = process.env.PORT || 3000;
 // Middlewares globales
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

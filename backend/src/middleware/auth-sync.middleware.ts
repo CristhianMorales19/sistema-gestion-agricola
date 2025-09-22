@@ -26,17 +26,17 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
         }
 
         // Verificar si el usuario ya existe en la BD
-        let usuario = await prisma.mom_usuario.findFirst({
+        let usuario = await prisma.mot_usuario.findFirst({
             where: {
                 OR: [
                     { auth0_user_id: auth0Id },
-                    { email: email }
+                    { username: email }
                 ]
             },
             include: {
                 mom_rol: {
                     include: {
-                        mom_rol_permisos: {
+                        rel_mom_rol__mom_permiso: {
                             include: {
                                 mom_permiso: true
                             }
@@ -64,12 +64,14 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
             }
 
             // Crear el usuario en la BD
-            usuario = await prisma.mom_usuario.create({
+            usuario = await prisma.mot_usuario.create({
                 data: {
                     auth0_user_id: auth0Id,
-                    email: email,
+                    // email: email,
                     username: email.split('@')[0], // Usar parte del email como username
-                    activo: true,
+                    password_hash: '',             // Valor temporal o manejar según tu lógica
+                    created_by: 0,                 // ID del usuario que crea (0 para sistema)
+                    estado: "activo",
                     rol_id: rolId,
                     created_at: new Date(),
                     updated_at: new Date()
@@ -77,7 +79,7 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -90,7 +92,7 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
             console.log(`✅ Usuario sincronizado: ${email} con rol ID: ${rolId}`);
         } else if (!usuario.auth0_user_id) {
             // Si existe pero no tiene auth0_user_id, actualizarlo
-            usuario = await prisma.mom_usuario.update({
+            usuario = await prisma.mot_usuario.update({
                 where: { usuario_id: usuario.usuario_id },
                 data: {
                     auth0_user_id: auth0Id,
@@ -99,7 +101,7 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -112,7 +114,7 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
 
         // Agregar información del usuario de BD al request
         (req as any).dbUser = usuario;
-        (req as any).userPermissions = usuario.mom_rol.mom_rol_permisos.map(
+        (req as any).userPermissions = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
             rp => rp.mom_permiso.codigo
         );
 

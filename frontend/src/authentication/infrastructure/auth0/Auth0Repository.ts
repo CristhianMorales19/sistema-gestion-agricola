@@ -49,22 +49,44 @@ export class Auth0Repository implements AuthRepository {
       console.log('🧪 Probando endpoint público primero...');
       const publicResponse = await fetch(`${this.apiBaseUrl}/auth/public`);
       console.log('📡 Endpoint público status:', publicResponse.status);
+
+      // DEBUG: Verificar la URL completa
+      const apiUrl = `${this.apiBaseUrl}/auth/protected`;
+      console.log('🌐 Intentando conectar a:', apiUrl);
       
-      const response = await fetch(`${this.apiBaseUrl}/auth/protected`, {
+       // Agregar timeout y mejor manejo de errores
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
+    
+      console.log('📡 Status:', response.status);
+      console.log('📡 Content-Type:', response.headers.get('content-type'));
       
       console.log('🌐 Respuesta del backend:', response.status);
 
-      if (!response.ok) {
-        throw new Error('Error al obtener perfil del usuario');
+      const contentType = response.headers.get('content-type');
+    
+      if (contentType && contentType.includes('text/html')) {
+        console.error('❌ ERROR: Se recibió HTML en lugar de JSON');
+        console.error('❌ Esto indica problemas de routing o URL incorrecta');
+        throw new Error('Configuración incorrecta del endpoint API');
       }
 
       const backendResponse = await response.json();
-      
+
+      if (!response.ok) {
+        throw new Error(backendResponse.message || 'Error al obtener perfil');
+      }
+
       console.log('🔍 DEBUG - Respuesta completa del backend:', backendResponse);
       console.log('🔍 DEBUG - backendResponse.success:', backendResponse.success);
       console.log('🔍 DEBUG - backendResponse.user:', backendResponse.user);
