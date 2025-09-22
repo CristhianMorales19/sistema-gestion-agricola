@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 // Crear cliente Prisma con logs detallados
 const prisma = new PrismaClient({
@@ -55,26 +55,54 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     console.log('🔍 Criterios de búsqueda: userSub O userEmail + estado ACTIVO/activo');
 
     // 3. Buscar usuario en BD local por username (Auth0 sub o email) y estado activo
-    let user = await prisma.mot_usuario.findFirst({
-      where: {
-        OR: [
-          { 
-            username: userSub,
-            OR: [
-              { estado: 'ACTIVO' },
-              { estado: 'activo' }
-            ]
-          },
-          { 
-            username: userEmail,
-            OR: [
-              { estado: 'ACTIVO' },
-              { estado: 'activo' }
-            ]
+    let user: any = null;
+    try {
+      user = await prisma.mot_usuario.findFirst({
+        where: {
+          OR: [
+            { 
+              username: userSub,
+              OR: [
+                { estado: 'ACTIVO' },
+                { estado: 'activo' }
+              ]
+            },
+            { 
+              username: userEmail,
+              OR: [
+                { estado: 'ACTIVO' },
+                { estado: 'activo' }
+              ]
+            }
+          ]
+        }
+      });
+    } catch (err: any) {
+      // Manejar error conocido de Prisma cuando la columna no existe (P2022)
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2022') {
+        console.warn('⚠️ Prisma P2022 detectado (columna ausente). Usando fallback SQL para búsqueda de usuario.');
+        try {
+          const rows: any = await prisma.$queryRawUnsafe(
+            `SELECT usuario_id, trabajador_id, username, password_hash, rol_id, estado, fecha_ultimo_cambio_rol_at, created_at, updated_at, created_by, updated_by, deleted_at
+             FROM mot_usuario
+             WHERE (username = ? OR username = ?) AND (estado = 'ACTIVO' OR estado = 'activo')
+             LIMIT 1`,
+            userSub,
+            userEmail
+          );
+          if (Array.isArray(rows) && rows.length > 0) {
+            user = rows[0];
+          } else {
+            user = null;
           }
-        ]
+        } catch (sqlErr) {
+          console.error('❌ Fallback SQL failed:', sqlErr);
+          throw sqlErr; // Este será capturado por el catch exterior y devolverá 500
+        }
+      } else {
+        throw err; // rethrow para que el catch exterior lo maneje
       }
-    });
+    }
 
     // 4. Si usuario no existe en BD local → RECHAZAR
     if (!user) {

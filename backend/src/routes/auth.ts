@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { checkJwt } from '../config/auth0-simple.config';
 import { requirePermission } from '../middleware/auth0';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const router = Router();
 
@@ -165,6 +170,60 @@ router.get('/test-permissions', checkJwt, (req, res) => {
     },
     timestamp: new Date().toISOString()
   });
+});
+
+/**
+ * POST /api/auth/login
+ * Body: { usernameOrEmail, password }
+ * Returns: { success, token }
+ */
+router.post('/login', async (req, res) => {
+  try {
+    const { usernameOrEmail, password } = req.body;
+    if (!usernameOrEmail || !password) {
+      return res.status(400).json({ success: false, message: 'usernameOrEmail and password required' });
+    }
+
+    // Buscar usuario por username o email
+    const usuario = await prisma.mot_usuario.findFirst({
+      where: {
+        username: usernameOrEmail,
+        OR: [
+          { estado: 'ACTIVO' },
+          { estado: 'activo' }
+        ]
+      }
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, usuario.password_hash);
+    if (!passwordMatches) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Firmar token con la clave del servidor (HS256)
+    const serverSecret = process.env.SERVER_JWT_SECRET;
+    if (!serverSecret) {
+      return res.status(500).json({ success: false, message: 'Server JWT secret not configured' });
+    }
+
+    const payload = {
+      sub: usuario.username,
+      usuario_id: usuario.usuario_id,
+      permissions: [] // opcional: cargar permisos desde BD si quieres
+    };
+
+    const token = jwt.sign(payload, serverSecret, { algorithm: 'HS256', expiresIn: '8h' });
+
+    res.json({ success: true, token });
+
+  } catch (error) {
+    console.error('Error en /login:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 });
 
 export default router;

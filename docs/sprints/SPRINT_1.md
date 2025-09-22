@@ -23,50 +23,6 @@
 - **Riesgo Técnico** (1-5): Complejidad de implementación
 - **Impacto de Negocio** (1-5): Criticidad para el funcionamiento del sistema
 - **Esfuerzo** (1-5): Story Points y tiempo estimado
-- **Calor Total**: Riesgo × Impacto × Esfuerzo
-
-| HU | User Story | Riesgo Técnico | Impacto Negocio | Esfuerzo | 🔥 Calor | Prioridad |
-|---|---|---|---|---|---|---|
-| **HU-033** | Login de usuario | 4 | 5 | 5 | **100** | 🔴 CRÍTICO |
-| **HU-001** | Crear registro trabajador | 3 | 5 | 5 | **75** | 🔴 ALTO |
-| **HU-034** | Logout de usuario | 2 | 4 | 2 | **16** | 🟡 MEDIO |
-| **HU-035** | Registro de nuevo usuario | 3 | 4 | 3 | **36** | 🟡 MEDIO |
-| **HU-000** | Consulta de empleados | 2 | 3 | 3 | **18** | 🟡 MEDIO |
-| **HU-002** | Asignar info laboral | 2 | 3 | 3 | **18** | 🟢 BAJO |
-| **HU-005** | Crear roles de usuario | 3 | 3 | 2 | **18** | 🟢 BAJO |
-
-### 🎯 Análisis de Riesgo por Categorías
-
-#### 🔴 **RIESGO CRÍTICO** (Calor > 60)
-- **HU-033 (Login)**: Base fundamental del sistema, token JWT, seguridad
-- **HU-001 (Registro trabajador)**: Core del negocio, múltiples validaciones
-
-#### 🟡 **RIESGO MEDIO** (Calor 20-60)
-- **HU-035**: Dependiente de HU-033, gestión de usuarios
-- **HU-000**: Consultas con filtros, paginación
-- **HU-034**: Simple pero crítico para seguridad
-
-#### 🟢 **RIESGO BAJO** (Calor < 20)
-- **HU-002, HU-005**: Funcionalidades complementarias
-
-### 🚨 Estrategias de Mitigación
-
-#### Para HU-033 (Login) - Calor 100:
-- [ ] Prototipo de autenticación en primeros 2 días
-- [ ] Revisión de seguridad con experto externo
-- [ ] Testing exhaustivo de casos edge
-- [ ] Documentación detallada de JWT
-
-#### Para HU-001 (Registro trabajador) - Calor 75:
-- [ ] Validaciones incrementales por fases
-- [ ] Mockups aprobados antes de desarrollo
-- [ ] Testing con datos reales
-- [ ] Backup de rollback preparado
-
----
-
-## 📋 User Stories & Tasks
-
 ### 🔐 Epic: Gestión de Identidad y Acceso
 
 #### HU-033: Login de usuario ⭐ **CRÍTICO** (5 SP) - **[EN AZURE]**
@@ -78,29 +34,29 @@
 Como usuario del sistema quiero poder iniciar sesión con mi email y contraseña para acceder a las funcionalidades del sistema
 
 **Acceptance Criteria:**
-- [ ] Formulario de login con email y contraseña
-- [ ] Validación de credenciales en backend  
-- [ ] Generación y persistencia de token JWT
-- [ ] Redirección a dashboard después de login exitoso
-- [ ] Manejo de errores de autenticación con mensajes claros
+- [x] Formulario de login con email y contraseña
+- [x] Validación de credenciales en backend  
+- [x] Generación y persistencia de token JWT
+- [x] Redirección a dashboard después de login exitoso
+- [x] Manejo de errores de autenticación con mensajes claros
 
 **Development Tasks:**
-- [ ] **Task 1.1**: Crear modelo de Usuario en base de datos (4h)
+- [x] **Task 1.1**: Crear modelo de Usuario en base de datos (4h)
   - *Description*: Definir tabla usuarios con campos email, password hash, rol, timestamps
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
-- [ ] **Task 1.2**: Implementar endpoint POST /auth/login (6h)
+- [x] **Task 1.2**: Implementar endpoint POST /auth/login (6h)
   - *Description*: Controlador para autenticar usuario y generar JWT
   - *Assigned To*: [Developer 1]  
   - *Area*: Backend\API
 
-- [ ] **Task 1.3**: Crear componente LoginForm en React (4h)
+- [x] **Task 1.3**: Crear componente LoginForm en React (4h)
   - *Description*: Formulario con validaciones frontend
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Autenticacion
 
-- [ ] **Task 1.4**: Implementar hook useAuth para gestión de estado (3h)
+- [x] **Task 1.4**: Implementar hook useAuth para gestión de estado (3h)
   - *Description*: Context y hook para manejar autenticación global
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Autenticacion
@@ -158,16 +114,16 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
 - [ ] Formulario completo con datos personales y laborales
 - [ ] Validación de cédula y email únicos
 - [ ] Selección de cargo y departamento desde catálogos
-- [ ] Guardado exitoso en base de datos
+- [x] Guardado exitoso en base de datos
 - [ ] Confirmación visual de registro exitoso
 
 **Development Tasks:**
-- [ ] **Task 3.1**: Diseñar modelo de Trabajador en BD (3h)
+- [x] **Task 3.1**: Diseñar modelo de Trabajador en BD (3h)
   - *Description*: Tabla trabajadores con todos los campos requeridos
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
-- [ ] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
+- [x] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
   - *Description*: API para crear trabajador con validaciones
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
@@ -183,6 +139,40 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
   - *Area*: Backend\Validaciones
 
 ---
+---
+### 👥 Epic: Administración de Personal
+
+#### HU-001: Crear registro de trabajador ⭐ **CRÍTICO** (5 SP) - **[EN AZURE]**
+**Parent Feature**: CRUD de Trabajadores  
+**Priority**: 1  
+
+**User Story:**  
+Como administrador quiero registrar un nuevo trabajador para gestionar el personal de la empresa agrícola
+
+**Acceptance Criteria:**
+- [ ] Formulario completo con datos personales y laborales
+- [ ] Validación de cédula y email únicos
+- [ ] Selección de cargo y departamento desde catálogos
+- [ ] Guardado exitoso en base de datos
+- [ ] Formulario completo con datos personales y laborales
+- [ ] Validación de cédula y email únicos
+- [ ] Selección de cargo y departamento desde catálogos
+- [x] Guardado exitoso en base de datos
+- [ ] Confirmación visual de registro exitoso
+  - *Assigned To*: [Developer 1]
+
+- [ ] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
+  - *Description*: API para crear trabajador con validaciones
+  - *Area*: Backend\API
+
+- [ ] **Task 3.3**: Desarrollar FormularioTrabajador component (6h)
+  - *Assigned To*: [Developer 2]
+  - *Area*: Frontend\Personal
+
+  - *Description*: Validar cédula única, formato email, campos requeridos
+  - *Assigned To*: [Developer 1]
+  - *Area*: Backend\Validaciones
+
 
 #### HU-002: Asignar información laboral al trabajador (3 SP) - **[EN AZURE]**
 **Parent Feature**: CRUD de Trabajadores  
@@ -193,62 +183,46 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
 Como administrador quiero asignar información laboral específica al trabajador para mantener datos completos y actualizados
 
 **Acceptance Criteria:**
-- [ ] Formulario específico para información laboral
-- [ ] Campos: fecha ingreso, salario base, tipo contrato, especialidades
-- [ ] Validación de fechas y rangos salariales
-- [ ] Actualización exitosa en base de datos
 
 **Development Tasks:**
-- [ ] **Task 4.1**: Extender modelo Trabajador con info laboral (2h)
   - *Description*: Agregar campos laborales a tabla trabajadores
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
-
 - [ ] **Task 4.2**: Crear endpoint PATCH /trabajadores/:id/info-laboral (3h)
   - *Description*: API para actualizar información laboral específica
   - *Assigned To*: [Developer 1]
-  - *Area*: Backend\API
 
 - [ ] **Task 4.3**: Desarrollar FormularioInfoLaboral component (4h)
   - *Description*: Formulario específico para datos laborales
   - *Assigned To*: [Developer 2]
-  - *Area*: Frontend\Personal
 
 ---
 
 #### HU-000: Consulta de empleados (3 SP) - **[EN AZURE]**
-**Parent Feature**: CRUD de Trabajadores  
 **Assigned To**: [Developer 2]  
 **Priority**: 2  
 
-**User Story:**  
 Como usuario quiero consultar la lista de empleados para ver información del personal y realizar búsquedas específicas
 
 **Acceptance Criteria:**
-- [ ] Lista paginada con información básica
 - [ ] Filtros por departamento, cargo y estado
 - [ ] Búsqueda por nombre, cédula o email
 - [ ] Vista detallada al hacer click en empleado
-
 **Development Tasks:**
 - [ ] **Task 5.1**: Crear endpoint GET /trabajadores con filtros (4h)
   - *Description*: API con paginación, filtros y búsqueda
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
-
 - [ ] **Task 5.2**: Desarrollar componente ListaTrabajadores (5h)
   - *Description*: Lista con paginación, filtros y búsqueda
   - *Assigned To*: [Developer 2]
-  - *Area*: Frontend\Personal
 
 - [ ] **Task 5.3**: Crear componente DetalleTrabajador (3h)
   - *Description*: Modal o página con información completa
-  - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Personal
 
 ---
 
-#### HU-005: Crear roles de usuario (2 SP) - **[EN AZURE]**
 **Parent Feature**: Gestión de Roles  
 **Assigned To**: [Developer 1]  
 **Priority**: 1  

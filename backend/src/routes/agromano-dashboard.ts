@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { checkJwt } from '../config/auth0-simple.config';
+import { flexibleAuth } from '../config/flexible-auth.config';
 import { hybridAuthMiddleware } from '../middleware/hybrid-auth-final.middleware';
 import { 
     requirePermission, 
@@ -27,7 +28,8 @@ const router = Router();
  *         description: Datos generales del dashboard
  */
 router.get('/general', 
-    checkJwt,
+    // flexibleAuth accepts server-signed tokens (HS256) or Auth0 (RS256)
+    flexibleAuth,
     hybridAuthMiddleware,
     requireAnyPermission(['dashboard:view:basic', 'dashboard:view:advanced']),
     async (req, res) => {
