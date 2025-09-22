@@ -31,19 +31,18 @@ async function verificarConexionBD() {
     const usuarios = await prisma.mot_usuario.count();
     console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
     
-    // Verificar usuario Auth0
-    const usuarioAuth0 = await prisma.mot_usuario.findFirst({
-      where: {
-        username: {
-          contains: 'admin@agromano.com'
         }
+      });
+
+      if (usuarioAuth0) {
+        console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
+      } else {
+        console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
       }
-    });
-    
-    if (usuarioAuth0) {
-      console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
-    } else {
-      console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
+    } catch (err: any) {
+      // Evitar que errores tipo P2022 por columnas ausentes rompan el inicio
+      const errMsg = err && err.code === 'P2022' ? 'Columna ausente en la BD para mot_usuario (P2022). Omitiendo verificación de usuario Auth0.' : (err instanceof Error ? err.message : String(err));
+      console.warn('⚠️ Advertencia al verificar usuario Auth0:', errMsg);
     }
     
     await prisma.$disconnect();
