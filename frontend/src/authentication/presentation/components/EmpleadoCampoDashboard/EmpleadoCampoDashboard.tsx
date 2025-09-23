@@ -14,6 +14,7 @@ export const EmpleadoCampoDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -30,7 +31,11 @@ export const EmpleadoCampoDashboard: React.FC = () => {
       }
     };
     loadDashboardData();
-  }, [getAccessTokenSilently]);
+  }, [getAccessTokenSilently, currentView]);
+
+  const handleNavigationChange = (view: string) => {
+    setCurrentView(view);
+  };
 
   const hasPermission = (permission: string) => {
     if (!user) return false;
@@ -60,7 +65,11 @@ export const EmpleadoCampoDashboard: React.FC = () => {
   }
 
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout 
+      user={user} 
+      onNavigationChange={handleNavigationChange}
+      currentView={currentView}
+      >
       <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
         <Grid container spacing={3}>
           <Grid item xs={12}>

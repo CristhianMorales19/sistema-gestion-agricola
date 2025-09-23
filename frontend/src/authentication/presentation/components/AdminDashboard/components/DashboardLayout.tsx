@@ -21,21 +21,24 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../../../application/hooks/useAuth';
 
-const sidebarItems = [
-  { id: 'nav-1', icon: <DashboardIcon />, text: 'Dashboard', active: true },
-  { id: 'nav-2', icon: <Agriculture />, text: 'Granjas', active: false },
-  { id: 'nav-3', icon: <People />, text: 'Usuarios', active: false },
-  { id: 'nav-4', icon: <Assessment />, text: 'Reportes', active: false },
-  { id: 'nav-5', icon: <Settings />, text: 'Configuración', active: false },
-];
-
 interface DashboardLayoutProps {
   children: React.ReactNode;
   user: any;
+  onNavigationChange: (view: string) => void; // Nueva prop
+  currentView: string; // Nueva prop
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user, onNavigationChange, currentView }) => {
   const { logout, loginWithDemoRole } = useAuth();
+
+  const sidebarItems = [
+    { id: 'dashboard', icon: <DashboardIcon />, text: 'Dashboard', active: currentView === 'dashboard' },
+    { id: 'employee-management', icon: <People />, text: 'Gestión de Personal', active: currentView === 'employee-management' },
+    { id: 'farms', icon: <Agriculture />, text: 'Granjas', active: currentView === '-farms' },
+    { id: 'users', icon: <People />, text: 'Usuarios', active: currentView === 'users' },
+    { id: 'reports', icon: <Assessment />, text: 'Reportes', active: currentView === 'reports' },
+    { id: 'settings', icon: <Settings />, text: 'Configuración', active: currentView === 'settings' },
+  ];
 
   const handleViewAsRole = async (roleName: string) => {
     try {
@@ -86,6 +89,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             {sidebarItems.map((item) => (
               <ListItem key={item.id} sx={{ p: 0, mb: 1 }}>
                 <ListItemButton
+                  onClick={() => onNavigationChange(item.id)} // Nuevo cambio
                   sx={{
                     borderRadius: 2,
                     backgroundColor: item.active ? '#334155' : 'transparent',

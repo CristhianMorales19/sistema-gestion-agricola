@@ -15,7 +15,7 @@ const prisma = new PrismaClient({
  */
 export const hybridAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log('🔄 ===== HYBRID AUTH MIDDLEWARE INICIADO =====');
+    console.log('🔄 ===== HYBRID AUTH MIDDLEWAREEEEEEE =====');
     console.log('⏰ Timestamp:', new Date().toISOString());
     
     // 1. Verificar que existe token Auth0 validado
@@ -33,41 +33,47 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
 
     // 2. Obtener email del token Auth0 (probamos ambas fuentes)
     const authData = req.auth || req.user;
-    const userEmail = (authData as any).email || (authData as any).sub;
-    const userSub = (authData as any).sub;
+    const userSub = (authData as any)?.sub;
+
+    let userEmail = (authData as any)?.email;
     
     console.log('📧 Email extraído:', userEmail);
     console.log('🆔 Sub extraído:', userSub);
     console.log('🔍 Auth data completo:', JSON.stringify(authData, null, 2));
     
-    if (!userEmail) {
-      console.log('❌ No se pudo extraer email del token Auth0');
-      return res.status(401).json({
-        success: false,
-        message: 'Email no encontrado en token Auth0',
-        code: 'NO_EMAIL_IN_TOKEN',
-        token_data: authData
-      });
-    }
+    console.log('📧 Email REAL extraído:', userEmail);
+    console.log('🆔 Sub extraído:', userSub);
+    
+    // if (!userEmail) {
+    //   console.log('❌ No se pudo extraer email del token Auth0');
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: 'Email no encontrado en token Auth0',
+    //     code: 'NO_EMAIL_IN_TOKEN',
+    //     token_data: authData
+    //   });
+    // }
 
     console.log(`🔍 Buscando usuario en BD por email: ${userEmail}`);
     console.log(`🔍 También buscando por sub: ${userSub}`);
     console.log('🔍 Criterios de búsqueda: userSub O userEmail + estado ACTIVO/activo');
 
-    // 3. Buscar usuario en BD local por username (Auth0 sub o email) y estado activo
+    // 3. Buscar usuario en BD local por auth0_user_id (sub) o por email
+    // Intentamos usar auth0_user_id primero (rama 'Sebastian'). Si la columna no existe
+    // (Prisma P2022) usamos un fallback que busca por username usando SQL crudo.
     let user: any = null;
     try {
       user = await prisma.mot_usuario.findFirst({
         where: {
           OR: [
-            { 
-              username: userSub,
+            {
+              auth0_user_id: userSub,
               OR: [
                 { estado: 'ACTIVO' },
                 { estado: 'activo' }
               ]
             },
-            { 
+            {
               username: userEmail,
               OR: [
                 { estado: 'ACTIVO' },

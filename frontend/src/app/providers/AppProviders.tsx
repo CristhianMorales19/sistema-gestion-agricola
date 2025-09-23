@@ -1,9 +1,10 @@
-import React from 'react';
-import { Auth0Provider } from '@auth0/auth0-react';
+import React, {useEffect} from 'react';
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 import { auth0Config, appConfig } from '../config';
+import { apiService } from '../../services/api.service'; // Importar el apiService
 
 // Tema personalizado de Material-UI
 const theme = createTheme({
@@ -43,6 +44,19 @@ const theme = createTheme({
   },
 });
 
+// Componente para configurar el token provider
+const ApiServiceConfig: React.FC = () => {
+  const { getAccessTokenSilently } = useAuth0();
+
+  useEffect(() => {
+    // ✅ CONFIGURAR EL TOKEN PROVIDER AQUÍ
+    apiService.setTokenProvider(getAccessTokenSilently);
+    console.log('✅ ApiService configurado con token provider');
+  }, [getAccessTokenSilently]);
+
+  return null;
+};
+
 interface AppProvidersProps {
   children: React.ReactNode;
 }
@@ -63,6 +77,7 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <CssBaseline />
+          <ApiServiceConfig />
           {children}
         </ThemeProvider>
       </BrowserRouter>

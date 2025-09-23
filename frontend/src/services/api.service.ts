@@ -149,16 +149,16 @@ class ApiService {
 
   // Empleados
   async getEmpleados(params?: any): Promise<PaginatedResponse<any>> {
-    const response = await this.axiosInstance.get('/empleados', { params });
+    const response = await this.axiosInstance.get('/trabajadores', { params });
     return response.data;
   }
 
   async getEmpleado(id: number) {
-    return this.get(`/empleados/${id}`);
+    return this.get(`/trabajadores/${id}`);
   }
 
   async createEmpleado(data: any) {
-    return this.post('/empleados', data);
+    return this.post('/trabajadores', data);
   }
 
   async updateEmpleado(id: number, data: any) {

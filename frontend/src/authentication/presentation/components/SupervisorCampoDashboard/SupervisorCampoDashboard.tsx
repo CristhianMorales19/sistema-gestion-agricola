@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
 import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
@@ -51,11 +51,21 @@ interface SupervisorCampoDashboardProps {
 }
 
 export const SupervisorCampoDashboard: React.FC<SupervisorCampoDashboardProps> = ({ user, dashboardData }) => {
+  const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
+
+  const handleNavigationChange = (view: string) => {
+    setCurrentView(view);
+  };
+
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);
   };
   return (
-    <DashboardLayout user={user}>
+      <DashboardLayout 
+        user={user}
+        onNavigationChange={handleNavigationChange}
+        currentView={currentView}
+      >
       <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
         <Grid container spacing={3}>
           {/* Stats Cards solo si tiene permiso de ver KPIs */}
