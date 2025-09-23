@@ -84,29 +84,30 @@ export const AdminDashboard: React.FC = () => {
     switch (currentView) {
       case 'dashboard':
         return (
-          /* Stats Cards */
-          <Grid container spacing={3}>
+          <>
+            {/* Stats Cards */}
+            <Grid container spacing={3}>
             <Grid item xs={12}>
               <StatsCards stats={dashboardData?.stats || []} />
             </Grid>
 
-            /* Permissions Panel */
+            {/* Permissions Panel */}
             <Grid item xs={12}>
               <PermissionsPanel user={user} />
             </Grid>
 
-            /* Activity Feed */
+            {/* Activity Feed */}
             <Grid container spacing={3} item xs={12}>
               <Grid item xs={12} md={6}>
                 <ActivityFeed activities={dashboardData?.activities || []} />
               </Grid>
-
-              /* Conditions Panel */
+              {/* Conditions Panel */}
               <Grid item xs={12} md={6}>
                 <ConditionsPanel conditions={dashboardData?.conditions || []} />
               </Grid>
             </Grid>
-          </Grid>
+            </Grid>
+          </>
         );
 
       case 'employee-management':

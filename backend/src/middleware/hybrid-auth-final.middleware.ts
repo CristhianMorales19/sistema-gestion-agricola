@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { ROLE_PERMISSIONS, AGROMANO_ROLES } from './agromano-rbac.middleware';
 
 // Crear cliente Prisma con logs detallados
 const prisma = new PrismaClient({
@@ -110,40 +111,67 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       }
     }
 
-    // 4. Si usuario no existe en BD local → RECHAZAR
+    // 4. Si usuario no existe en BD local → intentar fallback usando permisos del token
     if (!user) {
-      console.log('❌ Usuario NO encontrado con los criterios de búsqueda');
-      console.log('🔍 Intentando búsqueda más amplia para debug...');
-      
-      // Debug: buscar cualquier usuario que contenga auth0
-      const debugUser = await prisma.mot_usuario.findFirst({
-        where: {
-          username: {
-            contains: 'auth0'
+      console.warn('⚠️ Usuario NO encontrado en BD con los criterios de búsqueda (userSub/email)');
+      console.log('🔍 Intentando fallback: usar permisos presentes en el token Auth0 si existen');
+
+      // Si el token trae permisos (claims) podemos confiar en ellos en entornos híbridos
+      const tokenPermissions = (req.auth as any)?.permissions || (req.user as any)?.permissions || [];
+      if (Array.isArray(tokenPermissions) && tokenPermissions.length > 0) {
+        console.log('🔁 Fallback aplicado: permisos obtenidos del token:', tokenPermissions);
+        // Rellenar req.auth.permissions para que los middlewares RBAC funcionen
+        (req as any).auth = {
+          ...(req as any).auth,
+          permissions: tokenPermissions
+        };
+
+        // Crear un objeto user mínimo para que el resto del flujo pueda usarlo
+        (req as any).user = {
+          id: null,
+          username: userEmail || userSub,
+          email: userEmail,
+          role: null,
+          role_name: null,
+          permissions: tokenPermissions,
+          trabajador_id: null,
+          rol_id: null,
+          auth0_sub: userSub,
+          auth0_email: userEmail
+        };
+
+        // Continuar: el middleware RBAC comprobará ahora req.auth.permissions
+      } else {
+        // Debug: buscar cualquier usuario que contenga auth0 para ayudar a diagnosticar
+        const debugUser = await prisma.mot_usuario.findFirst({
+          where: {
+            username: {
+              contains: 'auth0'
+            }
           }
-        }
-      });
-      
-      console.log('🔍 Debug - Usuario con auth0:', debugUser ? {
-        id: debugUser.usuario_id,
-        username: debugUser.username,
-        estado: debugUser.estado
-      } : 'No encontrado');
-      
-      return res.status(403).json({
-        success: false,
-        message: 'Usuario no autorizado en el sistema',
-        code: 'USER_NOT_AUTHORIZED',
-        searchCriteria: {
-          userEmail,
-          userSub
-        },
-        debugUser: debugUser ? {
+        });
+
+        console.log('🔍 Debug - Usuario con auth0:', debugUser ? {
           id: debugUser.usuario_id,
           username: debugUser.username,
           estado: debugUser.estado
-        } : null
-      });
+        } : 'No encontrado');
+
+        return res.status(403).json({
+          success: false,
+          message: 'Usuario no autorizado en el sistema',
+          code: 'USER_NOT_AUTHORIZED',
+          searchCriteria: {
+            userEmail,
+            userSub
+          },
+          debugUser: debugUser ? {
+            id: debugUser.usuario_id,
+            username: debugUser.username,
+            estado: debugUser.estado
+          } : null
+        });
+      }
     }
 
     console.log(`✅ Usuario encontrado: ID ${user.usuario_id}, username: ${user.username}, estado: ${user.estado}`);
@@ -175,32 +203,69 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       AND p.is_activo = 1
     `;
 
-    const permissions = (rolPermisosQuery as any[]).map(item => item.permiso_codigo);
+  const permissions = (rolPermisosQuery as any[]).map(item => item.permiso_codigo);
 
-    console.log(`🔐 Permisos cargados: ${permissions.length} permisos`);
+  // También unir permisos que el token pueda traer para evitar inconsistencias
+  const tokenPermissions = (req as any).auth?.permissions || (req as any).user?.permissions || [];
+  console.log('🔁 Permisos desde DB:', permissions);
+  console.log('🔁 Permisos desde token:', tokenPermissions);
+  let mergedPermissions = Array.from(new Set([...(permissions || []), ...(tokenPermissions || [])]));
 
-    // 7. Crear objeto user con datos REALES de BD
-    (req as any).user = {
-      id: user.usuario_id,
-      username: user.username,
-      email: userEmail, // Del token Auth0
-      role: rol.codigo,
-      role_name: rol.nombre,
-      permissions: permissions, // PERMISOS REALES DE LA BD
-      trabajador_id: user.trabajador_id,
-      rol_id: user.rol_id,
-      // Datos adicionales de Auth0
-      auth0_sub: (req.auth as any).sub,
-      auth0_email: userEmail
-    };
+  console.log('🔀 Permisos iniciales (DB U Token):', mergedPermissions);
 
-    // 8. También mantener permisos en formato que espera el middleware RBAC
-    (req as any).auth = {
-      ...req.auth,
-      permissions: permissions // PERMISOS REALES
-    };
+  console.log(`🔐 Permisos cargados (DB): ${permissions.length} permisos`);
 
-    console.log(`🎉 Usuario autenticado: ${user.username} | Rol: ${rol.codigo} | Permisos: ${permissions.length}`);
+  // Si después de unir no hay permisos, intentar consulta menos restrictiva (sin is_activo)
+  if (mergedPermissions.length === 0) {
+    try {
+      const fallbackRows: any = await prisma.$queryRawUnsafe(
+        `SELECT p.permiso_id, p.codigo as permiso_codigo, p.is_activo, rp.deleted_at
+         FROM rel_mom_rol__mom_permiso rp
+         INNER JOIN mom_permiso p ON rp.permiso_id = p.permiso_id
+         WHERE rp.rol_id = ?
+        `,
+        user.rol_id
+      );
+      console.log('🔎 Fallback - rows sin filtro is_activo:', JSON.stringify(fallbackRows, null, 2));
+      if (Array.isArray(fallbackRows) && fallbackRows.length > 0) {
+        const fallbackPerms = fallbackRows.map((r: any) => r.permiso_codigo).filter(Boolean);
+        mergedPermissions = Array.from(new Set([...fallbackPerms, ...mergedPermissions]));
+        console.log('🔁 Permisos tras fallback menos restrictivo:', mergedPermissions);
+      }
+    } catch (fbErr) {
+      console.warn('⚠️ Fallback menos restrictivo falló:', fbErr);
+    }
+  }
+
+  // Fallback temporal: si rol es ADMIN y aún no hay permisos, usar ROLE_PERMISSIONS para admin
+  if (mergedPermissions.length === 0 && rol && (rol.codigo === 'ADMIN' || rol.codigo === AGROMANO_ROLES.ADMIN_AGROMANO)) {
+    console.warn('⚠️ Permisos resultaron vacíos para rol ADMIN; aplicando fallback ROLE_PERMISSIONS[ADMIN_AGROMANO]');
+    mergedPermissions = ROLE_PERMISSIONS[AGROMANO_ROLES.ADMIN_AGROMANO] || [];
+    console.log('🔁 Permisos aplicados desde ROLE_PERMISSIONS:', mergedPermissions.length);
+  }
+
+  // 7. Crear objeto user con datos REALES de BD
+  (req as any).user = {
+    id: user.usuario_id,
+    username: user.username,
+    email: userEmail, // Del token Auth0
+    role: rol.codigo,
+    role_name: rol.nombre,
+    permissions: mergedPermissions, // PERMISOS FINALES (DB U TOKEN u otros fallbacks)
+    trabajador_id: user.trabajador_id,
+    rol_id: user.rol_id,
+    // Datos adicionales de Auth0
+    auth0_sub: (req.auth as any).sub,
+    auth0_email: userEmail
+  };
+
+  // 8. También mantener permisos en formato que espera el middleware RBAC (merged)
+  (req as any).auth = {
+    ...req.auth,
+    permissions: mergedPermissions // PERMISOS FINALES
+  };
+
+  console.log(`🎉 Usuario autenticado: ${user.username} | Rol: ${rol.codigo} | Permisos: ${mergedPermissions.length}`);
 
     next();
 

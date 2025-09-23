@@ -22,29 +22,24 @@ async function verificarConexionBD() {
   try {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
-    
+
     console.log('🔄 Intentando conectar a la base de datos...');
     await prisma.$connect();
     console.log('✅ Conexión a la base de datos exitosa');
-    
-    // Verificar que existe la tabla de usuarios
-    const usuarios = await prisma.mot_usuario.count();
-    console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
-    
-        }
-      });
 
-      if (usuarioAuth0) {
-        console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
-      } else {
-        console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
-      }
+    // Verificar que existe la tabla de usuarios (si la tabla no existe esto lanzará)
+    try {
+      const usuarios = await prisma.mot_usuario.count();
+      console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
     } catch (err: any) {
-      // Evitar que errores tipo P2022 por columnas ausentes rompan el inicio
-      const errMsg = err && err.code === 'P2022' ? 'Columna ausente en la BD para mot_usuario (P2022). Omitiendo verificación de usuario Auth0.' : (err instanceof Error ? err.message : String(err));
-      console.warn('⚠️ Advertencia al verificar usuario Auth0:', errMsg);
+      // Manejo suave si la tabla/columna no existe (p. ej. entorno con esquema distinto)
+      if (err && (err.code === 'P2022' || err.code === 'P2025')) {
+        console.warn('⚠️ Advertencia: tabla o columna ausente al verificar mot_usuario. Omitiendo verificación.');
+      } else {
+        console.warn('⚠️ Advertencia al verificar tabla mot_usuario:', err instanceof Error ? err.message : String(err));
+      }
     }
-    
+
     await prisma.$disconnect();
     return true;
   } catch (error) {
@@ -71,8 +66,19 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares globales
 app.use(helmet());
+// Configurar CORS permitiendo múltiples orígenes desde la variable de entorno
+// FRONTEND_URLS (coma-separados) o FRONTEND_URL.
+const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000';
+const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, or same-origin)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn(`CORS: origin not allowed -> ${origin}. Allowed: ${allowedOrigins.join(',')}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
