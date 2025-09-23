@@ -10,6 +10,7 @@ import { StatsCards } from '../../../../dashboard/presentation/components/StatsC
 import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
+import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export const AdminDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -39,8 +41,15 @@ export const AdminDashboard: React.FC = () => {
       }
     };
 
-    loadDashboardData();
-  }, [getAccessTokenSilently]);
+    // Solo cargar datos del dashboard si estamos en esa vista
+    if (currentView === 'dashboard') {
+      loadDashboardData();
+    }
+  }, [getAccessTokenSilently, currentView]); // Dependencia de currentView
+
+  const handleNavigationChange = (view: string) => {
+    setCurrentView(view);
+  };
 
   if (loading) {
     return (
@@ -70,32 +79,87 @@ export const AdminDashboard: React.FC = () => {
     );
   }
 
+  // Renderizar contenido basado en la vista actual
+  const renderContent = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return (
+          /* Stats Cards */
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <StatsCards stats={dashboardData?.stats || []} />
+            </Grid>
+
+            /* Permissions Panel */
+            <Grid item xs={12}>
+              <PermissionsPanel user={user} />
+            </Grid>
+
+            /* Activity Feed */
+            <Grid container spacing={3} item xs={12}>
+              <Grid item xs={12} md={6}>
+                <ActivityFeed activities={dashboardData?.activities || []} />
+              </Grid>
+
+              /* Conditions Panel */
+              <Grid item xs={12} md={6}>
+                <ConditionsPanel conditions={dashboardData?.conditions || []} />
+              </Grid>
+            </Grid>
+          </Grid>
+        );
+
+      case 'employee-management':
+        return (
+          <EmployeeManagementView/>
+        );
+
+      case 'farms':
+        return (
+          <Box sx={{ p: 3, color: '#ffffff' }}>
+            Vista no implementada
+          </Box>
+        );
+
+      // Agrega más casos para otras vistas...
+
+      default:
+        return (
+          <Box sx={{ p: 3, color: '#ffffff' }}>
+            Vista no implementada
+          </Box>
+        );
+    }
+  };
+
+  if (loading && currentView === 'dashboard') {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#0f172a', color: '#fff' }}>
+        Cargando datos reales del servidor...
+      </Box>
+    );
+  }
+
+  if (error && currentView === 'dashboard') {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#0f172a', color: '#ef4444' }}>
+        <Box sx={{ mb: 2, fontSize: '1.2rem' }}>⚠️ Error de Conexión</Box>
+        <Box sx={{ textAlign: 'center', color: '#94a3b8' }}>{error}</Box>
+        <Box sx={{ mt: 2, color: '#64748b', fontSize: '0.9rem' }}>
+          Verifica que el servidor backend esté ejecutándose en http://localhost:3000
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <DashboardLayout user={user}>
+    <DashboardLayout 
+      user={user}
+      onNavigationChange={handleNavigationChange}
+      currentView={currentView}
+    >
       <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
-        <Grid container spacing={3}>
-          {/* Stats Cards */}
-          <Grid item xs={12}>
-            <StatsCards stats={dashboardData.stats} />
-          </Grid>
-
-          {/* Permissions Panel */}
-          <Grid item xs={12}>
-            <PermissionsPanel user={user} />
-          </Grid>
-
-          <Grid container spacing={3} item xs={12}>
-            {/* Activity Feed */}
-            <Grid item xs={12} md={6}>
-              <ActivityFeed activities={dashboardData.activities} />
-            </Grid>
-
-            {/* Conditions Panel */}
-            <Grid item xs={12} md={6}>
-              <ConditionsPanel conditions={dashboardData.conditions} />
-            </Grid>
-          </Grid>
-        </Grid>
+        {renderContent()}
       </Box>
     </DashboardLayout>
   );

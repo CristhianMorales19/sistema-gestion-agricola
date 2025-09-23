@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { checkJwt } from '../config/auth0-simple.config';
 import { hybridAuthMiddleware } from '../middleware/hybrid-auth-final.middleware';
 import { 
@@ -9,6 +10,7 @@ import {
 } from '../middleware/agromano-rbac.middleware';
 
 const router = Router();
+const prisma = new PrismaClient();
 
 /**
  * @route GET /api/trabajadores
@@ -28,25 +30,58 @@ const router = Router();
  *       200:
  *         description: Lista de trabajadores
  */
+// Backend - Modifica tu ruta para devolver datos reales
 router.get('/', 
     checkJwt,
-    hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
+    hybridAuthMiddleware,
     requireAnyPermission(['trabajadores:read:all', 'trabajadores:read:own']),
-    (req, res) => {
-        const userPermissions = req.auth?.permissions || [];
-        const canReadAll = userPermissions.includes('trabajadores:read:all');
-        
-        res.json({
-            success: true,
-            message: canReadAll ? 'Lista de todos los trabajadores' : 'Lista de trabajadores propios',
-            data: {
-                trabajadores: canReadAll ? 
-                    ['Trabajador 1', 'Trabajador 2', 'Trabajador 3'] : 
-                    ['Tu perfil de trabajador'],
-                permissions: userPermissions,
-                scope: canReadAll ? 'all' : 'own'
-            }
-        });
+    async (req, res) => {
+        try {
+            const userPermissions = req.auth?.permissions || [];
+            const canReadAll = userPermissions.includes('trabajadores:read:all');
+            
+            // Aquí debes hacer la consulta real a tu base de datos
+            const trabajadores = await prisma.mom_trabajador.findMany({
+                where: { is_activo: true },
+                select: {
+                    trabajador_id: true,
+                    documento_identidad: true,
+                    nombre_completo: true,
+                    fecha_nacimiento: true,
+                    telefono: true,
+                    email: true,
+                    is_activo: true,
+                    fecha_registro_at: true,
+                    created_at: true,
+                    updated_at: true
+                }
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    trabajadores: trabajadores.map(t => ({
+                        id: t.trabajador_id.toString(),
+                        name: t.nombre_completo,
+                        identification: t.documento_identidad,
+                        position: 'Por definir', // Necesitas join con otra tabla
+                        hireDate: t.fecha_registro_at,
+                        status: t.is_activo ? 'activo' : 'inactivo',
+                        email: t.email,
+                        phone: t.telefono,
+                        createdAt: t.created_at,
+                        updatedAt: t.updated_at
+                    })),
+                    permissions: userPermissions,
+                    scope: canReadAll ? 'all' : 'own'
+                }
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener trabajadores'
+            });
+        }
     }
 );
 
@@ -70,24 +105,169 @@ router.get('/',
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               documento_identidad:
+ *                 type: string
+ *                 description: Número de cédula del trabajador
+ *               nombre_completo:
+ *                 type: string
+ *                 description: Nombre completo del trabajador
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de nacimiento (YYYY-MM-DD)
+ *               fecha_registro_at:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de ingreso (YYYY-MM-DD)
+ *               telefono:
+ *                 type: string
+ *                 description: Número de teléfono
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico
+ *               cargo:
+ *                 type: string
+ *                 description: Cargo del trabajador
+ *               created_by:
+ *                 type: integer
+ *                 description: ID del usuario que crea el registro
+ *             required:
+ *               - documento_identidad
+ *               - nombre_completo
+ *               - fecha_nacimiento
+ *               - fecha_registro_at
+ *               - created_by
  *     responses:
- *       200:
+ *       201:
  *         description: Trabajador creado exitosamente
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       409:
+ *         description: La cédula ya existe
+ *       500:
+ *         description: Error del servidor
  */
 router.post('/', 
+        (req, res, next) => {
+        console.log('1. Request recibida - Headers:', req.headers);
+        console.log('1. Request recibida - Body:', req.body);
+        next();
+    },
     checkJwt,
-    hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
+    (req, res, next) => {
+        console.log('2. Después de checkJwt - User:', (req as any).user);
+        next();
+    },
+    hybridAuthMiddleware,
+    (req, res, next) => {
+        console.log('3. Después de hybridAuthMiddleware - User:', (req as any).user);
+        next();
+    },
     requirePermission('trabajadores:create'),
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Trabajador creado exitosamente',
-            data: {
-                action: 'create',
-                trabajador: req.body,
-                permissions: (req.user as any)?.permissions
+    (req, res, next) => {
+        console.log('4. Después de requirePermission');
+        next();
+    },
+    async (req, res) => {
+        try {
+            console.log('5. Datos recibidos en controller:', req.body);
+            
+            const {
+                documento_identidad,
+                nombre_completo,
+                fecha_nacimiento,
+                fecha_registro_at,
+                telefono,
+                email,
+                cargo,
+                created_by
+            } = req.body;
+
+            // Validar campos requeridos
+            if (!documento_identidad || !nombre_completo || !fecha_nacimiento || !fecha_registro_at || !created_by) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Faltan campos requeridos'
+                });
             }
-        });
+
+            // Verificar si la cédula ya existe
+            const existingEmployee = await prisma.mom_trabajador.findUnique({
+                where: {
+                    documento_identidad: documento_identidad.trim()
+                }
+            });
+
+            if (existingEmployee) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Ya existe un trabajador con esta cédula'
+                });
+            }
+
+            // Crear el trabajador en la base de datos
+            const newEmployee = await prisma.mom_trabajador.create({
+                data: {
+                    documento_identidad: documento_identidad.trim(),
+                    nombre_completo: nombre_completo.trim(),
+                    fecha_nacimiento: new Date(fecha_nacimiento),
+                    fecha_registro_at: new Date(fecha_registro_at),
+                    telefono: telefono ? telefono.trim() : null,
+                    email: email ? email.trim() : null,
+                    // El campo cargo se guardaría en otra tabla relacionada (mot_info_laboral)
+                    // Por ahora lo dejamos como campo adicional si es necesario
+                    created_at: new Date(),
+                    created_by: created_by,
+                    is_activo: true
+                }
+            });
+
+            // Si se proporcionó un cargo, crear registro en la tabla de información laboral
+            // if (cargo) {
+            //     await prisma.mot_info_laboral.create({
+            //         data: {
+            //             trabajador_id: newEmployee.trabajador_id,
+            //             cargo: cargo.trim(),
+            //             fecha_inicio: new Date(fecha_registro_at),
+            //             salario: 0, // Valor por defecto, se actualizará después
+            //             created_at: new Date(),
+            //             created_by: created_by,
+            //             is_activo: true
+            //         }
+            //     });
+            // }
+
+            res.status(201).json({
+                success: true,
+                message: 'Trabajador creado exitosamente',
+                data: {
+                    trabajador: newEmployee,
+                    permissions: (req.user as any)?.permissions
+                }
+            });
+
+        } catch (error: unknown) {
+            console.error('Error al crear trabajador:', error);
+            
+            // Type guard para verificar si es un error de Prisma
+            if (typeof error === 'object' && error !== null && 'code' in error) {
+                const prismaError = error as { code: string };
+                if (prismaError.code === 'P2002') {
+                    return res.status(409).json({
+                        success: false,
+                        message: 'Ya existe un trabajador con esta cédula'
+                    });
+                }
+            }
+            
+            // Manejar otros tipos de errores
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al crear trabajador'
+            });
+        }
     }
 );
 
@@ -187,6 +367,98 @@ router.post('/import',
                 permissions: (req.user as any)?.permissions
             }
         });
+    }
+);
+
+/**
+ * @route GET /api/trabajadores/search/:query
+ * @desc Buscar trabajadores por cédula o cargo
+ * @access Requiere permisos: trabajadores:read:all OR trabajadores:read:own
+ */
+/**
+ * @swagger
+ * /api/trabajadores/search/{query}:
+ *   get:
+ *     summary: Buscar trabajadores por cédula o cargo
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Trabajadores
+ *     parameters:
+ *       - in: path
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Término de búsqueda (cédula o cargo)
+ *     responses:
+ *       200:
+ *         description: Lista de trabajadores encontrados
+ */
+router.get('/search/:query', 
+    checkJwt,
+    hybridAuthMiddleware,
+    requireAnyPermission(['trabajadores:read:all', 'trabajadores:read:own']),
+    async (req, res) => {
+        try {
+            const { query } = req.params;
+            const userPermissions = req.auth?.permissions || [];
+            const canReadAll = userPermissions.includes('trabajadores:read:all');
+            
+            // Buscar por cédula o cargo (necesitarías join con la tabla de info laboral)
+            const trabajadores = await prisma.mom_trabajador.findMany({
+                where: {
+                    AND: [
+                        { is_activo: true },
+                        {
+                            OR: [
+                                { documento_identidad: { contains: query } },
+                                { 
+                                    mot_info_laboral: {
+                                        some: {
+                                            cargo: { contains: query }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                include: {
+                    mot_info_laboral: {
+                        take: 1,
+                        orderBy: { info_laboral_id: 'desc' }
+                    }
+                },
+                take: 50 // Limitar resultados
+            });
+
+            res.json({
+                success: true,
+                data: {
+                    trabajadores: trabajadores.map(t => ({
+                        id: t.trabajador_id.toString(),
+                        name: t.nombre_completo,
+                        identification: t.documento_identidad,
+                        position: t.mot_info_laboral[0]?.cargo || 'Sin definir',
+                        hireDate: t.fecha_registro_at,
+                        status: t.is_activo ? 'activo' : 'inactivo',
+                        email: t.email,
+                        phone: t.telefono,
+                        createdAt: t.created_at,
+                        updatedAt: t.updated_at
+                    })),
+                    permissions: userPermissions,
+                    scope: canReadAll ? 'all' : 'own'
+                }
+            });
+        } catch (error) {
+            console.error('Error en búsqueda:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al buscar trabajadores'
+            });
+        }
     }
 );
 

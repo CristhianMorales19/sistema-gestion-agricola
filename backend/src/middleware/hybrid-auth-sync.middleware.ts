@@ -25,17 +25,17 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
 
         // 2. Buscar usuario en BD por Auth0 ID o email
         if (auth0Id || email) {
-            usuario = await prisma.mom_usuario.findFirst({
+            usuario = await prisma.mot_usuario.findFirst({
                 where: {
                     OR: [
                         auth0Id ? { auth0_user_id: auth0Id } : {},
-                        email ? { email: email } : {}
+                        email ? { username: email } : {}
                     ]
                 },
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -56,12 +56,14 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                     permissions
                 });
             }
-            usuario = await prisma.mom_usuario.create({
+            usuario = await prisma.mot_usuario.create({
                 data: {
                     auth0_user_id: auth0Id,
-                    email: email,
+                    // email: email,
                     username: email.split('@')[0],
-                    activo: true,
+                    password_hash: '',  
+                    created_by: 0,  
+                    estado: "activo",
                     rol_id: rolId,
                     created_at: new Date(),
                     updated_at: new Date()
@@ -69,7 +71,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -80,7 +82,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
             });
         } else if (usuario && auth0Id && !usuario.auth0_user_id) {
             // Si existe pero no tiene auth0_user_id, actualizarlo
-            usuario = await prisma.mom_usuario.update({
+            usuario = await prisma.mot_usuario.update({
                 where: { usuario_id: usuario.usuario_id },
                 data: {
                     auth0_user_id: auth0Id,
@@ -89,7 +91,7 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -102,17 +104,17 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
 
         // 4. Fallback: Si no hay token Auth0, buscar usuario en BD por email/username
         if (!auth0User && req.body && (req.body.email || req.body.username)) {
-            usuario = await prisma.mom_usuario.findFirst({
+            usuario = await prisma.mot_usuario.findFirst({
                 where: {
                     OR: [
-                        req.body.email ? { email: req.body.email } : {},
+                        req.body.email ? { username: req.body.email } : {},
                         req.body.username ? { username: req.body.username } : {}
                     ]
                 },
                 include: {
                     mom_rol: {
                         include: {
-                            mom_rol_permisos: {
+                            rel_mom_rol__mom_permiso: {
                                 include: {
                                     mom_permiso: true
                                 }
@@ -124,9 +126,9 @@ export const hybridAuthSyncMiddleware = async (req: Request, res: Response, next
         }
 
         // 5. Si usuario existe y está activo, agregar info al request
-        if (usuario && usuario.activo) {
+        if (usuario && usuario.estado) {
             (req as any).dbUser = usuario;
-            (req as any).userPermissions = usuario.mom_rol.mom_rol_permisos.map(
+            (req as any).userPermissions = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
                 rp => rp.mom_permiso.codigo
             );
             return next();

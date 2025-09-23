@@ -1,4 +1,6 @@
 // Tipos para el sistema RBAC
+import { Employee } from "../employee-management";
+
 export interface UserPermissions {
   gestionar_usuarios: boolean;
   consultar_usuarios: boolean;
@@ -39,4 +41,15 @@ export interface AuthContextType {
   hasRole: (roleName: string) => boolean;
   login: () => Promise<void>;
   logout: () => void;
+}
+
+export interface ApiResponse<T = any> {
+    success: boolean;
+    message: string;
+    data?: T;
+}
+
+export interface CreateEmployeeResponse {
+    trabajador: Employee;
+    permissions: string[];
 }

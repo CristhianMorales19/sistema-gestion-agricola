@@ -102,7 +102,7 @@ app.use('/api/auth', authTestRoutes);
 app.use('/api/testing', authTestingRoutes);
 
 // Rutas AgroMano con RBAC granular
-app.use('/api/agromano/trabajadores', agroManoTrabajadoresRoutes);
+app.use('/api/trabajadores', agroManoTrabajadoresRoutes);
 app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
 app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
 app.use('/api/dashboard-simple', dashboardSimpleRoutes);
