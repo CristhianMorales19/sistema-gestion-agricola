@@ -139,40 +139,6 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
   - *Area*: Backend\Validaciones
 
 ---
----
-### 👥 Epic: Administración de Personal
-
-#### HU-001: Crear registro de trabajador ⭐ **CRÍTICO** (5 SP) - **[EN AZURE]**
-**Parent Feature**: CRUD de Trabajadores  
-**Priority**: 1  
-
-**User Story:**  
-Como administrador quiero registrar un nuevo trabajador para gestionar el personal de la empresa agrícola
-
-**Acceptance Criteria:**
-- [ ] Formulario completo con datos personales y laborales
-- [ ] Validación de cédula y email únicos
-- [ ] Selección de cargo y departamento desde catálogos
-- [ ] Guardado exitoso en base de datos
-- [ ] Formulario completo con datos personales y laborales
-- [ ] Validación de cédula y email únicos
-- [ ] Selección de cargo y departamento desde catálogos
-- [x] Guardado exitoso en base de datos
-- [ ] Confirmación visual de registro exitoso
-  - *Assigned To*: [Developer 1]
-
-- [ ] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
-  - *Description*: API para crear trabajador con validaciones
-  - *Area*: Backend\API
-
-- [ ] **Task 3.3**: Desarrollar FormularioTrabajador component (6h)
-  - *Assigned To*: [Developer 2]
-  - *Area*: Frontend\Personal
-
-  - *Description*: Validar cédula única, formato email, campos requeridos
-  - *Assigned To*: [Developer 1]
-  - *Area*: Backend\Validaciones
-
 
 #### HU-002: Asignar información laboral al trabajador (3 SP) - **[EN AZURE]**
 **Parent Feature**: CRUD de Trabajadores  
@@ -209,10 +175,10 @@ Como usuario quiero consultar la lista de empleados para ver información del pe
 - [ ] Búsqueda por nombre, cédula o email
 - [ ] Vista detallada al hacer click en empleado
 **Development Tasks:**
-- [ ] **Task 5.1**: Crear endpoint GET /trabajadores con filtros (4h)
-  - *Description*: API con paginación, filtros y búsqueda
-  - *Assigned To*: [Developer 1]
-  - *Area*: Backend\API
+    - [x] **Task 5.1**: Crear endpoint GET /trabajadores con filtros (4h)
+      - *Description*: API con paginación, filtros y búsqueda
+      - *Assigned To*: [Developer 1]
+      - *Area*: Backend\API
 - [ ] **Task 5.2**: Desarrollar componente ListaTrabajadores (5h)
   - *Description*: Lista con paginación, filtros y búsqueda
   - *Assigned To*: [Developer 2]
@@ -237,20 +203,21 @@ Como administrador quiero crear roles de usuario para organizar la estructura de
 - [ ] Validación de nombres de roles únicos
 
 **Development Tasks:**
-- [ ] **Task 6.1**: Crear modelo Rol y tabla de permisos (3h)
-  - *Description*: Tablas roles y roles_permisos con relaciones
-  - *Assigned To*: [Developer 1]
-  - *Area*: Backend\Base-Datos
 
-- [ ] **Task 6.2**: Implementar endpoints CRUD para roles (4h)
-  - *Description*: API completa para gestión de roles
-  - *Assigned To*: [Developer 1]
-  - *Area*: Backend\API
+ - [x] **Task 6.1**: Crear modelo Rol y tabla de permisos (3h)
+   - *Description*: Tablas roles y roles_permisos con relaciones
+   - *Assigned To*: [Developer 1]
+   - *Area*: Backend\Base-Datos
 
-- [ ] **Task 6.3**: Crear componente GestionRoles (3h)
-  - *Description*: Interface para CRUD de roles
-  - *Assigned To*: [Developer 2]
-  - *Area*: Frontend\Admin
+ - [x] **Task 6.2**: Implementar endpoints CRUD para roles (4h)
+   - *Description*: API completa para gestión de roles
+   - *Assigned To*: [Developer 1]
+   - *Area*: Backend\API
+
+ - [x] **Task 6.3**: Crear componente GestionRoles (3h)
+   - *Description*: Interface para CRUD de roles
+   - *Assigned To*: [Developer 2]
+   - *Area*: Frontend\Admin
 
 ---
 
