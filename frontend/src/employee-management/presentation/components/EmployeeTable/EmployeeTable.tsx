@@ -20,17 +20,21 @@ import { Employee } from '../../../domain/entities/Employee';
 
 interface EmployeeTableProps {
   employees: Employee[];
+  selectedEmployeeId?: string;
   onEdit: (employee: Employee) => void;
   onDelete: (id: string) => void;
+  onSelect: (employee: Employee) => void;
 }
 
 export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   employees,
+  selectedEmployeeId,
   onEdit,
-  onDelete
+  onDelete,
+  onSelect
 }) => {
 
-  console.log('Employees in table:', employees); // Verifica que lleguen datos
+  console.log('Employees in table:', employees);
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -43,6 +47,10 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('es-ES');
+  };
+
+  const handleRowClick = (employee: Employee) => {
+    onSelect(employee);
   };
 
   return (
@@ -60,7 +68,18 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         </TableHead>
         <TableBody>
           {employees.map((employee) => (
-            <TableRow key={employee.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            <TableRow 
+              key={employee.id} 
+              onClick={() => handleRowClick(employee)}
+              sx={{ 
+                '&:last-child td, &:last-child th': { border: 0 },
+                backgroundColor: selectedEmployeeId === employee.id ? '#334155' : 'transparent',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: selectedEmployeeId === employee.id ? '#334155' : '#2d3748'
+                }
+              }}
+            >
               <TableCell component="th" scope="row" sx={{ color: '#e2e8f0' }}>
                 {employee.name}
               </TableCell>
@@ -79,14 +98,20 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton 
                     size="small" 
-                    onClick={() => onEdit(employee)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
+                      onEdit(employee);
+                    }}
                     sx={{ color: '#3b82f6' }}
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton 
                     size="small" 
-                    onClick={() => onDelete(employee.id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
+                      onDelete(employee.id);
+                    }}
                     sx={{ color: '#ef4444' }}
                   >
                     <DeleteIcon />

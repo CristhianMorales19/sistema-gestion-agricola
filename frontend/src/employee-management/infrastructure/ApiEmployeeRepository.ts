@@ -4,6 +4,7 @@ import { Employee, CreateEmployeeData, UpdateEmployeeData } from '../domain/enti
 import { apiService } from '../../services/api.service';
 
 export class ApiEmployeeRepository implements EmployeeRepository {
+
   async getAllEmployees(): Promise<Employee[]> {
     const response = await apiService.get('/trabajadores');
 
@@ -103,7 +104,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
   async searchEmployees(query: string): Promise<Employee[]> {
     const response = await apiService.get(`/trabajadores/search/${encodeURIComponent(query)}`);
     
-    const trabajadores = response.data?.data?.trabajadores || [];
+    const trabajadores = response.data?.trabajadores || [];
     
     return trabajadores.map((item: any) => ({
       id: item.id.toString(),
