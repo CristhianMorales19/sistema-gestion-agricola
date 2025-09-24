@@ -280,22 +280,52 @@ router.put('/:id',
     checkJwt,
     hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
     requireAnyPermission(['trabajadores:update:all', 'trabajadores:update:own']),
-    (req, res) => {
-        const { id } = req.params;
-        const userPermissions = (req.user as any)?.permissions || [];
-        const canUpdateAll = userPermissions.includes('trabajadores:update:all');
-        
-        res.json({
-            success: true,
-            message: `Trabajador ${id} actualizado exitosamente`,
-            data: {
-                action: 'update',
-                trabajadorId: id,
-                scope: canUpdateAll ? 'all' : 'own',
-                data: req.body,
-                permissions: userPermissions
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userPermissions = (req.user as any)?.permissions || [];
+            const canUpdateAll = userPermissions.includes('trabajadores:update:all');
+            
+            // Validar datos requeridos
+            const { cargo, salario_base, tipo_contrato } = req.body;
+            
+            if (!cargo || !salario_base || !tipo_contrato) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Todos los campos son requeridos: cargo, salario_base, tipo_contrato'
+                });
             }
-        });
+            
+            // Validar que el salario sea un número positivo
+            if (isNaN(salario_base) || salario_base < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El salario base debe ser un número positivo'
+                });
+            }
+            
+            // Aquí iría la lógica para actualizar en la base de datos
+            // Por ahora simulamos una actualización exitosa
+            
+            res.json({
+                success: true,
+                message: `Información laboral del trabajador ${id} actualizada exitosamente`,
+                data: {
+                    action: 'update',
+                    trabajadorId: id,
+                    scope: canUpdateAll ? 'all' : 'own',
+                    data: req.body,
+                    permissions: userPermissions
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error al actualizar trabajador:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al actualizar la información laboral'
+            });
+        }
     }
 );
 

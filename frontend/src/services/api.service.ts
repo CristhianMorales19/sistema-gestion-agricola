@@ -147,6 +147,10 @@ class ApiService {
     return this.put('/auth/profile', data);
   }
 
+  async updateLaborInfoEmployee(id: number, data: any) {
+    return this.put(`/trabajadores/${id}`, data);
+  }
+
   // Empleados
   async getEmpleados(params?: any): Promise<PaginatedResponse<any>> {
     const response = await this.axiosInstance.get('/trabajadores', { params });
@@ -162,11 +166,11 @@ class ApiService {
   }
 
   async updateEmpleado(id: number, data: any) {
-    return this.put(`/empleados/${id}`, data);
+    return this.put(`/trabajadores/${id}`, data);
   }
 
   async deleteEmpleado(id: number) {
-    return this.delete(`/empleados/${id}`);
+    return this.delete(`/trabajadores/${id}`);
   }
 
   // Asistencias

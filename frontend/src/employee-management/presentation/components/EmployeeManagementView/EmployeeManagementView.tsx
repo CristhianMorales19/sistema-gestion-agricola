@@ -15,16 +15,23 @@ import {
 } from '@mui/icons-material';
 import { EmployeeTable } from '../EmployeeTable/EmployeeTable';
 import { NewEmployeeForm, NewEmployeeFormData } from '../EmployeeForm/NewEmployeeForm';
+import { LaborInfoView } from '../EmployeeLaborInfoForm/LaborInfoView'; // Nueva importación
 import { useEmployeeManagement } from '../../../application/hooks/useEmployeeManagement';
 import { Employee } from '../../../domain/entities/Employee';
 
 type EmployeeView = 'list' | 'new-employee' | 'labor-info';
 
+interface SelectedEmployee {
+  id: string;
+  name: string;
+}
+
 export const EmployeeManagementView: React.FC = () => {
   const { employees, loading, error, deleteEmployee, searchEmployees, refreshEmployees, createEmployee } = useEmployeeManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [currentView, setCurrentView] = useState<EmployeeView>('list'); // Estado para controlar la vista
+  const [currentView, setCurrentView] = useState<EmployeeView>('list');
+  const [selectedEmployee, setSelectedEmployee] = useState<SelectedEmployee | null>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -40,6 +47,7 @@ export const EmployeeManagementView: React.FC = () => {
   const handleClearSearch = async () => {
     setSearchQuery('');
     setIsSearching(false);
+    setSelectedEmployee(null); // Limpiar selección al limpiar búsqueda
     await refreshEmployees();
   };
 
@@ -50,16 +58,20 @@ export const EmployeeManagementView: React.FC = () => {
   };
 
   const handleAddLaborInfo = () => {
-    setCurrentView('labor-info');
+    if (selectedEmployee) {
+      setCurrentView('labor-info');
+    }
   };
 
   const handleAddEmployeeClick = () => {
     setCurrentView('new-employee');
+    setSelectedEmployee(null); // Limpiar selección al agregar nuevo empleado
   };
 
   const handleBackToList = () => {
     setCurrentView('list');
-    refreshEmployees(); // Recargar datos si es necesario
+    setSelectedEmployee(null); // Limpiar selección al volver a la lista
+    refreshEmployees();
   };
 
   const handleCreateEmployee = async (data: NewEmployeeFormData) => {
@@ -74,12 +86,17 @@ export const EmployeeManagementView: React.FC = () => {
 
   const handleEdit = (employee: Employee) => {
     console.log('Editar empleado:', employee);
+    setSelectedEmployee({ id: employee.id, name: employee.name });
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
       try {
         await deleteEmployee(id);
+        // Si el empleado eliminado era el seleccionado, limpiar selección
+        if (selectedEmployee && selectedEmployee.id === id) {
+          setSelectedEmployee(null);
+        }
         await refreshEmployees();
       } catch (err) {
         console.error('Error al eliminar empleado:', err);
@@ -87,10 +104,16 @@ export const EmployeeManagementView: React.FC = () => {
     }
   };
 
+  const handleEmployeeSelect = (employee: Employee) => {
+    setSelectedEmployee({ id: employee.id, name: employee.name });
+  };
+
   const handleSaveLaborInfo = async (laborData: any) => {
     try {
       // Lógica para guardar info laboral
       console.log('Guardando info laboral:', laborData);
+      console.log('Para el empleado:', selectedEmployee);
+      // Aquí iría la llamada a tu servicio para guardar la info laboral
       await handleBackToList();
     } catch (err) {
       console.error('Error al guardar info laboral:', err);
@@ -109,13 +132,14 @@ export const EmployeeManagementView: React.FC = () => {
           />
         );
 
-      // case 'labor-info':
-      //   return (
-      //     <LaborInfoView
-      //       onCancel={handleBackToList}
-      //       onSave={handleSaveLaborInfo}
-      //     />
-      //   );
+      case 'labor-info':
+        return (
+          <LaborInfoView
+            employee={selectedEmployee}
+            onCancel={handleBackToList}
+            onSave={handleSaveLaborInfo}
+          />
+        );
 
       case 'list':
       default:
@@ -183,13 +207,20 @@ export const EmployeeManagementView: React.FC = () => {
                   Mostrando resultados para: "{searchQuery}"
                 </Typography>
               )}
+              {selectedEmployee && (
+                <Typography variant="body2" sx={{ color: '#10b981', mt: 1, fontWeight: 'bold' }}>
+                  Empleado seleccionado: {selectedEmployee.name}
+                </Typography>
+              )}
             </Paper>
 
             {/* Employee Table */}
             <EmployeeTable
               employees={employees}
+              selectedEmployeeId={selectedEmployee?.id}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onSelect={handleEmployeeSelect}
             />
           </>
         );
@@ -219,9 +250,11 @@ export const EmployeeManagementView: React.FC = () => {
               variant="contained"
               startIcon={<WorkIcon />}
               onClick={handleAddLaborInfo}
+              disabled={!selectedEmployee}
               sx={{
-                backgroundColor: '#3b82f6',
-                '&:hover': { backgroundColor: '#2563eb' }
+                backgroundColor: selectedEmployee ? '#3b82f6' : '#475569',
+                '&:hover': selectedEmployee ? { backgroundColor: '#2563eb' } : { backgroundColor: '#475569' },
+                '&:disabled': { backgroundColor: '#475569', color: '#94a3b8' }
               }}
             >
               Agregar Info Laboral

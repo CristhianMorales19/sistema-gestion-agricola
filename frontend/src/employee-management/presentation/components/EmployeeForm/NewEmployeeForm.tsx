@@ -13,10 +13,10 @@ import {
   Person as PersonIcon,
   Badge as BadgeIcon,
   Event as EventIcon,
-  Work as WorkIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
   Cake as CakeIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 
 export interface NewEmployeeFormData {
@@ -24,7 +24,6 @@ export interface NewEmployeeFormData {
   nombre_completo: string;
   fecha_nacimiento: string;
   fecha_registro_at: string;
-  cargo?: string;
   telefono?: string;
   email?: string;
   created_by: number;
@@ -44,7 +43,6 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     nombre_completo: '',
     fecha_nacimiento: '',
     fecha_registro_at: new Date().toISOString().split('T')[0],
-    cargo: '',
     telefono: '',
     email: '',
     created_by: 1
@@ -277,33 +275,6 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
               />
             </Grid>
 
-            {/* Cargo */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Cargo"
-                name="cargo"
-                value={formData.cargo}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <WorkIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-
             {/* Teléfono */}
             <Grid item xs={12} md={6}>
               <TextField
@@ -332,7 +303,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
             </Grid>
 
             {/* Correo electrónico */}
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Correo electrónico"
@@ -367,6 +338,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
             <Button
               variant="outlined"
               onClick={onCancel}
+              startIcon={<ArrowBackIcon />}
               sx={{
                 color: '#94a3b8',
                 borderColor: '#475569',
