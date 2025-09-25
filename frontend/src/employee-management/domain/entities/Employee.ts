@@ -9,6 +9,7 @@ export interface Employee {
   email?: string;
   phone?: string;
   salary?: number;
+  cargo: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,4 +33,29 @@ export interface UpdateEmployeeData {
   email?: string;
   phone?: string;
   salary?: number;
+}
+
+// Nueva interfaz para información laboral
+export interface LaborInfoData {
+  trabajador_id: number;
+  cargo: string;
+  departamento: String,
+  salario_base: number;
+  tipo_contrato: string;
+  fecha_ingreso: string;
+  usuario_ultima_actualizacion: number;
+}
+
+export interface CreateLaborInfoResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    info_laboral_id: number;
+    trabajador_id: number;
+    cargo: string;
+    salario_base: number;
+    departamento: string
+    tipo_contrato: string;
+    fecha_ingreso: string;
+  };
 }

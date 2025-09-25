@@ -1,7 +1,7 @@
 // src/employee-management/application/services/EmployeeService.ts
 import { EmployeeUseCases } from '../../domain/use-cases/EmployeeUseCases';
 import { ApiEmployeeRepository } from '../../infrastructure/ApiEmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData } from '../../domain/entities/Employee';
+import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../../domain/entities/Employee';
 
 export class EmployeeService {
   private employeeUseCases: EmployeeUseCases;
@@ -36,6 +36,10 @@ export class EmployeeService {
       throw new Error('La búsqueda debe tener al menos 2 caracteres');
     }
     return this.employeeUseCases.searchEmployees(query.trim());
+  }
+
+  async createLaborInfo(data: LaborInfoData): Promise<CreateLaborInfoResponse> {
+    return this.employeeUseCases.createLaborInfo(data);
   }
 }
 
