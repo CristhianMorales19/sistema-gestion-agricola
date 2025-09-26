@@ -43,18 +43,26 @@ router.get('/',
             // Aquí debes hacer la consulta real a tu base de datos
             const trabajadores = await prisma.mom_trabajador.findMany({
                 where: { is_activo: true },
-                select: {
-                    trabajador_id: true,
-                    documento_identidad: true,
-                    nombre_completo: true,
-                    fecha_nacimiento: true,
-                    telefono: true,
-                    email: true,
-                    is_activo: true,
-                    fecha_registro_at: true,
-                    created_at: true,
-                    updated_at: true
+
+                include: {
+                    mot_info_laboral: {
+                        select: {
+                            cargo: true,
+                        }
+                    }
                 }
+                // select: {
+                //     trabajador_id: true,
+                //     documento_identidad: true,
+                //     nombre_completo: true,
+                //     fecha_nacimiento: true,
+                //     telefono: true,
+                //     email: true,
+                //     is_activo: true,
+                //     fecha_registro_at: true,
+                //     created_at: true,
+                //     updated_at: true
+                // }
             });
 
             res.json({
@@ -64,7 +72,7 @@ router.get('/',
                         id: t.trabajador_id.toString(),
                         name: t.nombre_completo,
                         identification: t.documento_identidad,
-                        position: 'Por definir', // Necesitas join con otra tabla
+                        cargo:  t.mot_info_laboral[0]?.cargo || 'Sin asignar', // Necesitas join con otra tabla
                         hireDate: t.fecha_registro_at,
                         status: t.is_activo ? 'activo' : 'inactivo',
                         email: t.email,
@@ -206,6 +214,34 @@ router.post('/',
                     message: 'Ya existe un trabajador con esta cédula'
                 });
             }
+            
+            // Verificar si el correo ya existe
+            const existingEmployeeByEmail = await prisma.mom_trabajador.findFirst({
+                where: {
+                    email: email.trim()
+                }
+            });
+
+            if (existingEmployeeByEmail) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Ya existe un trabajador con este correo electrónico'
+                });
+            }
+
+            // Verificar si el correo ya existe en la tabla de usuarios
+            const existingUserByEmail = await prisma.mot_usuario.findFirst({
+                where: {
+                    username: email.trim()
+                }
+            });
+
+            if (existingUserByEmail) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Ya existe un usuario con este correo electrónico'
+                });
+            }
 
             // Crear el trabajador en la base de datos
             const newEmployee = await prisma.mom_trabajador.create({
@@ -243,8 +279,7 @@ router.post('/',
                 success: true,
                 message: 'Trabajador creado exitosamente',
                 data: {
-                    trabajador: newEmployee,
-                    permissions: (req.user as any)?.permissions
+                    trabajador: newEmployee
                 }
             });
 
@@ -487,6 +522,82 @@ router.get('/search/:query',
             res.status(500).json({
                 success: false,
                 message: 'Error al buscar trabajadores'
+            });
+        }
+    }
+);
+
+// En tu archivo agromano-trabajadores.ts - Agregar endpoint POST
+/**
+ * @route POST /api/trabajadores/:id/info-laboral
+ * @desc Crear información laboral del trabajador
+ * @access Requiere permisos: trabajadores:update:all OR trabajadores:update:own
+ */
+router.post('/:id/info-laboral', 
+    checkJwt,
+    hybridAuthMiddleware,
+    requireAnyPermission(['trabajadores:update:all', 'trabajadores:update:own']),
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = (req.user as any)?.id;            
+            const { cargo, salario_base, tipo_contrato, fecha_ingreso, departamento } = req.body;
+
+            const existingInfo = await prisma.mot_info_laboral.findFirst({
+                where: { trabajador_id: parseInt(id) }
+            });
+
+            if (existingInfo) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Este trabajador ya tiene información laboral registrada'
+                });
+            }
+            
+            // Crear información laboral en la base de datos
+            const nuevaInfoLaboral = await prisma.mot_info_laboral.create({
+                data: {
+                    trabajador_id: parseInt(id),
+                    cargo,
+                    salario_base: parseFloat(salario_base),
+                    tipo_contrato,
+                    fecha_ingreso_at: new Date(fecha_ingreso),
+                    fecha_ultima_actualizacion_at: new Date(),
+                    usuario_ultima_actualizacion: parseInt(userId),
+                    created_at: new Date(),
+                    created_by: parseInt(userId),
+                    updated_at: new Date(),
+                    updated_by: parseInt(userId)
+                }
+            });
+            
+            res.status(201).json({
+                success: true,
+                message: 'Información laboral guardada',
+                data: {
+                    info_laboral_id: nuevaInfoLaboral.info_laboral_id,
+                    trabajador_id: nuevaInfoLaboral.trabajador_id,
+                    cargo: nuevaInfoLaboral.cargo,
+                    departamento: '',
+                    salario_base: nuevaInfoLaboral.salario_base,
+                    tipo_contrato: nuevaInfoLaboral.tipo_contrato,
+                    fecha_ingreso: nuevaInfoLaboral.fecha_ingreso_at
+                }
+            });
+            
+        } catch (error: any) {
+            console.error('Error al crear información laboral:', error);
+            
+            // Manejar errores específicos de Prisma
+            if (error.code === 'P2003') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Trabajador no encontrado'
+                });
+            }
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al crear la información laboral'
             });
         }
     }

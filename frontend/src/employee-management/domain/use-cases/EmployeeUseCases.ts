@@ -1,6 +1,6 @@
 // src/employee-management/domain/use-cases/EmployeeUseCases.ts
 import { EmployeeRepository } from '../repositories/EmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData } from '../entities/Employee';
+import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../entities/Employee';
 
 export class EmployeeUseCases {
   constructor(private employeeRepository: EmployeeRepository) {}
@@ -27,6 +27,10 @@ export class EmployeeUseCases {
 
   async searchEmployees(query: string): Promise<Employee[]> {
     return this.employeeRepository.searchEmployees(query);
+  }
+
+  async createLaborInfo(data: LaborInfoData): Promise<CreateLaborInfoResponse> {
+    return this.employeeRepository.createLaborInfo(data);
   }
 }
 

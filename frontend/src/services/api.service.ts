@@ -173,6 +173,10 @@ class ApiService {
     return this.delete(`/trabajadores/${id}`);
   }
 
+  async createLaborInfo(trabajadorId: number, data: any): Promise<ApiResponse<any>> {
+    return this.post(`/trabajadores/${trabajadorId}/info-laboral`, data);
+  }
+
   // Asistencias
   async getAsistencias(params?: any): Promise<PaginatedResponse<any>> {
     const response = await this.axiosInstance.get('/asistencias', { params });
