@@ -242,7 +242,7 @@ def main():
     """Función principal del script"""
     
     # Directorio de casos de uso en Markdown
-    markdown_dir = Path(__file__).parent
+    markdown_dir = Path(__file__).parent.parent / 'casos-uso'
     word_dir = markdown_dir / 'word'
     
     # Crear directorio de salida si no existe
