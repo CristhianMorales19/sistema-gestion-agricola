@@ -68,7 +68,7 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 // Configurar CORS permitiendo múltiples orígenes desde la variable de entorno
 // FRONTEND_URLS (coma-separados) o FRONTEND_URL.
-const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000';
+const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3001';
 const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
 
 app.use(cors({
