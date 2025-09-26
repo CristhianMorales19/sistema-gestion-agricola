@@ -77,10 +77,10 @@ Como usuario del sistema quiero poder iniciar sesión con mi email y contraseña
 Como usuario autenticado quiero poder cerrar mi sesión para proteger mi información al salir del sistema
 
 **Acceptance Criteria:**
-- [ ] Botón de logout visible en header
+- [x] Botón de logout visible en header
 - [ ] Invalidación del token JWT en backend
-- [ ] Limpieza del estado local de autenticación
-- [ ] Redirección automática a página de login
+- [x] Limpieza del estado local de autenticación
+- [x] Redirección automática a página de login
 
 **Development Tasks:**
 - [ ] **Task 2.1**: Crear endpoint POST /auth/logout (2h)
@@ -285,22 +285,22 @@ Como administrador quiero registrar nuevos usuarios en el sistema para que pueda
 ## 🏗️ Infrastructure & Setup Tasks
 
 ### Environment Setup
-- [ ] **Task 7.1**: Configurar proyecto backend Express + TypeScript (4h)
+- [X ] **Task 7.1**: Configurar proyecto backend Express + TypeScript (4h)
   - *Description*: Setup inicial con estructura de carpetas, dependencias básicas
   - *Assigned To*: [Developer 1]
   - *Area*: DevOps\Setup
 
-- [ ] **Task 7.2**: Configurar proyecto frontend React + TypeScript (3h)  
+- [ X] **Task 7.2**: Configurar proyecto frontend React + TypeScript (3h)  
   - *Description*: Create React App con TypeScript, estructura de carpetas
   - *Assigned To*: [Developer 2]
   - *Area*: DevOps\Setup
 
-- [ ] **Task 7.3**: Configurar base de datos MySQL (3h)
+- [ X] **Task 7.3**: Configurar base de datos MySQL (3h)
   - *Description*: Instancia local, configuración de conexión, migraciones básicas
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
-- [ ] **Task 7.4**: Configurar CORS y middleware básico (2h)
+- [x] **Task 7.4**: Configurar CORS y middleware básico (2h)
   - *Description*: Middleware de autenticación, CORS, body-parser, logging
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
@@ -311,12 +311,12 @@ Como administrador quiero registrar nuevos usuarios en el sistema para que pueda
   - *Assigned To*: [Developer 1]
   - *Area*: DevOps\Configuration
 
-- [ ] **Task 8.2**: Setup de Axios y servicios API (2h)
+- [x] **Task 8.2**: Setup de Axios y servicios API (2h)
   - *Description*: Cliente HTTP configurado con interceptors
   - *Assigned To*: [Developer 2]  
   - *Area*: Frontend\Services
 
-- [ ] **Task 8.3**: Configurar React Router y estructura de rutas (2h)
+- [x] **Task 8.3**: Configurar React Router y estructura de rutas (2h)
   - *Description*: Rutas principales, guards de autenticación
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Routing
@@ -435,5 +435,63 @@ Una User Story está completa cuando:
 - [ ] Configurar pipeline CI/CD básico
 - [ ] Agregar validaciones más robustas
 - [ ] Mejorar manejo de errores global
+
+---
+
+## 🔔 Actualización - Estado en `main` (22/09/2025)
+
+Esta sección resume el estado real del Sprint 1 según el contenido actual de la rama `main`. Para cada User Story / Task muestro: Estado (Done / Partial / Missing), evidencia de archivos y notas.
+
+- HU-033: Login de usuario — Partial/Done
+  - Estado: El backend expone `POST /api/auth/login` (local login) y firma JWT.
+  - Evidencia: `backend/src/routes/auth.ts` (implementación de `/login`).
+  - Notas: Frontend está integrado principalmente con Auth0 (`frontend/src/components/Login.tsx`), por lo que coexisten dos flujos (Auth0 y login local). Falta un `LoginForm` que consuma el endpoint local si se quiere usar ese flujo.
+
+- HU-034: Logout de usuario — Partial
+  - Estado: Frontend logout via Auth0 implementado; backend no tiene `POST /api/auth/logout`.
+  - Evidencia: `frontend/src/contexts/AuthContext.tsx`, `frontend/src/components/rbac/RBACLayout.tsx` (Logout). Backend: falta ruta `/logout` en `backend/src/routes/auth.ts`.
+
+- HU-001: Crear registro de trabajador — Partial
+  - Estado: Backend CRUD para trabajadores presente (GET, POST, PUT, DELETE). Frontend tiene cliente API y vistas referenciadas pero falta el formulario UI completado y confirmaciones visuales.
+  - Evidencia: `backend/src/routes/trabajadores.ts`, `frontend/src/employee-management/infrastructure/ApiEmployeeRepository.ts`, `frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx` (referencia `EmployeeManagementView`).
+
+- HU-002: Asignar información laboral al trabajador — Partial
+  - Estado: Existe `PUT /api/trabajadores/:id` para actualizar trabajador; no existe ruta específica `PATCH /trabajadores/:id/info-laboral` (puede usarse PUT como alternativa).
+  - Evidencia: `backend/src/routes/trabajadores.ts` (PUT).
+
+- HU-000: Consulta de empleados — Partial
+  - Estado: `GET /api/trabajadores` implementado (lista básica). Búsqueda y endpoints auxiliares referenciados desde frontend (`/trabajadores/search/...`), pero UI de filtros/paginación no completa.
+  - Evidencia: `backend/src/routes/trabajadores.ts`, `frontend/src/employee-management/infrastructure/ApiEmployeeRepository.ts`.
+
+- Gestión de Roles — Partial
+  - Estado: Modelo y scripts de BD están (roles y permisos). Middleware híbrido carga permisos desde BD. Falta endpoints CRUD de roles y UI para gestión.
+  - Evidencia: `database/SCRIPT_SEBASTIAN_CORREGIDO.sql`, `backend/src/middleware/hybrid-auth-final.middleware.ts`, `backend/src/middleware/agromano-rbac.middleware.ts`.
+
+- HU-035: Registro de nuevo usuario — Missing/Partial
+  - Estado: No se encontró `POST /api/usuarios/registro` ni UI para crear usuarios desde el frontend. La tabla `mot_usuario` existe y hay scripts de inserción.
+  - Evidencia: `database/SCRIPT_SEBASTIAN_CORREGIDO.sql`, pero falta `backend/src/routes/usuarios.ts`.
+
+### RBAC / Permisos
+- Estado: Done (robusto)
+  - El middleware híbrido une permisos desde la BD y del token, con fallbacks para administradores y para tokens con permisos. Esto cubre la lógica crítica para evitar 403 imprevistos.
+  - Evidencia: `backend/src/middleware/hybrid-auth-final.middleware.ts`, `backend/src/middleware/agromano-rbac.middleware.ts`.
+
+### Frontend Auth & Dashboard
+- Estado: Done/Partial
+  - `AuthContext` y hooks para obtener perfil desde backend están implementados; `AdminDashboard` está completo y consume la API (usa `ApiDashboardRepository`).
+  - Evidencia: `frontend/src/contexts/AuthContext.tsx`, `frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx`, `frontend/src/dashboard/infrastructure/ApiDashboardRepository.ts`.
+
+### Tests
+- Estado: Partial
+  - Existen pruebas y documentación de pruebas en `test/` pero faltan tests unitarios/integración explícitos para login (Task 1.5) y para endpoints nuevos (trabajadores, roles).
+
+## Recomendaciones (próximos pasos mínimos)
+1. Decidir flujo de autenticación principal (Auth0 SSO o login local). Si se opta por login local, crear `LoginForm` frontend que consuma `POST /api/auth/login` y gestione el token.
+2. Implementar `POST /api/auth/logout` si se desea invalidación server-side de tokens locales.
+3. Crear `FormularioTrabajador` frontend y mostrar confirmación visual al crear trabajador; reusar `ApiEmployeeRepository.post('/trabajadores')`.
+4. Agregar endpoints CRUD para roles (`backend/src/routes/roles.ts`) y UI `GestionRoles`.
+5. Añadir tests unitarios para `/auth/login`, `/trabajadores` (create + get) y flujos RBAC.
+
+Si quieres, puedo empezar a implementar los items 1 y 3 ahora (crear `LoginForm` y `FormularioTrabajador`) en una rama nueva y añadir tests básicos; dime si prefieres que commit/push vaya a `main` o a una rama y abro PR.
 
 

@@ -1,3 +1,4 @@
+````markdown
 # Configuración Auth0 Dashboard - CORRECCIÓN OBLIGATORIA
 
 ## 🚨 ERROR IDENTIFICADO
@@ -70,19 +71,9 @@ npm run dev
 
 3. Probar login en: http://localhost:3000
 
-## 🐛 PROBLEMAS COMUNES
+````
+"""
+Moved from frontend/AUTH0_DASHBOARD_CONFIG.md
+"""
 
-- **Client ID incorrecto**: Verificar que coincida exactamente
-- **URLs no permitidas**: Asegurar que `http://localhost:3000` esté en todas las URLs
-- **Tipo de aplicación incorrecto**: Debe ser SPA, no Regular Web App
-- **API no configurada**: Verificar que el audience `https://agromano-api.com` exista
-
-## 📝 CREDENCIALES ACTUALES
-
-```env
-REACT_APP_AUTH0_DOMAIN=dev-agromano.us.auth0.com
-REACT_APP_AUTH0_CLIENT_ID=jkaDs31ucGZTjRsq3cVa7BLApPSXP9oT
-REACT_APP_AUTH0_AUDIENCE=https://agromano-api.com
-```
-
-**IMPORTANTE**: Si el Client ID no existe o es incorrecto, crear una nueva aplicación SPA en Auth0 Dashboard.
+// ...existing code...

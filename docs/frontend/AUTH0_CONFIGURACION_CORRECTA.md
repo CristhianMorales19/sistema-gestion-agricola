@@ -1,3 +1,5 @@
+"""
+````markdown
 # Configuración Correcta de Auth0 Dashboard
 
 ## ⚠️ ERROR SOLUCIONADO: "Oops!, something went wrong"
@@ -101,3 +103,8 @@ Si persiste el error, verificar en Auth0 Dashboard → Logs para ver detalles es
 - `http://localhost:3000/callback`
 
 Sin estas URLs, Auth0 mostrará el error "Oops!, something went wrong".
+
+````
+"""
+
+// ...existing code...

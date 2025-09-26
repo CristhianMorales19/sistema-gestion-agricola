@@ -1,3 +1,5 @@
+"""
+````markdown
 # Estructura del Frontend - Screaming Architecture
 
 ## 🏗️ Organización por Características del Negocio
@@ -50,9 +52,9 @@ frontend/src/
 │   └── types/                   # Tipos compartidos
 │
 └── 🚀 app/                      # Configuración de la aplicación
-    ├── providers/               # Providers globales
-    ├── routing/                 # Configuración de rutas
-    └── config/                  # Configuración general
+	├── providers/               # Providers globales
+	├── routing/                 # Configuración de rutas
+	└── config/                  # Configuración general
 ```
 
 ## 🎯 Principios Aplicados
@@ -61,3 +63,8 @@ frontend/src/
 - **Clean Architecture**: Separación clara de responsabilidades
 - **Domain Driven Design**: Organización por dominios de negocio
 - **Separation of Concerns**: Cada capa tiene una responsabilidad específica
+
+````
+"""
+
+// ...existing code...
