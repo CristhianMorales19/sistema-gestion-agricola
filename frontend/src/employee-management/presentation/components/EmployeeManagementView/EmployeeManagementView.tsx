@@ -108,12 +108,13 @@ export const EmployeeManagementView: React.FC = () => {
     setSelectedEmployee({ id: employee.id, name: employee.name });
   };
 
+  const { updateEmployeeLaborInfo } = useEmployeeManagement();
+
   const handleSaveLaborInfo = async (laborData: any) => {
+    if (!selectedEmployee) throw new Error('No hay empleado seleccionado');
     try {
-      // Lógica para guardar info laboral
-      console.log('Guardando info laboral:', laborData);
-      console.log('Para el empleado:', selectedEmployee);
-      // Aquí iría la llamada a tu servicio para guardar la info laboral
+      await updateEmployeeLaborInfo(selectedEmployee.id, laborData);
+      await refreshEmployees();
       await handleBackToList();
     } catch (err) {
       console.error('Error al guardar info laboral:', err);
