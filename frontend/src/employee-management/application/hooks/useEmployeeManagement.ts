@@ -59,6 +59,34 @@ export const useEmployeeManagement = () => {
     }
   };
 
+  const updateEmployeeLaborInfo = async (id: string, laborData: any): Promise<Employee> => {
+    // Reutiliza updateEmployee pero permite payloads laborales extendidos
+    try {
+      const payload: any = {
+        cargo: laborData.position,
+        salario_base: laborData.baseSalary,
+        tipo_contrato: laborData.contractType,
+        codigo_nomina: laborData.payrollCode,
+        salario_bruto: laborData.salaryGross,
+        rebajas_ccss: laborData.ccssDeduction,
+        otras_rebajas: laborData.otherDeductions,
+        salario_por_hora: laborData.salaryPerHour,
+        horas_ordinarias: laborData.ordinaryHours,
+        horas_extras: laborData.extraHours,
+        horas_otras: laborData.otherHours,
+        vacaciones_monto: laborData.vacationAmount,
+        incapacidad_monto: laborData.incapacityAmount,
+        lactancia_monto: laborData.lactationAmount,
+      };
+
+      const updated = await updateEmployee(id, payload);
+      return updated;
+    } catch (err) {
+      console.error('Error updating labor info:', err);
+      throw err;
+    }
+  };
+
   const deleteEmployee = async (id: string): Promise<void> => {
     try {
       await employeeService.deleteEmployee(id);
@@ -93,6 +121,7 @@ export const useEmployeeManagement = () => {
     error,
     createEmployee,
     updateEmployee,
+    updateEmployeeLaborInfo,
     deleteEmployee,
     searchEmployees,
     refreshEmployees: loadEmployees

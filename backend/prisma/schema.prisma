@@ -461,6 +461,21 @@ model mot_info_laboral {
   cargo                         String         @db.VarChar(100)
   fecha_ingreso_at              DateTime       @db.DateTime(0)
   tipo_contrato                 String         @db.VarChar(50)
+  // Campos añadidos para soportar reportes y comprobantes
+  codigo_nomina                 String?        @db.VarChar(50)
+  salario_bruto                 Decimal?       @db.Decimal(13, 2)
+  rebajas_ccss                  Decimal?       @db.Decimal(13, 2)
+  otras_rebajas                 Decimal?       @db.Decimal(13, 2)
+  salario_por_hora              Decimal?       @db.Decimal(13, 2)
+  horas_ordinarias              Decimal?       @db.Decimal(7, 2)
+  horas_extras                  Decimal?       @db.Decimal(7, 2)
+  horas_otras                   Decimal?       @db.Decimal(7, 2)
+  vacaciones_monto              Decimal?       @db.Decimal(13, 2)
+  incapacidad_monto             Decimal?       @db.Decimal(13, 2)
+  lactancia_monto               Decimal?       @db.Decimal(13, 2)
+  salario_promedio              Decimal?       @db.Decimal(13, 2)
+  meses_trabajados              Int?
+  area                          String?        @db.VarChar(120)
   salario_base                  Decimal        @db.Decimal(13, 2)
   fecha_ultima_actualizacion_at DateTime       @db.DateTime(0)
   usuario_ultima_actualizacion  Int

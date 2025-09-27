@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/LaborInfoView/LaborInfoView.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -16,6 +16,18 @@ export interface LaborInfoData {
   baseSalary: number;
   contractType: string;
   department: string;
+  // Campos añadidos para reportes / comprobantes
+  payrollCode?: string;
+  salaryGross?: number;
+  ccssDeduction?: number;
+  otherDeductions?: number;
+  salaryPerHour?: number;
+  ordinaryHours?: number;
+  extraHours?: number;
+  otherHours?: number;
+  vacationAmount?: number;
+  incapacityAmount?: number;
+  lactationAmount?: number;
 }
 
 interface LaborInfoViewProps {
@@ -35,6 +47,27 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     contractType: '',
     department: ''
   });
+  // Inicializar campos adicionales al montar para evitar inputs uncontrolled
+  useEffect(() => {
+    setFormData(prev => ({
+      payrollCode: prev.payrollCode ?? '',
+      position: prev.position ?? '',
+      baseSalary: prev.baseSalary ?? 0,
+      contractType: prev.contractType ?? '',
+      department: prev.department ?? '',
+      salaryGross: prev.salaryGross ?? 0,
+      ccssDeduction: prev.ccssDeduction ?? 0,
+      otherDeductions: prev.otherDeductions ?? 0,
+      salaryPerHour: prev.salaryPerHour ?? 0,
+      ordinaryHours: prev.ordinaryHours ?? 0,
+      extraHours: prev.extraHours ?? 0,
+      otherHours: prev.otherHours ?? 0,
+      vacationAmount: prev.vacationAmount ?? 0,
+      incapacityAmount: prev.incapacityAmount ?? 0,
+      lactationAmount: prev.lactationAmount ?? 0,
+    } as LaborInfoData));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [loading, setLoading] = useState(false);
 
   const contractTypes = [
@@ -57,7 +90,9 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'baseSalary' ? parseFloat(value) || 0 : value
+      [name]: ['baseSalary','salaryGross','ccssDeduction','otherDeductions','salaryPerHour','ordinaryHours','extraHours','otherHours','vacationAmount','incapacityAmount','lactationAmount'].includes(name)
+        ? (parseFloat(value) || 0)
+        : value
     }));
   };
 
@@ -151,6 +186,24 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
+              label="Código de Nómina (Cod)"
+              name="payrollCode"
+              value={formData.payrollCode}
+              onChange={handleChange}
+              sx={{
+                '& .MuiInputBase-input': { color: '#ffffff' },
+                '& .MuiInputLabel-root': { color: '#94a3b8' },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': { borderColor: '#475569' },
+                  '&:hover fieldset': { borderColor: '#64748b' },
+                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+                }
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
               label="Salario Base"
               name="baseSalary"
               type="number"
@@ -220,6 +273,150 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
                 </MenuItem>
               ))}
             </TextField>
+          </Grid>
+
+          {/* Campos de nómina / comprobantes */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Salario Bruto"
+              name="salaryGross"
+              type="number"
+              value={formData.salaryGross}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Rebajas CCSS"
+              name="ccssDeduction"
+              type="number"
+              value={formData.ccssDeduction}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Otras Rebajas"
+              name="otherDeductions"
+              type="number"
+              value={formData.otherDeductions}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Salario por Hora"
+              name="salaryPerHour"
+              type="number"
+              value={formData.salaryPerHour}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Horas Ordinarias (HN)"
+              name="ordinaryHours"
+              type="number"
+              value={formData.ordinaryHours}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Horas Extras (HE)"
+              name="extraHours"
+              type="number"
+              value={formData.extraHours}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Horas Otras"
+              name="otherHours"
+              type="number"
+              value={formData.otherHours}
+              onChange={handleChange}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Vacaciones (monto)"
+              name="vacationAmount"
+              type="number"
+              value={formData.vacationAmount}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Incapacidad (monto)"
+              name="incapacityAmount"
+              type="number"
+              value={formData.incapacityAmount}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              label="Lactancia (monto)"
+              name="lactationAmount"
+              type="number"
+              value={formData.lactationAmount}
+              onChange={handleChange}
+              InputProps={{ startAdornment: '$' }}
+            />
+          </Grid>
+
+          {/* Mostrar cálculos rápidos */}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Salario Neto (estimado)"
+              value={
+                ((formData.salaryGross || formData.baseSalary) - (formData.ccssDeduction || 0) - (formData.otherDeductions || 0)).toFixed(2)
+              }
+              InputProps={{ readOnly: true }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Salario por Hora (estimado)"
+              value={
+                ((formData.salaryPerHour && formData.salaryPerHour > 0)
+                  ? formData.salaryPerHour
+                  : (formData.salaryGross || formData.baseSalary) && (formData.salaryGross || formData.baseSalary) / (30 * 8)
+                )
+              }
+              InputProps={{ readOnly: true }}
+            />
           </Grid>
         </Grid>
 
