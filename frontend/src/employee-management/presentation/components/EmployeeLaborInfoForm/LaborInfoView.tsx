@@ -10,6 +10,7 @@ import {
   Grid
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { validateLaborInfo, LaborInfoErrors } from './validation';
 
 export interface LaborInfoData {
   position: string;
@@ -69,6 +70,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<LaborInfoErrors>({});
 
   const contractTypes = [
     { value: 'full_time', label: 'Tiempo Completo' },
@@ -108,6 +110,11 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!employee) return;
+
+    // Validar antes de enviar
+    const validation = validateLaborInfo(formData);
+    setErrors(validation);
+    if (Object.keys(validation).length > 0) return;
 
     setLoading(true);
     try {
@@ -181,6 +188,8 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.position}
               onChange={handleChange}
               required
+              error={!!errors.position}
+              helperText={errors.position}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
                 '& .MuiInputLabel-root': { color: '#94a3b8' },
@@ -200,6 +209,8 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.payrollCode}
               onChange={handleChange}
               sx={mutedFieldSx}
+              error={!!errors.payrollCode}
+              helperText={errors.payrollCode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -211,6 +222,8 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.baseSalary}
               onChange={handleChange}
               required
+              error={!!errors.baseSalary}
+              helperText={errors.baseSalary}
               InputProps={{ startAdornment: '$' }}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
@@ -232,6 +245,8 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.contractType}
               onChange={handleChange}
               required
+              error={!!errors.contractType}
+              helperText={errors.contractType}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
                 '& .MuiInputLabel-root': { color: '#94a3b8' },
@@ -258,6 +273,8 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.department}
               onChange={handleChange}
               required
+              error={!!errors.department}
+              helperText={errors.department}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
                 '& .MuiInputLabel-root': { color: '#94a3b8' },

@@ -136,9 +136,9 @@ export const useEmployeeManagement = () => {
       
       return result;
     } catch (err: any) {
-      const errorMessage = err.message || 'Error al crear la información laboral';
-      setError(errorMessage);
-      setSuccessMessage(null);
+  const errorMessage = err.message || 'Error al crear la información laboral';
+  setError(errorMessage ?? null);
+  setSuccessMessage(null);
       console.error('Error creating labor info:', err);
       throw err;
     } finally {
@@ -147,8 +147,8 @@ export const useEmployeeManagement = () => {
   };
 
   const clearMessages = () => {
-    setError(null);
-    setSuccessMessage(null);
+  setError(null);
+  setSuccessMessage(null);
   };
 
   return {
