@@ -1,6 +1,6 @@
 // src/employee-management/infrastructure/ApiEmployeeRepository.ts
 import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, Response } from '../domain/entities/Employee';
+import { Employee, CreateEmployeeData, LaborInfoData, Response } from '../domain/entities/Employee';
 import { apiService } from '../../services/api.service';
 
 export class ApiEmployeeRepository implements EmployeeRepository {
@@ -126,10 +126,13 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       id: item.id.toString(),
       name: item.name || item.nombre_completo,
       identification: item.identification || item.documento_identidad,
-      cargo: item.cargo || 'Sin definir',
+      role: item.role || 'Sin definir',
       department: item.department || 'Sin definir',
-      hireDate: new Date(item.hireDate || item.fecha_registro_at),
+      entryDate: new Date(item.entryDate),
+      birthDate: new Date(item.birthDate),
       status: item.status || (item.is_activo ? 'active' : 'inactive'),
+      baseSalary: item.baseSalary,
+      contractType: item.contractType,
       email: item.email,
       phone: item.phone || item.telefono
     }));
