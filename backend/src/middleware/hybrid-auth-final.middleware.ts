@@ -20,10 +20,10 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     console.log('⏰ Timestamp:', new Date().toISOString());
     
     // 1. Verificar que existe token Auth0 validado
-    console.log('🔍 Verificando req.auth:', !!req.auth);
-    console.log('🔍 Verificando req.user:', !!req.user);
+    console.log('🔍 Verificando req.auth:', !!(req as any).auth);
+    console.log('🔍 Verificando req.user:', !!(req as any).user);
     
-    if (!req.auth && !req.user) {
+    if (!(req as any).auth && !(req as any).user) {
       console.log('❌ No hay token Auth0 validado');
       return res.status(401).json({
         success: false,
@@ -33,7 +33,7 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     }
 
     // 2. Obtener email del token Auth0 (probamos ambas fuentes)
-    const authData = req.auth || req.user;
+    const authData = (req as any).auth || (req as any).user;
     const userSub = (authData as any)?.sub;
 
     let userEmail = (authData as any)?.email;
@@ -47,19 +47,17 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     
     // if (!userEmail) {
     //   console.log('❌ No se pudo extraer email del token Auth0');
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: 'Email no encontrado en token Auth0',
-    //     code: 'NO_EMAIL_IN_TOKEN',
-    //     token_data: authData
-    //   });
+    //   // To enforce email presence, uncomment the return below:
+    //   // return res.status(401).json({
+    //   //   success: false,
+    //   //   message: 'Email no encontrado en token Auth0',
+    //   //   code: 'NO_EMAIL_IN_TOKEN'
+    //   // });
     // }
 
     console.log(`🔍 Buscando usuario en BD por email: ${userEmail}`);
     console.log(`🔍 También buscando por sub: ${userSub}`);
     console.log('🔍 Criterios de búsqueda: userSub O userEmail + estado ACTIVO/activo');
-
-    // 3. Buscar usuario en BD local por auth0_user_id (sub) o por email
     // Intentamos usar auth0_user_id primero (rama 'Sebastian'). Si la columna no existe
     // (Prisma P2022) usamos un fallback que busca por username usando SQL crudo.
     let user: any = null;
@@ -117,7 +115,7 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       console.log('🔍 Intentando fallback: usar permisos presentes en el token Auth0 si existen');
 
       // Si el token trae permisos (claims) podemos confiar en ellos en entornos híbridos
-      const tokenPermissions = (req.auth as any)?.permissions || (req.user as any)?.permissions || [];
+      const tokenPermissions = (req as any).auth?.permissions || (req as any).user?.permissions || [];
       if (Array.isArray(tokenPermissions) && tokenPermissions.length > 0) {
         console.log('🔁 Fallback aplicado: permisos obtenidos del token:', tokenPermissions);
         // Rellenar req.auth.permissions para que los middlewares RBAC funcionen
@@ -141,7 +139,7 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
         };
 
         // Continuar: el middleware RBAC comprobará ahora req.auth.permissions
-      } else {
+        const tokenPermissionsFromAuth = ((req as any).auth as any)?.permissions || ((req as any).user as any)?.permissions || [];
         // Debug: buscar cualquier usuario que contenga auth0 para ayudar a diagnosticar
         const debugUser = await prisma.mot_usuario.findFirst({
           where: {
@@ -230,7 +228,7 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       if (Array.isArray(fallbackRows) && fallbackRows.length > 0) {
         const fallbackPerms = fallbackRows.map((r: any) => r.permiso_codigo).filter(Boolean);
         mergedPermissions = Array.from(new Set([...fallbackPerms, ...mergedPermissions]));
-        console.log('🔁 Permisos tras fallback menos restrictivo:', mergedPermissions);
+      const tokenPermissions = ((req as any).auth as any)?.permissions || ((req as any).user as any)?.permissions || [];
       }
     } catch (fbErr) {
       console.warn('⚠️ Fallback menos restrictivo falló:', fbErr);

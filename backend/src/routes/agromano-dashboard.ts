@@ -42,13 +42,13 @@ router.get('/general',
                 origin: req.headers.origin
             });
             
-            console.log('👤 Usuario Auth0 después de checkJwt:', (req.user as any)?.sub);
-            console.log('📧 Email usuario:', (req.user as any)?.email);
+            console.log('👤 Usuario Auth0 después de checkJwt:', (req as any).user?.sub);
+            console.log('📧 Email usuario:', (req as any).user?.email);
             console.log('� Estado después de hybridAuthMiddleware:');
-            console.log('   - dbUser:', (req.user as any)?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
-            console.log('   - permissions length:', ((req.user as any)?.permissions || []).length);
+            console.log('   - dbUser:', (req as any).user?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
+            console.log('   - permissions length:', ((req as any).user?.permissions || []).length);
             
-            const userPermissions = (req.user as any)?.permissions || [];
+            const userPermissions = (req as any).user?.permissions || [];
             console.log('🎭 Permisos completos del usuario:', userPermissions);
             const isAdvanced = userPermissions.includes('dashboard:view:advanced');
             
@@ -231,7 +231,7 @@ router.get('/general',
             console.log('💥 ===== ERROR EN DASHBOARD GENERAL =====');
             console.error('❌ Error obteniendo datos del dashboard:', error);
             console.error('🔍 Stack trace:', error instanceof Error ? error.stack : 'No disponible');
-            console.error('👤 Usuario en error:', (req.user as any)?.sub);
+            console.error('👤 Usuario en error:', (req as any).user?.sub);
             console.log('=======================================');
             
             res.status(500).json({

@@ -52,7 +52,7 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
 
       try {
         // 2. Obtener información del usuario de Auth0
-        const auth0User = req.user as unknown as Auth0User;
+  const auth0User = (req as any).user as unknown as Auth0User;
         const auth0UserId = auth0User?.sub;
         const userEmail = auth0User?.email;
 
@@ -101,13 +101,13 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
 
 
         // 5. Agregar información al request
-        req.auth0User = {
+        (req as any).auth0User = {
           sub: auth0UserId,
           email: userEmail,
           permissions: auth0User?.permissions || []
         };
 
-        req.localUser = {
+        (req as any).localUser = {
           usuario_id: usuario.usuario_id,
           username: usuario.username,
           rol_id: usuario.rol_id,
@@ -115,8 +115,8 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
           permisos: permisos
         };
 
-        req.userPermissions = permisos;
-        req.userRoles = [usuario.mom_rol.codigo];
+        (req as any).userPermissions = permisos;
+        (req as any).userRoles = [usuario.mom_rol.codigo];
 
         console.log(`✅ Usuario autenticado: ${userEmail} (${usuario.mom_rol.nombre})`);
         next();
@@ -144,23 +144,22 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
  */
 export const requirePermission = (permission: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.userPermissions) {
+    if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
         message: 'Permisos no cargados'
       });
     }
-
-    if (!req.userPermissions.includes(permission)) {
+    if (!(req as any).userPermissions.includes(permission)) {
       return res.status(403).json({
         success: false,
         message: `Acceso denegado. Se requiere permiso: ${permission}`,
         required_permission: permission,
-        user_permissions: req.userPermissions
+        user_permissions: (req as any).userPermissions
       });
     }
 
-    console.log(`✅ Permiso verificado: ${permission} para usuario ${req.localUser?.username}`);
+    console.log(`✅ Permiso verificado: ${permission} para usuario ${(req as any).localUser?.username}`);
     next();
   };
 };
@@ -170,15 +169,15 @@ export const requirePermission = (permission: string) => {
  */
 export const requireAnyPermission = (permissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.userPermissions) {
+    if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
         message: 'Permisos no cargados'
       });
     }
 
-    const hasPermission = permissions.some(permission => 
-      req.userPermissions!.includes(permission)
+    const hasPermission = permissions.some((permission) =>
+      (req as any).userPermissions!.includes(permission)
     );
 
     if (!hasPermission) {
@@ -186,7 +185,7 @@ export const requireAnyPermission = (permissions: string[]) => {
         success: false,
         message: 'Acceso denegado',
         required_permissions: permissions,
-        user_permissions: req.userPermissions
+        user_permissions: (req as any).userPermissions
       });
     }
 
@@ -199,27 +198,27 @@ export const requireAnyPermission = (permissions: string[]) => {
  */
 export const requireAllPermissions = (permissions: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.userPermissions) {
+    if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
         message: 'Permisos no cargados'
       });
     }
 
-    const hasAllPermissions = permissions.every(permission => 
-      req.userPermissions!.includes(permission)
+    const hasAllPermissions = permissions.every((permission) =>
+      (req as any).userPermissions!.includes(permission)
     );
 
     if (!hasAllPermissions) {
-      const missingPermissions = permissions.filter(permission => 
-        !req.userPermissions!.includes(permission)
+      const missingPermissions = permissions.filter((permission) =>
+        !(req as any).userPermissions!.includes(permission)
       );
 
       return res.status(403).json({
         success: false,
         message: 'Acceso denegado',
         missing_permissions: missingPermissions,
-        user_permissions: req.userPermissions
+        user_permissions: (req as any).userPermissions
       });
     }
 
@@ -232,12 +231,12 @@ export const requireAllPermissions = (permissions: string[]) => {
  */
 export const requireRole = (role: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.userRoles || !req.userRoles.includes(role)) {
+    if (!(req as any).userRoles || !(req as any).userRoles.includes(role)) {
       return res.status(403).json({
         success: false,
         message: `Acceso denegado. Se requiere rol: ${role}`,
         required_role: role,
-        user_roles: req.userRoles
+        user_roles: (req as any).userRoles
       });
     }
 

@@ -12,7 +12,7 @@ router.get('/test',
     checkJwt,
     async (req, res) => {
         try {
-            console.log('🧪 Dashboard simple - usuario autenticado:', (req.user as any)?.sub);
+            console.log('🧪 Dashboard simple - usuario autenticado:', (req as any).user?.sub);
             console.log('🟢 Sin conexión a BD - usando datos mock para producción');
             
             res.json({

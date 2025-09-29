@@ -1,7 +1,22 @@
 {
   "compilerOptions": {
-    // ...existing options...
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "esModuleInterop": true
-  }
+    "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types", "./backend/src/types"]
+  },
+  "include": [
+    "backend/src/**/*",
+    "backend/backup_antes_limpieza/**/*",
+    "frontend/src/**/*",
+    "test/**/*",
+    "backend/src/types/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

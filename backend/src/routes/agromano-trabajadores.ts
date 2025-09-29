@@ -343,7 +343,7 @@ router.put('/:id',
     async (req, res) => {
         try {
             const { id } = req.params;
-            const userPermissions = (req.user as any)?.permissions || [];
+            const userPermissions = (req as any).user?.permissions || [];
             const canUpdateAll = userPermissions.includes('trabajadores:update:all');
             
             // Validar datos requeridos
@@ -404,7 +404,7 @@ router.put('/:id',
                 incapacidad_monto: req.body.incapacidad_monto ? parseFloat(String(req.body.incapacidad_monto)) : (existingInfo ? existingInfo.incapacidad_monto : null),
                 lactancia_monto: req.body.lactancia_monto ? parseFloat(String(req.body.lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
                 fecha_ultima_actualizacion_at: new Date(),
-                usuario_ultima_actualizacion: (req.user as any)?.sub || 1,
+                usuario_ultima_actualizacion: (req as any).user?.sub || 1,
                 updated_at: new Date()
             };
 
@@ -457,7 +457,7 @@ router.delete('/:id',
             data: {
                 action: 'delete',
                 trabajadorId: id,
-                permissions: (req.user as any)?.permissions
+                permissions: (req as any).user?.permissions
             }
         });
     }
@@ -480,7 +480,7 @@ router.get('/export',
                 action: 'export',
                 format: req.query.format || 'excel',
                 filename: `trabajadores_${new Date().toISOString().split('T')[0]}.xlsx`,
-                permissions: (req.user as any)?.permissions
+                permissions: (req as any).user?.permissions
             }
         });
     }
@@ -504,7 +504,7 @@ router.post('/import',
                 recordsProcessed: 25,
                 recordsCreated: 20,
                 recordsSkipped: 5,
-                permissions: (req.user as any)?.permissions
+                permissions: (req as any).user?.permissions
             }
         });
     }
@@ -615,7 +615,7 @@ router.post('/:id/info-laboral',
     async (req, res) => {
         try {
             const { id } = req.params;
-            const userId = (req.user as any)?.id;            
+            const userId = (req as any).user?.id;            
             const { cargo, salario_base, tipo_contrato, fecha_ingreso, departamento } = req.body;
 
             const existingInfo = await prisma.mot_info_laboral.findFirst({
