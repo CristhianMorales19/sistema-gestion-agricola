@@ -459,6 +459,7 @@ model mot_info_laboral {
   info_laboral_id               Int            @id @default(autoincrement())
   trabajador_id                 Int
   cargo                         String         @db.VarChar(100)
+  departamento                  String         @db.VarChar(100)
   fecha_ingreso_at              DateTime       @db.DateTime(0)
   tipo_contrato                 String         @db.VarChar(50)
   salario_base                  Decimal        @db.Decimal(13, 2)

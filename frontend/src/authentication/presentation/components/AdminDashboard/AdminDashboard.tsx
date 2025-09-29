@@ -10,7 +10,7 @@ import { StatsCards } from '../../../../dashboard/presentation/components/StatsC
 import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
-import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView';
+import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -158,7 +158,7 @@ export const AdminDashboard: React.FC = () => {
       onNavigationChange={handleNavigationChange}
       currentView={currentView}
     >
-      <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
+      <Box sx={{ flex: 1, p: 5, backgroundColor: '#0f172a' }}>
         {renderContent()}
       </Box>
     </DashboardLayout>

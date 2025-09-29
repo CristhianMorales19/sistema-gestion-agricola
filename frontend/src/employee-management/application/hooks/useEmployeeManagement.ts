@@ -1,7 +1,7 @@
 // src/employee-management/application/hooks/useEmployeeManagement.ts
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { EmployeeService } from '../services/EmployeeService';
-import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../../domain/entities/Employee';
+import { Employee, CreateEmployeeData, LaborInfoData } from '../../domain/entities/Employee';
 
 export const useEmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -38,7 +38,7 @@ export const useEmployeeManagement = () => {
   const createEmployee = async (data: CreateEmployeeData): Promise<Employee> => {
     try {
         const newEmployee = await employeeService.createEmployee(data);
-        setEmployees(prev => [...prev, newEmployee]);
+        await loadEmployees();
         setError(null);
         setSuccessMessage('Empleado creado exitosamente');
         return newEmployee;
@@ -51,15 +51,24 @@ export const useEmployeeManagement = () => {
     }
   };
 
-  const updateEmployee = async (id: string, data: UpdateEmployeeData): Promise<Employee> => {
+  const updateEmployee = async (id: string, data: Partial<Employee>): Promise<boolean> => {
     try {
-      const updatedEmployee = await employeeService.updateEmployee(id, data);
-      setEmployees(prev => prev.map(emp => emp.id === id ? updatedEmployee : emp));
-      return updatedEmployee;
+      const result = await employeeService.updateEmployee(id, data);
+      if (result.success) {
+        setSuccessMessage(result.message);
+        console.log('Mensaje del backend:', result.message);
+        setError(null);
+        await loadEmployees();
+        return true;
+      } else {
+        setError(result.message);
+        setSuccessMessage(null);
+        return false;
+      }
     } catch (err) {
       setError('Error al actualizar el empleado');
       console.error(err);
-      throw err;
+      return false;
     }
   };
 
@@ -67,12 +76,14 @@ export const useEmployeeManagement = () => {
     try {
       await employeeService.deleteEmployee(id);
       setEmployees(prev => prev.filter(emp => emp.id !== id));
-    } catch (err) {
-      setError('Error al eliminar el empleado');
-      console.error(err);
-      throw err;
+      setSuccessMessage("Empleado eliminado correctamente");
+    } catch (err: any) {
+      const backendMessage = err.response?.data?.message;
+      setError(backendMessage || 'Error al eliminar el empleadooo');
+      console.error('Error al eliminar empleado:', err);
     }
   };
+
 
   const searchEmployees = async (query: string): Promise<Employee[]> => {
     setLoading(true);
@@ -91,7 +102,7 @@ export const useEmployeeManagement = () => {
     }
   };
 
-  const createLaborInfo = async (laborInfo: LaborInfoData): Promise<CreateLaborInfoResponse> => {
+  const createLaborInfo = async (laborInfo: LaborInfoData): Promise<boolean> => {
     try {
       setLoading(true);
       const result = await employeeService.createLaborInfo(laborInfo);
@@ -101,18 +112,18 @@ export const useEmployeeManagement = () => {
         console.log('Mensaje del backend:', result.message);
         setError(null);
         await loadEmployees();
+        return true;
       } else {
         setError(result.message);
         setSuccessMessage(null);
+        return false;
       }
-      
-      return result;
     } catch (err: any) {
       const errorMessage = err.message || 'Error al crear la información laboral';
       setError(errorMessage);
       setSuccessMessage(null);
       console.error('Error creating labor info:', err);
-      throw err;
+      return false;
     } finally {
       setLoading(false);
     }

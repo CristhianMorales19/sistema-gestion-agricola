@@ -22,7 +22,7 @@ interface EmployeeTableProps {
   employees: Employee[];
   selectedEmployeeId?: string;
   onEdit: (employee: Employee) => void;
-  onDelete: (id: string) => void;
+  onDelete: (employee: Employee) => void;
   onSelect: (employee: Employee) => void;
 }
 
@@ -46,8 +46,15 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   };
 
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('es-ES');
+    const utcDate = new Date(date);
+    return utcDate.toLocaleDateString('es-ES', { 
+      timeZone: 'UTC',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    });
   };
+
 
   const handleRowClick = (employee: Employee) => {
     onSelect(employee);
@@ -84,8 +91,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 {employee.name}
               </TableCell>
               <TableCell sx={{ color: '#e2e8f0' }}>{employee.identification}</TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{employee.cargo}</TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.hireDate)}</TableCell>
+              <TableCell sx={{ color: '#e2e8f0' }}>{employee.role}</TableCell>
+              <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.entryDate)}</TableCell>
               <TableCell>
                 <Chip 
                   label={employee.status === 'activo' ? 'Activo' : 
@@ -110,7 +117,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     size="small" 
                     onClick={(e) => {
                       e.stopPropagation(); // Prevenir que el click en el botón active la selección
-                      onDelete(employee.id);
+                      onDelete(employee);
                     }}
                     sx={{ color: '#ef4444' }}
                   >

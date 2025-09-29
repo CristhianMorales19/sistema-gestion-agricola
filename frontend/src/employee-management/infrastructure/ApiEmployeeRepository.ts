@@ -1,6 +1,6 @@
 // src/employee-management/infrastructure/ApiEmployeeRepository.ts
 import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../domain/entities/Employee';
+import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, Response } from '../domain/entities/Employee';
 import { apiService } from '../../services/api.service';
 
 export class ApiEmployeeRepository implements EmployeeRepository {
@@ -15,15 +15,16 @@ export class ApiEmployeeRepository implements EmployeeRepository {
     return trabajadores.map((item: any) => ({
       id: item.id || item.trabajador_id?.toString(),
       name: item.name || item.nombre_completo,
-      identification: item.identification || item.documento_identidad,
-      cargo: item.cargo || 'Sin definir',
+      identification: item.identification,
+      role: item.role || 'Sin definir',
       department: item.department || 'Sin definir',
-      hireDate: new Date(item.hireDate || item.fecha_registro_at),
-      status: item.status || (item.is_activo ? 'active' : 'inactive'),
+      entryDate: item.entryDate,
+      status: (item.status ? 'activo' : 'inactivo'),
       email: item.email,
-      phone: item.telefono,
-      createdAt: new Date(item.createdAt || item.created_at),
-      updatedAt: new Date(item.updatedAt || item.updated_at),
+      phone: item.phone,
+      contractType: item.contractType,
+      baseSalary: item.baseSalary,
+      birthDate: item.birthDate
     }));
   }
 
@@ -42,9 +43,8 @@ export class ApiEmployeeRepository implements EmployeeRepository {
 
     const cleanedData = {
       ...data,
-      fecha_nacimiento: new Date(data.fecha_nacimiento).toISOString(),
-      fecha_registro_at: new Date(data.fecha_registro_at).toISOString(),
-      telefono: data.telefono?.trim(),
+      birthDate: data.birthDate.toString(),
+      phone: data.phone?.trim(),
       email: data.email?.trim(),
     };
 
@@ -62,11 +62,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       
       const convertedData = {
         ...employeeData,
-        fecha_nacimiento: new Date(employeeData.fecha_nacimiento),
-        fecha_registro_at: new Date(employeeData.fecha_registro_at),
-        created_at: new Date(employeeData.created_at),
-        updated_at: employeeData.updated_at ? new Date(employeeData.updated_at) : undefined,
-        deleted_at: employeeData.deleted_at ? new Date(employeeData.deleted_at) : undefined,
+        birthDate: new Date(employeeData.birthDate).toLocaleDateString('es-ES')
       };
       
       return convertedData;
@@ -86,18 +82,39 @@ export class ApiEmployeeRepository implements EmployeeRepository {
     }
   }
 
-  async updateEmployee(id: string, data: UpdateEmployeeData): Promise<Employee> {
-    const response = await apiService.put(`/empleados/${id}`, data);
-    return {
-      ...response.data,
-      hireDate: new Date(response.data.hireDate),
-      createdAt: new Date(response.data.createdAt),
-      updatedAt: new Date(response.data.updatedAt),
-    };
+  async updateEmployee(id: string, data: Partial<Employee>): Promise<Response> {
+    console.log('Enviando datos al backend:', data);
+
+    try {
+      const response = await apiService.put(`/trabajadores/${id}`, data);
+
+      console.log('Respuesta del backend 1:', response);
+
+      return {
+        success: true,
+        message: response.message ?? '',
+      };
+
+    } catch(error: any) {
+      console.error('Respuesta del backend 1', error);
+
+      if (error.response?.data) {
+        return {
+          success: false,
+          message: error.response.data.message
+        };
+      }
+      
+      return {
+        success: false,
+        message: 'Error de conexión al servidor'
+      };
+    }
+
   }
 
   async deleteEmployee(id: string): Promise<void> {
-    await apiService.delete(`/empleados/${id}`);
+    await apiService.delete(`/trabajadores/${id}`);
   }
 
   async searchEmployees(query: string): Promise<Employee[]> {
@@ -109,28 +126,26 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       id: item.id.toString(),
       name: item.name || item.nombre_completo,
       identification: item.identification || item.documento_identidad,
-      position: item.position || 'Sin definir',
+      cargo: item.cargo || 'Sin definir',
       department: item.department || 'Sin definir',
       hireDate: new Date(item.hireDate || item.fecha_registro_at),
       status: item.status || (item.is_activo ? 'active' : 'inactive'),
       email: item.email,
-      phone: item.phone || item.telefono,
-      createdAt: new Date(item.createdAt || item.created_at),
-      updatedAt: new Date(item.updatedAt || item.updated_at),
+      phone: item.phone || item.telefono
     }));
   }
 
   // Método para crear información laboral
-  async createLaborInfo(laborInfo: LaborInfoData): Promise<CreateLaborInfoResponse> {
+  async createLaborInfo(laborInfo: LaborInfoData): Promise<Response> {
     try {
       console.log('Enviando datos al backend:', laborInfo);
 
-      const response = await apiService.post(`/trabajadores/${laborInfo.trabajador_id}/info-laboral`, {
-        cargo: laborInfo.cargo,
-        departamento: laborInfo.departamento,
-        salario_base: laborInfo.salario_base,
-        tipo_contrato: laborInfo.tipo_contrato,
-        fecha_ingreso: laborInfo.fecha_ingreso
+      const response = await apiService.post(`/trabajadores/${laborInfo.employeeId}/info-laboral`, {
+        role: laborInfo.role,
+        department: laborInfo.department,
+        baseSalary: laborInfo.baseSalary,
+        contractType: laborInfo.contractType,
+        entryDate: laborInfo.entryDate
       });
 
       console.log('Respuesta del backend:', response);
@@ -138,7 +153,6 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       return {
         success: true,
         message: response.message ?? '',
-        data: response.data
       };
     } catch (error: any) {
       console.error('Error creating labor infoooooo:', error);

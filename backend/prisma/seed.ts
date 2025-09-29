@@ -163,6 +163,7 @@ async function main() {
       data: {
         trabajador_id: trabajador.trabajador_id,
         cargo: 'Trabajador Agrícola',
+        departamento: '',
         fecha_ingreso_at: new Date(),
         tipo_contrato: 'Indefinido',
         salario_base: 1200.00,

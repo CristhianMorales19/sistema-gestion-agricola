@@ -1,7 +1,7 @@
 // src/employee-management/application/services/EmployeeService.ts
 import { EmployeeUseCases } from '../../domain/use-cases/EmployeeUseCases';
 import { ApiEmployeeRepository } from '../../infrastructure/ApiEmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../../domain/entities/Employee';
+import { Employee, CreateEmployeeData, LaborInfoData, Response } from '../../domain/entities/Employee';
 
 export class EmployeeService {
   private employeeUseCases: EmployeeUseCases;
@@ -23,7 +23,7 @@ export class EmployeeService {
     return this.employeeUseCases.createEmployee(data);
   }
 
-  async updateEmployee(id: string, data: UpdateEmployeeData): Promise<Employee> {
+  async updateEmployee(id: string, data: Partial<Employee>): Promise<Response> {
     return this.employeeUseCases.updateEmployee(id, data);
   }
 
@@ -32,13 +32,10 @@ export class EmployeeService {
   }
 
   async searchEmployees(query: string): Promise<Employee[]> {
-    if (!query || query.trim().length < 2) {
-      throw new Error('La búsqueda debe tener al menos 2 caracteres');
-    }
     return this.employeeUseCases.searchEmployees(query.trim());
   }
 
-  async createLaborInfo(data: LaborInfoData): Promise<CreateLaborInfoResponse> {
+  async createLaborInfo(data: LaborInfoData): Promise<Response> {
     return this.employeeUseCases.createLaborInfo(data);
   }
 }
