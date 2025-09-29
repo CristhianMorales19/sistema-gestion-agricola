@@ -125,12 +125,12 @@ export const useEmployeeManagement = () => {
       const result = await employeeService.createLaborInfo(laborInfo);
       
       if (result.success) {
-        setSuccessMessage(result.message);
+        setSuccessMessage(result.message ?? null);
         console.log('Mensaje del backend:', result.message);
         setError(null);
         await loadEmployees();
       } else {
-        setError(result.message);
+        setError(result.message ?? null);
         setSuccessMessage(null);
       }
       

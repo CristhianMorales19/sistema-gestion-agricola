@@ -4,6 +4,7 @@ export interface Employee {
   name: string;
   identification: string;
   position: string;
+  cargo?: string;
   hireDate: Date;
   status: 'activo' | 'inactivo';
   email?: string;
@@ -72,4 +73,33 @@ export interface UpdateEmployeeData {
   otherHours?: number;
   vacationAmount?: number;
   incapacityAmount?: number;
+}
+
+export interface LaborInfoData {
+  // Campos usados por el formulario de información laboral
+  trabajador_id?: string | number;
+  cargo?: string;
+  departamento?: string;
+  salario_base?: number;
+  tipo_contrato?: string;
+  fecha_ingreso?: string | Date;
+
+  codigo_nomina?: string;
+  salario_bruto?: number;
+  rebajas_ccss?: number;
+  rebajas?: number;
+  salario_por_hora?: number;
+  horas_ordinarias?: number;
+  horas_extras?: number;
+  horas_otras?: number;
+  vacaciones_monto?: number;
+  incapacidad_monto?: number;
+  lactancia_monto?: number;
+}
+
+export interface CreateLaborInfoResponse {
+  success: boolean;
+  laborInfo?: LaborInfoData;
+  message?: string;
+  data?: any;
 }
