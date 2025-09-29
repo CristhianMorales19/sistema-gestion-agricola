@@ -87,7 +87,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
   }
 
   async updateEmployee(id: string, data: UpdateEmployeeData): Promise<Employee> {
-    const response = await apiService.put(`/empleados/${id}`, data);
+    const response = await apiService.put(`/trabajadores/${id}`, data);
     return {
       ...response.data,
       hireDate: new Date(response.data.hireDate),

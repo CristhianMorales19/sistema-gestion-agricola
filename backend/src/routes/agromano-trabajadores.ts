@@ -190,6 +190,18 @@ router.post('/',
                 telefono,
                 email,
                 cargo,
+                // Campos laborales opcionales
+                codigo_nomina,
+                salario_bruto,
+                rebajas_ccss,
+                otras_rebajas,
+                salario_por_hora,
+                horas_ordinarias,
+                horas_extras,
+                horas_otras,
+                vacaciones_monto,
+                incapacidad_monto,
+                lactancia_monto,
                 created_by
             } = req.body;
 
@@ -261,19 +273,32 @@ router.post('/',
             });
 
             // Si se proporcionó un cargo, crear registro en la tabla de información laboral
-            // if (cargo) {
-            //     await prisma.mot_info_laboral.create({
-            //         data: {
-            //             trabajador_id: newEmployee.trabajador_id,
-            //             cargo: cargo.trim(),
-            //             fecha_inicio: new Date(fecha_registro_at),
-            //             salario: 0, // Valor por defecto, se actualizará después
-            //             created_at: new Date(),
-            //             created_by: created_by,
-            //             is_activo: true
-            //         }
-            //     });
-            // }
+            if (cargo || salario_bruto || codigo_nomina) {
+                await prisma.mot_info_laboral.create({
+                    data: {
+                        trabajador_id: newEmployee.trabajador_id,
+                        cargo: cargo ? cargo.trim() : 'Sin definir',
+                        fecha_ingreso_at: new Date(fecha_registro_at),
+                        tipo_contrato: req.body.tipo_contrato || 'no_definido',
+                        salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0,
+                        codigo_nomina: codigo_nomina ? String(codigo_nomina) : null,
+                        salario_bruto: salario_bruto ? parseFloat(String(salario_bruto)) : null,
+                        rebajas_ccss: rebajas_ccss ? parseFloat(String(rebajas_ccss)) : null,
+                        otras_rebajas: otras_rebajas ? parseFloat(String(otras_rebajas)) : null,
+                        salario_por_hora: salario_por_hora ? parseFloat(String(salario_por_hora)) : null,
+                        horas_ordinarias: horas_ordinarias ? parseFloat(String(horas_ordinarias)) : null,
+                        horas_extras: horas_extras ? parseFloat(String(horas_extras)) : null,
+                        horas_otras: horas_otras ? parseFloat(String(horas_otras)) : null,
+                        vacaciones_monto: vacaciones_monto ? parseFloat(String(vacaciones_monto)) : null,
+                        incapacidad_monto: incapacidad_monto ? parseFloat(String(incapacidad_monto)) : null,
+                        lactancia_monto: lactancia_monto ? parseFloat(String(lactancia_monto)) : null,
+                        fecha_ultima_actualizacion_at: new Date(),
+                        usuario_ultima_actualizacion: created_by,
+                        created_at: new Date(),
+                        created_by: created_by,
+                    }
+                });
+            }
 
             res.status(201).json({
                 success: true,
@@ -323,6 +348,20 @@ router.put('/:id',
             
             // Validar datos requeridos
             const { cargo, salario_base, tipo_contrato } = req.body;
+            // Campos adicionales que pueden llegar por el formulario laboral
+            const {
+                codigo_nomina,
+                salario_bruto,
+                rebajas_ccss,
+                otras_rebajas,
+                salario_por_hora,
+                horas_ordinarias,
+                horas_extras,
+                horas_otras,
+                vacaciones_monto,
+                incapacidad_monto,
+                lactancia_monto
+            } = req.body;
             
             if (!cargo || !salario_base || !tipo_contrato) {
                 return res.status(400).json({
@@ -339,9 +378,45 @@ router.put('/:id',
                 });
             }
             
-            // Aquí iría la lógica para actualizar en la base de datos
-            // Por ahora simulamos una actualización exitosa
-            
+            // Actualizar o crear registro en mot_info_laboral
+            const trabajadorId = parseInt(id, 10);
+            // Buscar info laboral más reciente
+            const existingInfo = await prisma.mot_info_laboral.findFirst({
+                where: { trabajador_id: trabajadorId },
+                orderBy: { info_laboral_id: 'desc' }
+            });
+
+            const laboralData: any = {
+                trabajador_id: trabajadorId,
+                cargo: cargo ? String(cargo) : (existingInfo ? existingInfo.cargo : 'Sin definir'),
+                fecha_ingreso_at: req.body.fecha_ingreso_at ? new Date(req.body.fecha_ingreso_at) : (existingInfo ? existingInfo.fecha_ingreso_at : new Date()),
+                tipo_contrato: tipo_contrato ? String(tipo_contrato) : (existingInfo ? existingInfo.tipo_contrato : 'no_definido'),
+                salario_base: salario_base ? parseFloat(String(salario_base)) : (existingInfo ? existingInfo.salario_base : 0),
+                codigo_nomina: req.body.codigo_nomina ? String(req.body.codigo_nomina) : (existingInfo ? existingInfo.codigo_nomina : null),
+                salario_bruto: req.body.salario_bruto ? parseFloat(String(req.body.salario_bruto)) : (existingInfo ? existingInfo.salario_bruto : null),
+                rebajas_ccss: req.body.rebajas_ccss ? parseFloat(String(req.body.rebajas_ccss)) : (existingInfo ? existingInfo.rebajas_ccss : null),
+                otras_rebajas: req.body.otras_rebajas ? parseFloat(String(req.body.otras_rebajas)) : (existingInfo ? existingInfo.otras_rebajas : null),
+                salario_por_hora: req.body.salario_por_hora ? parseFloat(String(req.body.salario_por_hora)) : (existingInfo ? existingInfo.salario_por_hora : null),
+                horas_ordinarias: req.body.horas_ordinarias ? parseFloat(String(req.body.horas_ordinarias)) : (existingInfo ? existingInfo.horas_ordinarias : null),
+                horas_extras: req.body.horas_extras ? parseFloat(String(req.body.horas_extras)) : (existingInfo ? existingInfo.horas_extras : null),
+                horas_otras: req.body.horas_otras ? parseFloat(String(req.body.horas_otras)) : (existingInfo ? existingInfo.horas_otras : null),
+                vacaciones_monto: req.body.vacaciones_monto ? parseFloat(String(req.body.vacaciones_monto)) : (existingInfo ? existingInfo.vacaciones_monto : null),
+                incapacidad_monto: req.body.incapacidad_monto ? parseFloat(String(req.body.incapacidad_monto)) : (existingInfo ? existingInfo.incapacidad_monto : null),
+                lactancia_monto: req.body.lactancia_monto ? parseFloat(String(req.body.lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
+                fecha_ultima_actualizacion_at: new Date(),
+                usuario_ultima_actualizacion: (req.user as any)?.sub || 1,
+                updated_at: new Date()
+            };
+
+            if (existingInfo) {
+                await prisma.mot_info_laboral.update({
+                    where: { info_laboral_id: existingInfo.info_laboral_id },
+                    data: laboralData
+                });
+            } else {
+                await prisma.mot_info_laboral.create({ data: laboralData });
+            }
+
             res.json({
                 success: true,
                 message: `Información laboral del trabajador ${id} actualizada exitosamente`,
@@ -349,7 +424,7 @@ router.put('/:id',
                     action: 'update',
                     trabajadorId: id,
                     scope: canUpdateAll ? 'all' : 'own',
-                    data: req.body,
+                    data: laboralData,
                     permissions: userPermissions
                 }
             });

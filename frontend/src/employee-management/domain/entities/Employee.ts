@@ -9,7 +9,22 @@ export interface Employee {
   email?: string;
   phone?: string;
   salary?: number;
-  cargo: string;
+  // Campos adicionales para reportes / comprobantes
+  payrollCode?: string; // Cod (código interno de nómina)
+  salaryGross?: number; // Salario bruto
+  ccssDeduction?: number; // Rebajas CCSS
+  otherDeductions?: number; // Otras rebajas
+  salaryNet?: number; // Salario neto
+  salaryPerHour?: number; // Salario por hora
+  ordinaryHours?: number; // HN
+  extraHours?: number; // HE
+  otherHours?: number; // Horas otras
+  vacationAmount?: number; // Vacaciones
+  incapacityAmount?: number; // Incapacidad
+  lactationAmount?: number; // Lactancia
+  area?: string;
+  salaryAverage?: number; // Salario promedio (para cálculo de vacaciones/aguinaldo)
+  monthsWorked?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +38,18 @@ export interface CreateEmployeeData {
   fecha_registro_at: string;
   created_by: number;
   cargo?: string;
+  // Campos opcionales que pueden llegara al crear desde el formulario laboral
+  codigo_nomina?: string;
+  salario_bruto?: number;
+  rebajas_ccss?: number;
+  rebajas?: number;
+  salario_por_hora?: number;
+  horas_ordinarias?: number;
+  horas_extras?: number;
+  horas_otras?: number;
+  vacaciones_monto?: number;
+  incapacidad_monto?: number;
+  lactancia_monto?: number;
 }
 
 export interface UpdateEmployeeData {
@@ -33,29 +60,16 @@ export interface UpdateEmployeeData {
   email?: string;
   phone?: string;
   salary?: number;
-}
-
-// Nueva interfaz para información laboral
-export interface LaborInfoData {
-  trabajador_id: number;
-  cargo: string;
-  departamento: String,
-  salario_base: number;
-  tipo_contrato: string;
-  fecha_ingreso: string;
-  usuario_ultima_actualizacion: number;
-}
-
-export interface CreateLaborInfoResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    info_laboral_id: number;
-    trabajador_id: number;
-    cargo: string;
-    salario_base: number;
-    departamento: string
-    tipo_contrato: string;
-    fecha_ingreso: string;
-  };
+  // Actualizaciones relacionadas con nómina
+  payrollCode?: string;
+  salaryGross?: number;
+  ccssDeduction?: number;
+  otherDeductions?: number;
+  salaryNet?: number;
+  salaryPerHour?: number;
+  ordinaryHours?: number;
+  extraHours?: number;
+  otherHours?: number;
+  vacationAmount?: number;
+  incapacityAmount?: number;
 }

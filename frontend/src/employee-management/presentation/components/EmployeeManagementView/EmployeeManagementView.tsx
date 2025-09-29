@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -7,7 +7,6 @@ import {
   TextField,
   Paper,
   InputAdornment,
-  Alert,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -28,17 +27,11 @@ interface SelectedEmployee {
 }
 
 export const EmployeeManagementView: React.FC = () => {
-  const { employees, loading, error, successMessage, deleteEmployee, searchEmployees, refreshEmployees, createEmployee, createLaborInfo, clearMessages } = useEmployeeManagement();
+  const { employees, loading, error, deleteEmployee, searchEmployees, refreshEmployees, createEmployee } = useEmployeeManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [currentView, setCurrentView] = useState<EmployeeView>('list');
   const [selectedEmployee, setSelectedEmployee] = useState<SelectedEmployee | null>(null);
-
-  useEffect(() => {
-    if (currentView === 'list') {
-      clearMessages();
-    }
-  }, [currentView, clearMessages]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -84,11 +77,7 @@ export const EmployeeManagementView: React.FC = () => {
   const handleCreateEmployee = async (data: NewEmployeeFormData) => {
     try {
       await createEmployee(data);
-      setTimeout(() => {
-        handleBackToList();
-        clearMessages();
-      }, 3000);
-      
+      await refreshEmployees();
     } catch (err) {
       console.error('Error al crear empleado:', err);
       throw err;
@@ -119,21 +108,14 @@ export const EmployeeManagementView: React.FC = () => {
     setSelectedEmployee({ id: employee.id, name: employee.name });
   };
 
+  const { updateEmployeeLaborInfo } = useEmployeeManagement();
+
   const handleSaveLaborInfo = async (laborData: any) => {
+    if (!selectedEmployee) throw new Error('No hay empleado seleccionado');
     try {
-      const result = await createLaborInfo(laborData);
-      if (result.success) {
-        setTimeout(() => {
-          setCurrentView('list');
-          setSelectedEmployee(null);
-          clearMessages();
-        }, 3000);
-      } else {
-        setTimeout(() => {
-          clearMessages();
-        }, 3000);
-      }
-      return result;
+      await updateEmployeeLaborInfo(selectedEmployee.id, laborData);
+      await refreshEmployees();
+      await handleBackToList();
     } catch (err) {
       console.error('Error al guardar info laboral:', err);
       throw err;
@@ -157,7 +139,6 @@ export const EmployeeManagementView: React.FC = () => {
             employee={selectedEmployee}
             onCancel={handleBackToList}
             onSave={handleSaveLaborInfo}
-            loading={loading}
           />
         );
 
@@ -293,23 +274,6 @@ export const EmployeeManagementView: React.FC = () => {
           </Box>
         )}
       </Box>
-
-      {/* Mensajes de éxito/error */}
-      {error && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <Alert severity="error" sx={{ width: "auto", maxWidth: "90%", textAlign: 'center', fontWeight: 'bold', borderRadius: 3, color: '#d13d3dff', }}>
-            {error}
-          </Alert>
-        </Box>
-      )}
-      
-      {successMessage && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <Alert severity="success" sx={{ width: "auto", maxWidth: "90%", textAlign: 'center', fontWeight: 'bold', borderRadius: 3, color: '#36b441ff', }}>
-            {successMessage}
-          </Alert>
-        </Box>
-      )}
 
       {/* Contenido dinámico */}
       {renderContent()}
