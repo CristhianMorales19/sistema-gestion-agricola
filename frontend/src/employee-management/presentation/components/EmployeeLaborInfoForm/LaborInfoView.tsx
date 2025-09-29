@@ -86,6 +86,15 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     { value: 'sales', label: 'Ventas' }
   ];
 
+  // Estilo atenuado (igual al campo ID) para campos de información laboral
+  const mutedFieldSx = {
+    '& .MuiInputBase-input': { color: '#94a3b8' },
+    '& .MuiInputLabel-root': { color: '#94a3b8' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: '#475569' }
+    }
+  } as const;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -190,15 +199,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               name="payrollCode"
               value={formData.payrollCode}
               onChange={handleChange}
-              sx={{
-                '& .MuiInputBase-input': { color: '#ffffff' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' },
-                  '&:hover fieldset': { borderColor: '#64748b' },
-                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                }
-              }}
+              sx={mutedFieldSx}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -285,6 +286,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.salaryGross}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -297,6 +299,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.ccssDeduction}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -309,6 +312,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.otherDeductions}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -321,6 +325,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.salaryPerHour}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -332,6 +337,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               type="number"
               value={formData.ordinaryHours}
               onChange={handleChange}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -343,6 +349,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               type="number"
               value={formData.extraHours}
               onChange={handleChange}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -354,6 +361,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               type="number"
               value={formData.otherHours}
               onChange={handleChange}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -366,6 +374,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.vacationAmount}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -378,6 +387,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.incapacityAmount}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -390,6 +400,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.lactationAmount}
               onChange={handleChange}
               InputProps={{ startAdornment: '$' }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -402,6 +413,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
                 ((formData.salaryGross || formData.baseSalary) - (formData.ccssDeduction || 0) - (formData.otherDeductions || 0)).toFixed(2)
               }
               InputProps={{ readOnly: true }}
+              sx={mutedFieldSx}
             />
           </Grid>
 
@@ -416,6 +428,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
                 )
               }
               InputProps={{ readOnly: true }}
+              sx={mutedFieldSx}
             />
           </Grid>
         </Grid>
