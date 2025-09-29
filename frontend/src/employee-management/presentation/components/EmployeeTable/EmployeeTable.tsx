@@ -84,7 +84,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 {employee.name}
               </TableCell>
               <TableCell sx={{ color: '#e2e8f0' }}>{employee.identification}</TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{employee.position}</TableCell>
+              <TableCell sx={{ color: '#e2e8f0' }}>{employee.cargo}</TableCell>
               <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.hireDate)}</TableCell>
               <TableCell>
                 <Chip 

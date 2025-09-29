@@ -1,24 +1,21 @@
 // src/employee-management/application/hooks/useEmployeeManagement.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { EmployeeService } from '../services/EmployeeService';
-import { Employee, CreateEmployeeData, UpdateEmployeeData } from '../../domain/entities/Employee';
+import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../../domain/entities/Employee';
 
 export const useEmployeeManagement = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const employeeService = new EmployeeService();
+  const employeeService = useMemo(() => new EmployeeService(), []);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadEmployees();
-  }, []);
-
-  const loadEmployees = async () => {
+  const loadEmployees = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
       const data = await employeeService.getAllEmployees();
       setEmployees(data);
-      setError(null);
     } catch (err: any) {
       if (err.response?.status === 404) {
         setError('Endpoint no encontrado. Verifica la configuración del servidor.');
@@ -31,17 +28,24 @@ export const useEmployeeManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [employeeService]);
+
+  useEffect(() => {
+    loadEmployees();
+  }, [loadEmployees]);
+
 
   const createEmployee = async (data: CreateEmployeeData): Promise<Employee> => {
     try {
         const newEmployee = await employeeService.createEmployee(data);
         setEmployees(prev => [...prev, newEmployee]);
         setError(null);
+        setSuccessMessage('Empleado creado exitosamente');
         return newEmployee;
     } catch (err: any) {
         const errorMessage = err.message || 'Error al crear el empleado';
         setError(errorMessage);
+        setSuccessMessage(null);
         console.error('Error creating employee:', err);
         throw err;
     }
@@ -115,16 +119,51 @@ export const useEmployeeManagement = () => {
     }
   };
 
+  const createLaborInfo = async (laborInfo: LaborInfoData): Promise<CreateLaborInfoResponse> => {
+    try {
+      setLoading(true);
+      const result = await employeeService.createLaborInfo(laborInfo);
+      
+      if (result.success) {
+        setSuccessMessage(result.message);
+        console.log('Mensaje del backend:', result.message);
+        setError(null);
+        await loadEmployees();
+      } else {
+        setError(result.message);
+        setSuccessMessage(null);
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Error al crear la información laboral';
+      setError(errorMessage);
+      setSuccessMessage(null);
+      console.error('Error creating labor info:', err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearMessages = () => {
+    setError(null);
+    setSuccessMessage(null);
+  };
+
   return {
     employees,
     loading,
     error,
+    successMessage,
     createEmployee,
     updateEmployee,
     updateEmployeeLaborInfo,
     deleteEmployee,
     searchEmployees,
-    refreshEmployees: loadEmployees
+    refreshEmployees: loadEmployees,
+    createLaborInfo,
+    clearMessages
   };
 };
 

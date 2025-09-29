@@ -1,6 +1,6 @@
 // src/employee-management/infrastructure/ApiEmployeeRepository.ts
 import { EmployeeRepository } from '../domain/repositories/EmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData } from '../domain/entities/Employee';
+import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../domain/entities/Employee';
 import { apiService } from '../../services/api.service';
 
 export class ApiEmployeeRepository implements EmployeeRepository {
@@ -16,7 +16,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       id: item.id || item.trabajador_id?.toString(),
       name: item.name || item.nombre_completo,
       identification: item.identification || item.documento_identidad,
-      position: item.position || 'Sin definir',
+      cargo: item.cargo || 'Sin definir',
       department: item.department || 'Sin definir',
       hireDate: new Date(item.hireDate || item.fecha_registro_at),
       status: item.status || (item.is_activo ? 'active' : 'inactive'),
@@ -55,6 +55,8 @@ export class ApiEmployeeRepository implements EmployeeRepository {
         console.log('3. Success es false');
         throw new Error(response?.message || 'Error al crear empleado');
       }
+
+      console.log('Respuesta:', response);
       
       const employeeData = response.data.trabajador;
       
@@ -78,9 +80,6 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       });
       
       if (error.response?.status === 409) {
-        throw new Error('Ya existe un empleado con esta cédula');
-      }
-      if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
       throw new Error(error.message || 'Error al crear el empleado');
@@ -119,6 +118,43 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       createdAt: new Date(item.createdAt || item.created_at),
       updatedAt: new Date(item.updatedAt || item.updated_at),
     }));
+  }
+
+  // Método para crear información laboral
+  async createLaborInfo(laborInfo: LaborInfoData): Promise<CreateLaborInfoResponse> {
+    try {
+      console.log('Enviando datos al backend:', laborInfo);
+
+      const response = await apiService.post(`/trabajadores/${laborInfo.trabajador_id}/info-laboral`, {
+        cargo: laborInfo.cargo,
+        departamento: laborInfo.departamento,
+        salario_base: laborInfo.salario_base,
+        tipo_contrato: laborInfo.tipo_contrato,
+        fecha_ingreso: laborInfo.fecha_ingreso
+      });
+
+      console.log('Respuesta del backend:', response);
+
+      return {
+        success: true,
+        message: response.message ?? '',
+        data: response.data
+      };
+    } catch (error: any) {
+      console.error('Error creating labor infoooooo:', error);
+      
+      if (error.response?.data) {
+        return {
+          success: false,
+          message: error.response.data.message
+        };
+      }
+      
+      return {
+        success: false,
+        message: 'Error de conexión al servidor'
+      };
+    }
   }
 }
 

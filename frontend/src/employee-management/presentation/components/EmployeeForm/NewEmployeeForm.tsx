@@ -86,20 +86,12 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
       newErrors.documento_identidad = 'La cédula es requerida';
     }
 
-    if (!formData.nombre_completo.trim()) {
-      newErrors.nombre_completo = 'El nombre completo es requerido';
-    }
-
-    if (!formData.fecha_nacimiento) {
-      newErrors.fecha_nacimiento = 'La fecha de nacimiento es requerida';
-    }
-
-    if (!formData.fecha_registro_at) {
-      newErrors.fecha_registro_at = 'La fecha de ingreso es requerida';
-    }
-
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'El formato del email no es válido';
+    }
+
+    if (formData.telefono && !/^[0-9]+$/.test(formData.telefono)) {
+      newErrors.telefono = 'El teléfono debe contener solo números';
     }
 
     setErrors(newErrors);
@@ -124,15 +116,19 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     try {
       await onSubmit(cleanedData);
     } catch (error: any) {
-      // Mostrar error específico si es por cédula duplicada
-      if (error.message.includes('cédula') || error.message.includes('Ya existe')) {
+      if (error.message.includes('cédula')) {
         setErrors(prev => ({
           ...prev,
           documento_identidad: error.message,
           submit: undefined
         }));
+      } else if (error.message.includes('electrónico')) {
+        setErrors(prev => ({
+          ...prev,
+          email: error.message,
+          submit: undefined
+        }));
       } else {
-        // Mostrar error general
         setFormError(error.message || 'Error al crear el empleado');
       }
     }
@@ -282,7 +278,10 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 label="Teléfono"
                 name="telefono"
                 value={formData.telefono}
+                required
                 onChange={handleChange}
+                error={!!errors.telefono}
+                helperText={errors.telefono}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -309,6 +308,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 label="Correo electrónico"
                 name="email"
                 type="email"
+                required
                 value={formData.email}
                 onChange={handleChange}
                 error={!!errors.email}
