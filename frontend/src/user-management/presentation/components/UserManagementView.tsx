@@ -35,9 +35,7 @@ import {
   Refresh,
   PersonAdd,
   Edit,
-  Delete,
-  Search,
-  FilterList
+  Search
 } from '@mui/icons-material';
 import { useAuth0 } from '@auth0/auth0-react';
 import { UserManagementService } from '../../services/UserManagementService';
@@ -65,10 +63,6 @@ export const UserManagementView: React.FC = () => {
   // Inicializar servicio
   const userService = new UserManagementService(getAccessTokenSilently);
 
-  useEffect(() => {
-    loadData();
-  }, [filters]);
-
   const loadData = async () => {
     try {
       setLoading(true);
@@ -89,6 +83,11 @@ export const UserManagementView: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
   const handleSyncUsers = async () => {
     try {
       setLoading(true);
@@ -105,7 +104,7 @@ export const UserManagementView: React.FC = () => {
 
   const handleOpenRoleDialog = (user: UserWithRoles) => {
     setSelectedUser(user);
-    setSelectedRoles(user.roles.map((role: Role) => role.id));
+    setSelectedRoles(user.roles.map((role: Role) => role.id).filter((id): id is string => id !== undefined));
     setRoleDialogOpen(true);
   };
 
@@ -116,7 +115,7 @@ export const UserManagementView: React.FC = () => {
   };
 
   const handleAssignRoles = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !selectedUser.user.user_id) return;
     
     try {
       await userService.assignRoles(selectedUser.user.user_id, selectedRoles);
@@ -148,10 +147,18 @@ export const UserManagementView: React.FC = () => {
     );
   };
 
-  const getRoleColor = (roleName: string) => {
+  const getRoleColor = (roleName: string | undefined): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' => {
+    if (!roleName) return 'default';
+    
     const colors: { [key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' } = {
       'admin': 'error',
       'administrador': 'error',
+      'admin_agromano': 'error',
+      'supervisor_campo': 'warning',
+      'gerente_rrhh': 'warning',
+      'supervisor_rrhh': 'secondary',
+      'empleado_campo': 'success',
+      'visual_solo_lectura': 'primary',
       'manager': 'warning',
       'gerente': 'warning',
       'worker': 'success',
@@ -326,19 +333,25 @@ export const UserManagementView: React.FC = () => {
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                         {userWithRoles.roles.length > 0 ? (
                           userWithRoles.roles.map((role: Role) => (
-                            <Chip
-                              key={role.id}
-                              label={role.name}
-                              size="small"
-                              color={getRoleColor(role.name)}
-                              onDelete={() => handleRemoveRole(userWithRoles.user.user_id, role.id)}
-                              sx={{ 
-                                '& .MuiChip-deleteIcon': { 
-                                  color: 'inherit',
-                                  '&:hover': { color: '#ef4444' }
+                            role.id && (
+                              <Chip
+                                key={role.id}
+                                label={role.name}
+                                size="small"
+                                color={getRoleColor(role.name)}
+                                onDelete={
+                                  userWithRoles.user.user_id && role.id
+                                    ? () => handleRemoveRole(userWithRoles.user.user_id!, role.id!)
+                                    : undefined
                                 }
-                              }}
-                            />
+                                sx={{ 
+                                  '& .MuiChip-deleteIcon': { 
+                                    color: 'inherit',
+                                    '&:hover': { color: '#ef4444' }
+                                  }
+                                }}
+                              />
+                            )
                           ))
                         ) : (
                           <Typography variant="body2" sx={{ color: '#64748b', fontStyle: 'italic' }}>
@@ -388,28 +401,30 @@ export const UserManagementView: React.FC = () => {
             Selecciona los roles que deseas asignar a este usuario:
           </Typography>
           {roles.map((role) => (
-            <FormControlLabel
-              key={role.id}
-              control={
-                <Checkbox
-                  checked={selectedRoles.includes(role.id)}
-                  onChange={() => handleRoleToggle(role.id)}
-                  sx={{
-                    color: '#64748b',
-                    '&.Mui-checked': { color: '#3b82f6' }
-                  }}
-                />
-              }
-              label={
-                <Box>
-                  <Typography sx={{ color: '#ffffff' }}>{role.name}</Typography>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>
-                    {role.description}
-                  </Typography>
-                </Box>
-              }
-              sx={{ display: 'block', mb: 1 }}
-            />
+            role.id && (
+              <FormControlLabel
+                key={role.id}
+                control={
+                  <Checkbox
+                    checked={selectedRoles.includes(role.id)}
+                    onChange={() => handleRoleToggle(role.id!)}
+                    sx={{
+                      color: '#64748b',
+                      '&.Mui-checked': { color: '#3b82f6' }
+                    }}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography sx={{ color: '#ffffff' }}>{role.name}</Typography>
+                    <Typography variant="body2" sx={{ color: '#64748b' }}>
+                      {role.description}
+                    </Typography>
+                  </Box>
+                }
+                sx={{ display: 'block', mb: 1 }}
+              />
+            )
           ))}
         </DialogContent>
         <DialogActions sx={{ borderTop: '1px solid #334155', pt: 2 }}>

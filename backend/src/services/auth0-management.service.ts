@@ -322,6 +322,31 @@ export class Auth0ManagementService {
       throw new Error('Error al buscar usuarios');
     }
   }
+
+  /**
+   * Crear un nuevo usuario en Auth0
+   */
+  async createUser(userData: {
+    email: string;
+    name: string;
+    password: string;
+    connection: string;
+  }): Promise<Auth0User> {
+    try {
+      const result = await this.management.users.create({
+        email: userData.email,
+        name: userData.name,
+        password: userData.password,
+        connection: userData.connection,
+        email_verified: false
+      }) as any;
+
+      return result.data || result;
+    } catch (error) {
+      console.error('Error creando usuario en Auth0:', error);
+      throw new Error('Error al crear usuario en Auth0');
+    }
+  }
 }
 
 // Singleton instance

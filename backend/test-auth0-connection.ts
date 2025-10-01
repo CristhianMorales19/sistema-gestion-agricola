@@ -15,7 +15,8 @@ async function testAuth0Connection() {
     const management = new ManagementClient({
       domain: process.env.AUTH0_DOMAIN!,
       clientId: process.env.AUTH0_CLIENT_ID!,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET!
+      clientSecret: process.env.AUTH0_CLIENT_SECRET!,
+      audience: `https://${process.env.AUTH0_DOMAIN}/api/v2/`
     });
 
     console.log('\n🔄 Testing Management API access...');

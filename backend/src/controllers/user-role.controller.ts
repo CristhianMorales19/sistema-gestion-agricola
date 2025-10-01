@@ -6,7 +6,8 @@ import {
   UsersListResponse,
   RolesListResponse,
   RoleAssignmentRequest,
-  UserSearchFilters
+  UserSearchFilters,
+  Auth0Role
 } from '../types/auth0-roles.types';
 
 const prisma = new PrismaClient();
@@ -96,7 +97,7 @@ export class UserRoleController {
       let filteredUsers = usersWithRoles;
       if (role) {
         filteredUsers = usersWithRoles.filter(userWithRoles => 
-          userWithRoles.roles.some(r => r.name && r.name.toLowerCase().includes(role.toLowerCase()))
+          userWithRoles.roles.some((r: Auth0Role) => r.name && r.name.toLowerCase().includes(role.toLowerCase()))
         );
       }
 
