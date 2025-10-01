@@ -66,9 +66,10 @@ router.get('/general',
                 
                 // Consultas reales a la BD con manejo de errores individual
                 console.log('📊 Consultando trabajadores...');
+                // En el modelo `mom_trabajador` el campo es `is_activo` (boolean), no `estado`.
                 const totalTrabajadores = await prisma.mom_trabajador.count({
                     where: {
-                        estado: 'activo'
+                        is_activo: true
                     }
                 }).catch((err: any) => {
                     console.log('⚠️ Error consultando trabajadores:', err.message);
@@ -89,9 +90,10 @@ router.get('/general',
                 });
                 
                 console.log('👑 Consultando roles...');
+                // is_activo es boolean en el modelo
                 const totalRoles = await prisma.mom_rol.count({
                     where: {
-                        is_activo: 1
+                        is_activo: true
                     }
                 }).catch((err: any) => {
                     console.log('⚠️ Error consultando roles:', err.message);
@@ -122,7 +124,11 @@ router.get('/general',
                     alertasPendientes: 0 // Por ahora 0 hasta que tengamos tabla de alertas
                 };
                 
-                await prisma.$disconnect();
+                try {
+                    await prisma.$disconnect();
+                } catch (dErr) {
+                    console.warn('⚠️ Error al desconectar Prisma:', dErr);
+                }
                 
             } catch (error) {
                 console.error('❌ Error obteniendo datos de la BD:', error);
@@ -233,7 +239,29 @@ router.get('/general',
             console.error('🔍 Stack trace:', error instanceof Error ? error.stack : 'No disponible');
             console.error('👤 Usuario en error:', (req as any).user?.sub);
             console.log('=======================================');
-            
+            // Si detectamos un error de Prisma P2022 (columna inexistente), devolver datos por defecto en vez de 500
+            const anyErr = error as any;
+            if (anyErr && anyErr.code === 'P2022') {
+                console.warn('Prisma P2022 detectado en dashboard.general, devolviendo datos por defecto');
+                return res.json({
+                    success: true,
+                    message: 'Datos del dashboard (modo degradado)',
+                    data: {
+                        estadisticas: {
+                            trabajadores: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            usuarios: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            roles: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            permisos: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            alertas: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' }
+                        },
+                        actividadReciente: [],
+                        condicionesClimaticas: {},
+                        permisos: { nivel: 'basico', total: 0 },
+                        timestamp: new Date().toISOString()
+                    }
+                });
+            }
+
             res.status(500).json({
                 success: false,
                 message: 'Error interno del servidor',
