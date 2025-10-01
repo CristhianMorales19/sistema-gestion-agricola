@@ -8,6 +8,7 @@
     "dev": "nodemon src/app.ts",
     "build": "tsc",
     "test": "jest",
+    "test:user-roles": "tsx scripts/test-user-roles.ts",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "db:generate": "prisma generate",

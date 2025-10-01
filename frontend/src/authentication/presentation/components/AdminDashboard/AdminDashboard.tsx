@@ -11,6 +11,7 @@ import { ActivityFeed } from '../../../../dashboard/presentation/components/Acti
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
 import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView';
+import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -113,6 +114,11 @@ export const AdminDashboard: React.FC = () => {
       case 'employee-management':
         return (
           <EmployeeManagementView/>
+        );
+
+      case 'users':
+        return (
+          <UserManagementView/>
         );
 
       case 'farms':

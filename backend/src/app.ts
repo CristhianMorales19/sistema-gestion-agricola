@@ -16,6 +16,8 @@ import agroManoDashboardRoutes from './routes/agromano-dashboard';
 import dashboardSimpleRoutes from './routes/dashboard-simple';
 import debugRoutes from './routes/debug-routes';
 import debugPrismaRoutes from './routes/debug-prisma';
+import userRoleManagementRoutes from './routes/user-role-management';
+import testUserManagementRoutes from './routes/test-user-management';
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
@@ -113,6 +115,12 @@ app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
 app.use('/api/dashboard-simple', dashboardSimpleRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/debug-prisma', debugPrismaRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
+app.use('/api/test', testUserManagementRoutes);
 
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {

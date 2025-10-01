@@ -138,37 +138,9 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
           auth0_email: userEmail
         };
 
-        // Continuar: el middleware RBAC comprobará ahora req.auth.permissions
-        const tokenPermissionsFromAuth = ((req as any).auth as any)?.permissions || ((req as any).user as any)?.permissions || [];
-        // Debug: buscar cualquier usuario que contenga auth0 para ayudar a diagnosticar
-        const debugUser = await prisma.mot_usuario.findFirst({
-          where: {
-            username: {
-              contains: 'auth0'
-            }
-          }
-        });
-
-        console.log('🔍 Debug - Usuario con auth0:', debugUser ? {
-          id: debugUser.usuario_id,
-          username: debugUser.username,
-          estado: debugUser.estado
-        } : 'No encontrado');
-
-        return res.status(403).json({
-          success: false,
-          message: 'Usuario no autorizado en el sistema',
-          code: 'USER_NOT_AUTHORIZED',
-          searchCriteria: {
-            userEmail,
-            userSub
-          },
-          debugUser: debugUser ? {
-            id: debugUser.usuario_id,
-            username: debugUser.username,
-            estado: debugUser.estado
-          } : null
-        });
+        // Do NOT block the request — allow RBAC to decide based on token permissions
+        console.warn('⚠️ Usuario no encontrado en BD pero token contiene permisos — continuando usando permisos del token');
+        return next();
       }
     }
 
