@@ -8,15 +8,6 @@ enabled = true
   [analyzers.meta]
   plugins = ["react"]
   environment = ["nodejs", "browser"]
-  
-  # Deshabilitar reglas que pueden causar bloqueos
-  style_guide = "airbnb"
-  skip_doc_coverage = ["file-header"]
-  
-  # Configuración de métricas más permisiva
-  [analyzers.meta.metrics]
-  cyclomatic_complexity_threshold = 20
-  max_file_length = 1000
 
 # Configuración para análisis de SQL
 [[analyzers]]
