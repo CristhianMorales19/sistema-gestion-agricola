@@ -11,12 +11,6 @@ enabled = true
     "nodejs",
     "browser"
   ]
-  # Dependencias externas
-  dependencies_file_paths = [
-    "backend/package.json",
-    "frontend/package.json",
-    "package.json"
-  ]
 
 # Configuración para análisis de SQL
 [[analyzers]]
@@ -42,10 +36,6 @@ enabled = true
 [[transformers]]
 name = "prettier"
 enabled = true
-
-[[transformers]]
-name = "autopep8"
-enabled = false
 
 # Exclusiones - archivos/carpetas que no se deben analizar
 exclude_patterns = [
