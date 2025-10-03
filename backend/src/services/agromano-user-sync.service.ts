@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -53,12 +53,15 @@ type UsuarioCompleto = {
 };
 
 // Helper para ejecutar SQL directo (compatible con MySQL 5.5)
-async function executeRawSQL(query: string, params: unknown[] = []): Promise<RawSQLResult[]> {
+async function executeRawSQL(
+  query: string,
+  params: unknown[] = [],
+): Promise<RawSQLResult[]> {
   try {
     const result = await prisma.$queryRawUnsafe(query, ...params);
     return result as RawSQLResult[];
   } catch (error) {
-    console.error('❌ [SQL] Error ejecutando consulta:', error);
+    console.error("❌ [SQL] Error ejecutando consulta:", error);
     throw error;
   }
 }
@@ -68,7 +71,6 @@ async function executeRawSQL(query: string, params: unknown[] = []): Promise<Raw
  * Adaptado para trabajar con MySQL 5.5 usando consultas SQL directas
  */
 export class AgroManoUserSyncService {
-
   /**
    * Obtener o crear usuario local basado en datos de Auth0
    * @param auth0UserId - ID único de Auth0 (sub del token JWT)
@@ -76,13 +78,14 @@ export class AgroManoUserSyncService {
    */
   static async getOrCreateUser(
     auth0UserId: string,
-    auth0UserData: Auth0UserData
+    auth0UserData: Auth0UserData,
   ): Promise<UsuarioCompleto> {
     try {
       console.log(`🔍 Buscando usuario con Auth0 ID: ${auth0UserId}`);
 
       // 1. Buscar usuario existente por auth0_id usando SQL directo
-      const usuarios = await executeRawSQL(`
+      const usuarios = await executeRawSQL(
+        `
         SELECT 
           u.usuario_id,
           u.auth0_id,
@@ -110,27 +113,30 @@ export class AgroManoUserSyncService {
         LEFT JOIN mom_trabajador t ON u.trabajador_id = t.trabajador_id
         WHERE u.auth0_id = ? AND u.deleted_at IS NULL
         LIMIT 1
-      `, [auth0UserId]);
+      `,
+        [auth0UserId],
+      );
 
       if (usuarios.length > 0) {
         const usuario: any = usuarios[0];
-        
+
         // Actualizar último login usando SQL directo
-        await executeRawSQL(`
+        await executeRawSQL(
+          `
           UPDATE mot_usuario 
           SET last_login_at = NOW(),
               email_verified = ?,
               updated_at = NOW()
           WHERE usuario_id = ?
-        `, [
-          auth0UserData.email_verified ? 1 : 0,
-          usuario.usuario_id
-        ]);
+        `,
+          [auth0UserData.email_verified ? 1 : 0, usuario.usuario_id],
+        );
 
         console.log(`✅ Usuario encontrado: ${usuario.username}`);
-        
+
         // Obtener permisos del rol
-        const permisos = await executeRawSQL(`
+        const permisos = await executeRawSQL(
+          `
           SELECT 
             p.permiso_id,
             p.codigo,
@@ -140,7 +146,9 @@ export class AgroManoUserSyncService {
           FROM rel_mom_rol__mom_permiso rp
           INNER JOIN mom_permiso p ON rp.permiso_id = p.permiso_id
           WHERE rp.rol_id = ? AND rp.deleted_at IS NULL
-        `, [usuario.rol_id]);
+        `,
+          [usuario.rol_id],
+        );
 
         return {
           usuario_id: usuario.usuario_id,
@@ -164,19 +172,21 @@ export class AgroManoUserSyncService {
                 codigo: p.codigo,
                 nombre: p.nombre,
                 descripcion: p.descripcion,
-                categoria: p.categoria
-              }
-            }))
+                categoria: p.categoria,
+              },
+            })),
           },
-          mom_trabajador: usuario.trabajador_id ? {
-            trabajador_id: usuario.trabajador_id,
-            nombre_completo: usuario.nombre_completo,
-            documento_identidad: usuario.documento_identidad,
-            telefono: usuario.telefono,
-            email: usuario.trabajador_email
-          } : null,
+          mom_trabajador: usuario.trabajador_id
+            ? {
+                trabajador_id: usuario.trabajador_id,
+                nombre_completo: usuario.nombre_completo,
+                documento_identidad: usuario.documento_identidad,
+                telefono: usuario.telefono,
+                email: usuario.trabajador_email,
+              }
+            : null,
           created_at: usuario.created_at,
-          updated_at: usuario.updated_at
+          updated_at: usuario.updated_at,
         };
       }
 
@@ -194,14 +204,15 @@ export class AgroManoUserSyncService {
       `);
 
       if (roles.length === 0) {
-        throw new Error('❌ No se encontró un rol por defecto para asignar');
+        throw new Error("❌ No se encontró un rol por defecto para asignar");
       }
 
       const rolPorDefecto: any = roles[0];
       const username = auth0UserData.email || `user_${auth0UserId.slice(-8)}`;
 
       // Crear el usuario usando SQL directo
-      await executeRawSQL(`
+      await executeRawSQL(
+        `
         INSERT INTO mot_usuario (
           auth0_id,
           auth0_user_id,
@@ -216,21 +227,24 @@ export class AgroManoUserSyncService {
           created_at,
           created_by
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), ?)
-      `, [
-        auth0UserId,
-        auth0UserId,
-        username,
-        auth0UserData.email || null,
-        'AUTH0_MANAGED',
-        rolPorDefecto.rol_id,
-        'activo',
-        'auth0',
-        auth0UserData.email_verified ? 1 : 0,
-        1 // Sistema
-      ]);
+      `,
+        [
+          auth0UserId,
+          auth0UserId,
+          username,
+          auth0UserData.email || null,
+          "AUTH0_MANAGED",
+          rolPorDefecto.rol_id,
+          "activo",
+          "auth0",
+          auth0UserData.email_verified ? 1 : 0,
+          1, // Sistema
+        ],
+      );
 
       // Obtener el usuario recién creado
-      const nuevosUsuarios = await executeRawSQL(`
+      const nuevosUsuarios = await executeRawSQL(
+        `
         SELECT 
           u.usuario_id,
           u.auth0_id,
@@ -244,14 +258,17 @@ export class AgroManoUserSyncService {
         LEFT JOIN mom_rol r ON u.rol_id = r.rol_id
         WHERE u.auth0_id = ?
         LIMIT 1
-      `, [auth0UserId]);
+      `,
+        [auth0UserId],
+      );
 
       const nuevoUsuario: any = nuevosUsuarios[0];
 
       console.log(`✅ Usuario creado exitosamente: ${nuevoUsuario.username}`);
 
       // Obtener permisos del rol
-      const permisos = await executeRawSQL(`
+      const permisos = await executeRawSQL(
+        `
         SELECT 
           p.permiso_id,
           p.codigo,
@@ -261,7 +278,9 @@ export class AgroManoUserSyncService {
         FROM rel_mom_rol__mom_permiso rp
         INNER JOIN mom_permiso p ON rp.permiso_id = p.permiso_id
         WHERE rp.rol_id = ? AND rp.deleted_at IS NULL
-      `, [nuevoUsuario.rol_id]);
+      `,
+        [nuevoUsuario.rol_id],
+      );
 
       return {
         usuario_id: nuevoUsuario.usuario_id,
@@ -279,15 +298,14 @@ export class AgroManoUserSyncService {
               codigo: p.codigo,
               nombre: p.nombre,
               descripcion: p.descripcion,
-              categoria: p.categoria
-            }
-          }))
+              categoria: p.categoria,
+            },
+          })),
         },
-        mom_trabajador: null
+        mom_trabajador: null,
       };
-
     } catch (error) {
-      console.error('❌ [SYNC] Error sincronizando usuario:', error);
+      console.error("❌ [SYNC] Error sincronizando usuario:", error);
       throw error;
     }
   }

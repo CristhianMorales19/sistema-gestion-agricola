@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 const router = Router();
 
@@ -7,13 +7,13 @@ const router = Router();
  * @desc Ruta pública de prueba
  * @access Público
  */
-router.get('/public', (req, res) => {
+router.get("/public", (req, res) => {
   res.json({
     success: true,
-    message: '🎉 AgroMano API funcionando correctamente',
+    message: "🎉 AgroMano API funcionando correctamente",
     timestamp: new Date().toISOString(),
     auth0_domain: process.env.AUTH0_DOMAIN,
-    server_status: 'OK'
+    server_status: "OK",
   });
 });
 
@@ -22,17 +22,25 @@ router.get('/public', (req, res) => {
  * @desc Verificar configuración Auth0 (sin datos sensibles)
  * @access Público
  */
-router.get('/config', (req, res) => {
+router.get("/config", (req, res) => {
   res.json({
     success: true,
-    message: 'Configuración Auth0 verificada',
+    message: "Configuración Auth0 verificada",
     config: {
-      domain: process.env.AUTH0_DOMAIN ? '✅ Configurado' : '❌ Falta configurar',
-      audience: process.env.AUTH0_AUDIENCE ? '✅ Configurado' : '❌ Falta configurar',
-      client_id: process.env.AUTH0_CLIENT_ID ? '✅ Configurado' : '❌ Falta configurar',
-      client_secret: process.env.AUTH0_CLIENT_SECRET ? '✅ Configurado' : '❌ Falta configurar'
+      domain: process.env.AUTH0_DOMAIN
+        ? "✅ Configurado"
+        : "❌ Falta configurar",
+      audience: process.env.AUTH0_AUDIENCE
+        ? "✅ Configurado"
+        : "❌ Falta configurar",
+      client_id: process.env.AUTH0_CLIENT_ID
+        ? "✅ Configurado"
+        : "❌ Falta configurar",
+      client_secret: process.env.AUTH0_CLIENT_SECRET
+        ? "✅ Configurado"
+        : "❌ Falta configurar",
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -41,31 +49,31 @@ router.get('/config', (req, res) => {
  * @desc Probar conexión a base de datos
  * @access Público
  */
-router.get('/database', async (req, res) => {
+router.get("/database", async (req, res) => {
   try {
     // Importar Prisma solo cuando se necesite
-    const { PrismaClient } = await import('@prisma/client');
+    const { PrismaClient } = await import("@prisma/client");
     const prisma = new PrismaClient();
-    
+
     // Probar conexión simple
     await prisma.$connect();
     const result = await prisma.$queryRaw`SELECT 1 as test`;
     await prisma.$disconnect();
-    
+
     res.json({
       success: true,
-      message: '✅ Conexión a base de datos exitosa',
+      message: "✅ Conexión a base de datos exitosa",
       database: process.env.DB_NAME,
       test_result: result,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     const err = error as Error;
     res.status(500).json({
       success: false,
-      message: '❌ Error de conexión a base de datos',
+      message: "❌ Error de conexión a base de datos",
       error: err.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -75,30 +83,35 @@ router.get('/database', async (req, res) => {
  * @desc Verificar variables de entorno (sin mostrar valores sensibles)
  * @access Público
  */
-router.get('/env', (req, res) => {
+router.get("/env", (req, res) => {
   const requiredEnvVars = [
-    'DATABASE_URL',
-    'AUTH0_DOMAIN', 
-    'AUTH0_AUDIENCE',
-    'AUTH0_CLIENT_ID',
-    'AUTH0_CLIENT_SECRET',
-    'PORT'
+    "DATABASE_URL",
+    "AUTH0_DOMAIN",
+    "AUTH0_AUDIENCE",
+    "AUTH0_CLIENT_ID",
+    "AUTH0_CLIENT_SECRET",
+    "PORT",
   ];
 
-  const envStatus = requiredEnvVars.reduce((acc: Record<string, string>, envVar) => {
-    acc[envVar] = process.env[envVar] ? '✅ Configurado' : '❌ Falta';
-    return acc;
-  }, {});
+  const envStatus = requiredEnvVars.reduce(
+    (acc: Record<string, string>, envVar) => {
+      acc[envVar] = process.env[envVar] ? "✅ Configurado" : "❌ Falta";
+      return acc;
+    },
+    {},
+  );
 
-  const allConfigured = Object.values(envStatus).every(status => String(status).includes('✅'));
+  const allConfigured = Object.values(envStatus).every((status) =>
+    String(status).includes("✅"),
+  );
 
   res.json({
     success: allConfigured,
-    message: allConfigured ? 
-      '🎉 Todas las variables de entorno configuradas' : 
-      '⚠️ Algunas variables de entorno faltan',
+    message: allConfigured
+      ? "🎉 Todas las variables de entorno configuradas"
+      : "⚠️ Algunas variables de entorno faltan",
     environment_variables: envStatus,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
