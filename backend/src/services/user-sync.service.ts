@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { auth0ManagementService, Auth0User } from './auth0-management.service';
+import { PrismaClient } from "@prisma/client";
+import { auth0ManagementService, Auth0User } from "./auth0-management.service";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
  * Servicio para sincronizar usuarios entre Auth0 y base de datos local
  */
 export class UserSyncService {
-
   /**
    * Sincronizar un usuario de Auth0 con la base de datos local
    */
@@ -23,42 +22,45 @@ export class UserSyncService {
       if (!auth0User) {
         return {
           success: false,
-          message: 'Usuario no encontrado en Auth0'
+          message: "Usuario no encontrado en Auth0",
         };
       }
 
       // Verificar si ya existe en base de datos local
       let localUser = await prisma.mot_usuario.findUnique({
-        where: { auth0_user_id: auth0UserId }
+        where: { auth0_user_id: auth0UserId },
       });
 
       if (!localUser) {
         // Crear usuario local si no existe
         // Obtener rol por defecto
         const defaultRole = await prisma.mom_rol.findFirst({
-          where: { 
-            codigo: 'USUARIO',
-            is_activo: true
-          }
+          where: {
+            codigo: "USUARIO",
+            is_activo: true,
+          },
         });
 
         if (!defaultRole) {
           return {
             success: false,
-            message: 'No se encontró un rol por defecto para asignar'
+            message: "No se encontró un rol por defecto para asignar",
           };
         }
 
         localUser = await prisma.mot_usuario.create({
           data: {
             auth0_user_id: auth0UserId,
-            username: auth0User.email || auth0User.nickname || `user_${auth0UserId.slice(-8)}`,
-            password_hash: 'AUTH0_MANAGED', // Password manejado por Auth0
+            username:
+              auth0User.email ||
+              auth0User.nickname ||
+              `user_${auth0UserId.slice(-8)}`,
+            password_hash: "AUTH0_MANAGED", // Password manejado por Auth0
             rol_id: defaultRole.rol_id,
-            estado: 'activo',
+            estado: "activo",
             created_at: new Date(),
-            created_by: 1 // Sistema
-          }
+            created_by: 1, // Sistema
+          },
         });
 
         console.log(`Usuario local creado para Auth0 ID: ${auth0UserId}`);
@@ -67,14 +69,13 @@ export class UserSyncService {
       return {
         success: true,
         user: localUser,
-        message: 'Usuario sincronizado exitosamente'
+        message: "Usuario sincronizado exitosamente",
       };
-
     } catch (error) {
-      console.error('Error sincronizando usuario:', error);
+      console.error("Error sincronizando usuario:", error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Error desconocido'
+        message: error instanceof Error ? error.message : "Error desconocido",
       };
     }
   }
@@ -82,7 +83,10 @@ export class UserSyncService {
   /**
    * Obtener o crear usuario local basado en usuario Auth0
    */
-  static async getOrCreateLocalUser(auth0UserId: string, auth0UserData?: any): Promise<any> {
+  static async getOrCreateLocalUser(
+    auth0UserId: string,
+    auth0UserData?: any,
+  ): Promise<any> {
     try {
       // Buscar usuario local existente
       let localUser = await prisma.mot_usuario.findUnique({
@@ -92,12 +96,12 @@ export class UserSyncService {
             include: {
               rel_mom_rol__mom_permiso: {
                 include: {
-                  mom_permiso: true
-                }
-              }
-            }
-          }
-        }
+                  mom_permiso: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (localUser) {
@@ -106,7 +110,7 @@ export class UserSyncService {
 
       // Si no existe, crear usuario local
       const syncResult = await this.syncUserFromAuth0(auth0UserId);
-      
+
       if (syncResult.success) {
         // Volver a buscar con relaciones incluidas
         localUser = await prisma.mot_usuario.findUnique({
@@ -116,19 +120,18 @@ export class UserSyncService {
               include: {
                 rel_mom_rol__mom_permiso: {
                   include: {
-                    mom_permiso: true
-                  }
-                }
-              }
-            }
-          }
+                    mom_permiso: true,
+                  },
+                },
+              },
+            },
+          },
         });
       }
 
       return localUser;
-
     } catch (error) {
-      console.error('Error obteniendo/creando usuario local:', error);
+      console.error("Error obteniendo/creando usuario local:", error);
       throw error;
     }
   }
@@ -145,7 +148,7 @@ export class UserSyncService {
       const result = {
         success: true,
         syncedUsers: 0,
-        errors: [] as string[]
+        errors: [] as string[],
       };
 
       let page = 0;
@@ -154,8 +157,11 @@ export class UserSyncService {
 
       while (hasMoreUsers) {
         // Obtener usuarios de Auth0 por páginas
-        const auth0Result = await auth0ManagementService.getUsers(page, perPage);
-        
+        const auth0Result = await auth0ManagementService.getUsers(
+          page,
+          perPage,
+        );
+
         if (auth0Result.users.length === 0) {
           hasMoreUsers = false;
           break;
@@ -165,19 +171,23 @@ export class UserSyncService {
         for (const auth0User of auth0Result.users) {
           try {
             const syncResult = await this.syncUserFromAuth0(auth0User.user_id!);
-            
+
             if (syncResult.success) {
               result.syncedUsers++;
             } else {
-              result.errors.push(`${auth0User.email || auth0User.user_id}: ${syncResult.message}`);
+              result.errors.push(
+                `${auth0User.email || auth0User.user_id}: ${syncResult.message}`,
+              );
             }
           } catch (error) {
-            result.errors.push(`${auth0User.email || auth0User.user_id}: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+            result.errors.push(
+              `${auth0User.email || auth0User.user_id}: ${error instanceof Error ? error.message : "Error desconocido"}`,
+            );
           }
         }
 
         page++;
-        
+
         // Si obtuvimos menos usuarios que el límite, no hay más páginas
         if (auth0Result.users.length < perPage) {
           hasMoreUsers = false;
@@ -185,13 +195,12 @@ export class UserSyncService {
       }
 
       return result;
-
     } catch (error) {
-      console.error('Error sincronizando todos los usuarios:', error);
+      console.error("Error sincronizando todos los usuarios:", error);
       return {
         success: false,
         syncedUsers: 0,
-        errors: [error instanceof Error ? error.message : 'Error desconocido']
+        errors: [error instanceof Error ? error.message : "Error desconocido"],
       };
     }
   }
@@ -208,41 +217,43 @@ export class UserSyncService {
     try {
       // Obtener todos los usuarios de Auth0
       const auth0Result = await auth0ManagementService.getUsers(0, 1000); // Asumiendo max 1000 usuarios
-      
+
       // Obtener todos los usuarios locales con auth0_user_id
       const localUsers = await prisma.mot_usuario.findMany({
         where: {
-          auth0_user_id: { not: null }
+          auth0_user_id: { not: null },
         },
         select: {
           usuario_id: true,
           auth0_user_id: true,
           username: true,
-          estado: true
-        }
+          estado: true,
+        },
       });
 
       // Identificar usuarios locales huérfanos (auth0_user_id no existe en Auth0)
-      const auth0UserIds = auth0Result.users.map(user => user.user_id);
-      const orphanedLocalUsers = localUsers.filter(localUser => 
-        localUser.auth0_user_id && !auth0UserIds.includes(localUser.auth0_user_id)
+      const auth0UserIds = auth0Result.users.map((user) => user.user_id);
+      const orphanedLocalUsers = localUsers.filter(
+        (localUser) =>
+          localUser.auth0_user_id &&
+          !auth0UserIds.includes(localUser.auth0_user_id),
       );
 
       // Identificar usuarios Auth0 sin representación local
-      const localAuth0Ids = localUsers.map(user => user.auth0_user_id);
-      const missingLocalUsers = auth0Result.users.filter(auth0User => 
-        auth0User.user_id && !localAuth0Ids.includes(auth0User.user_id)
+      const localAuth0Ids = localUsers.map((user) => user.auth0_user_id);
+      const missingLocalUsers = auth0Result.users.filter(
+        (auth0User) =>
+          auth0User.user_id && !localAuth0Ids.includes(auth0User.user_id),
       );
 
       return {
         auth0UsersCount: auth0Result.users.length,
         localUsersCount: localUsers.length,
         orphanedLocalUsers,
-        missingLocalUsers
+        missingLocalUsers,
       };
-
     } catch (error) {
-      console.error('Error verificando integridad de usuarios:', error);
+      console.error("Error verificando integridad de usuarios:", error);
       throw error;
     }
   }
@@ -257,35 +268,36 @@ export class UserSyncService {
   }> {
     try {
       const integrity = await this.verifyUserIntegrity();
-      
+
       if (!dryRun && integrity.orphanedLocalUsers.length > 0) {
         // Marcar usuarios huérfanos como inactivos en lugar de eliminarlos
-        const orphanedIds = integrity.orphanedLocalUsers.map(user => user.usuario_id);
-        
+        const orphanedIds = integrity.orphanedLocalUsers.map(
+          (user) => user.usuario_id,
+        );
+
         await prisma.mot_usuario.updateMany({
           where: {
-            usuario_id: { in: orphanedIds }
+            usuario_id: { in: orphanedIds },
           },
           data: {
-            estado: 'inactivo',
+            estado: "inactivo",
             updated_at: new Date(),
-            updated_by: 1 // Sistema
-          }
+            updated_by: 1, // Sistema
+          },
         });
       }
 
       return {
         success: true,
         orphanedUsers: integrity.orphanedLocalUsers,
-        deletedCount: dryRun ? 0 : integrity.orphanedLocalUsers.length
+        deletedCount: dryRun ? 0 : integrity.orphanedLocalUsers.length,
       };
-
     } catch (error) {
-      console.error('Error limpiando usuarios huérfanos:', error);
+      console.error("Error limpiando usuarios huérfanos:", error);
       return {
         success: false,
         orphanedUsers: [],
-        deletedCount: 0
+        deletedCount: 0,
       };
     }
   }
