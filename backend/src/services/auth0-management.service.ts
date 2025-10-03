@@ -37,7 +37,7 @@ export interface Auth0Role {
  */
 export class Auth0ManagementService {
   private management: ManagementClient;
-  private useMockData: boolean = false;
+  private useMockData = false;
 
   constructor() {
     this.management = new ManagementClient({
@@ -67,7 +67,7 @@ export class Auth0ManagementService {
   /**
    * Obtener todos los usuarios de Auth0
    */
-  async getUsers(page: number = 0, perPage: number = 25): Promise<{
+  async getUsers(page = 0, perPage = 25): Promise<{
     users: Auth0User[];
     total: number;
     start: number;
@@ -243,7 +243,7 @@ export class Auth0ManagementService {
   /**
    * Obtener usuarios de un rol específico
    */
-  async getUsersInRole(roleId: string, page: number = 0, perPage: number = 25): Promise<{
+  async getUsersInRole(roleId: string, page = 0, perPage = 25): Promise<{
     users: Auth0User[];
     total: number;
   }> {
@@ -300,7 +300,7 @@ export class Auth0ManagementService {
   /**
    * Buscar usuarios por query
    */
-  async searchUsers(query: string, page: number = 0, perPage: number = 25): Promise<{
+  async searchUsers(query: string, page = 0, perPage = 25): Promise<{
     users: Auth0User[];
     total: number;
   }> {

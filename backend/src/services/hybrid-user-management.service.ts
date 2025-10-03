@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
  */
 export class HybridUserManagementService {
   private auth0Service: Auth0ManagementService;
-  private isAuth0Available: boolean = true;
+  private isAuth0Available = true;
 
   constructor() {
     this.auth0Service = new Auth0ManagementService();
@@ -33,7 +33,7 @@ export class HybridUserManagementService {
   /**
    * Obtener usuarios - Híbrido
    */
-  async getUsers(page: number = 0, perPage: number = 25) {
+  async getUsers(page = 0, perPage = 25) {
     const auth0Available = await this.checkAuth0Availability();
 
     if (auth0Available) {
@@ -73,7 +73,7 @@ export class HybridUserManagementService {
   /**
    * Obtener usuarios desde la base de datos local
    */
-  private async getUsersFromDatabase(page: number = 0, perPage: number = 25) {
+  private async getUsersFromDatabase(page = 0, perPage = 25) {
     const skip = page * perPage;
     
     const [users, total] = await Promise.all([

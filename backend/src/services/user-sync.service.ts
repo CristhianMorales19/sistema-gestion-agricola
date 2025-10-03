@@ -250,7 +250,7 @@ export class UserSyncService {
   /**
    * Limpiar usuarios locales huérfanos
    */
-  static async cleanupOrphanedUsers(dryRun: boolean = true): Promise<{
+  static async cleanupOrphanedUsers(dryRun = true): Promise<{
     success: boolean;
     orphanedUsers: any[];
     deletedCount: number;
