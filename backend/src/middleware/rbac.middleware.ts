@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
-import { LocalUser } from '../types/express'; // Importar desde el archivo único
+import { Request, Response, NextFunction } from "express";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import { LocalUser } from "../types/express"; // Importar desde el archivo único
 
 const prisma = new PrismaClient();
 
@@ -23,15 +23,19 @@ const prisma = new PrismaClient();
 /**
  * Middleware para verificar JWT y cargar permisos del usuario
  */
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Token de acceso requerido'
+        message: "Token de acceso requerido",
       });
     }
 
@@ -42,36 +46,37 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     const usuario = await prisma.mot_usuario.findUnique({
       where: {
         usuario_id: decoded.usuario_id,
-        estado: 'activo'
+        estado: "activo",
       },
       include: {
         mom_rol: {
           include: {
             rel_mom_rol__mom_permiso: {
-              where: {  // where va aquí, no dentro de mom_permiso
+              where: {
+                // where va aquí, no dentro de mom_permiso
                 mom_permiso: {
-                  is_activo: true
-                }
+                  is_activo: true,
+                },
               },
               include: {
-                mom_permiso: true
-              }
-            }
-          }
-        }
-      }
+                mom_permiso: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!usuario) {
       return res.status(401).json({
         success: false,
-        message: 'Usuario no encontrado o inactivo'
+        message: "Usuario no encontrado o inactivo",
       });
     }
 
     // Extraer permisos del usuario
     const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
-      rp => rp.mom_permiso.codigo!
+      (rp) => rp.mom_permiso.codigo!,
     );
 
     // Agregar usuario a la request
@@ -80,15 +85,15 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       username: usuario.username,
       rol_id: usuario.rol_id,
       trabajador_id: usuario.trabajador_id || undefined,
-      permisos
+      permisos,
     };
 
     next();
   } catch (error) {
-    console.error('Error en authenticateToken:', error);
+    console.error("Error en authenticateToken:", error);
     return res.status(403).json({
       success: false,
-      message: 'Token inválido'
+      message: "Token inválido",
     });
   }
 };
@@ -105,30 +110,30 @@ export const requirePermissions = (requiredPermissions: string[]) => {
       if (!localUser || !localUser.permisos) {
         return res.status(403).json({
           success: false,
-          message: 'Usuario no autenticado'
+          message: "Usuario no autenticado",
         });
       }
 
       // Verificar si el usuario tiene al menos uno de los permisos requeridos
-      const hasPermission = requiredPermissions.some(permission => 
-        localUser.permisos!.includes(permission)
+      const hasPermission = requiredPermissions.some((permission) =>
+        localUser.permisos!.includes(permission),
       );
 
       if (!hasPermission) {
         return res.status(403).json({
           success: false,
-          message: 'No tienes permisos para realizar esta acción',
+          message: "No tienes permisos para realizar esta acción",
           permisosRequeridos: requiredPermissions,
-          permisosUsuario: localUser.permisos
+          permisosUsuario: localUser.permisos,
         });
       }
 
       next();
     } catch (error) {
-      console.error('Error en requirePermissions:', error);
+      console.error("Error en requirePermissions:", error);
       return res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
   };
@@ -146,30 +151,30 @@ export const requireAllPermissions = (requiredPermissions: string[]) => {
       if (!localUser || !localUser.permisos) {
         return res.status(403).json({
           success: false,
-          message: 'Usuario no autenticado'
+          message: "Usuario no autenticado",
         });
       }
 
       // Verificar si el usuario tiene TODOS los permisos requeridos
-      const hasAllPermissions = requiredPermissions.every(permission => 
-        localUser.permisos!.includes(permission)
+      const hasAllPermissions = requiredPermissions.every((permission) =>
+        localUser.permisos!.includes(permission),
       );
 
       if (!hasAllPermissions) {
         return res.status(403).json({
           success: false,
-          message: 'No tienes todos los permisos necesarios para esta acción',
+          message: "No tienes todos los permisos necesarios para esta acción",
           permisosRequeridos: requiredPermissions,
-          permisosUsuario: localUser.permisos
+          permisosUsuario: localUser.permisos,
         });
       }
 
       next();
     } catch (error) {
-      console.error('Error en requireAllPermissions:', error);
+      console.error("Error en requireAllPermissions:", error);
       return res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
   };
@@ -187,30 +192,30 @@ export const requireRole = (allowedRoles: string[]) => {
       if (!localUser) {
         return res.status(403).json({
           success: false,
-          message: 'Usuario no autenticado'
+          message: "Usuario no autenticado",
         });
       }
 
       // Obtener el rol del usuario
       const rol = await prisma.mom_rol.findUnique({
-        where: { rol_id: localUser.rol_id }
+        where: { rol_id: localUser.rol_id },
       });
 
       if (!rol || !allowedRoles.includes(rol.codigo)) {
         return res.status(403).json({
           success: false,
-          message: 'No tienes el rol necesario para esta acción',
+          message: "No tienes el rol necesario para esta acción",
           rolRequerido: allowedRoles,
-          rolUsuario: rol?.codigo
+          rolUsuario: rol?.codigo,
         });
       }
 
       next();
     } catch (error) {
-      console.error('Error en requireRole:', error);
+      console.error("Error en requireRole:", error);
       return res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
   };
@@ -221,7 +226,10 @@ export const requireRole = (allowedRoles: string[]) => {
  * @param user - Usuario autenticado
  * @param permission - Permiso a verificar
  */
-export const userHasPermission = (user: LocalUser, permission: string): boolean => {
+export const userHasPermission = (
+  user: LocalUser,
+  permission: string,
+): boolean => {
   return user?.permisos?.includes(permission) || false;
 };
 
@@ -230,7 +238,10 @@ export const userHasPermission = (user: LocalUser, permission: string): boolean 
  * @param user - Usuario autenticado
  * @param category - Categoría de permisos
  */
-export const getUserPermissionsByCategory = async (user: LocalUser, category?: string) => {
+export const getUserPermissionsByCategory = async (
+  user: LocalUser,
+  category?: string,
+) => {
   if (!user) return [];
 
   const whereClause: {
@@ -244,10 +255,10 @@ export const getUserPermissionsByCategory = async (user: LocalUser, category?: s
   } = {
     rel_mom_rol__mom_permiso: {
       some: {
-        rol_id: user.rol_id
-      }
+        rol_id: user.rol_id,
+      },
     },
-    is_activo: true
+    is_activo: true,
   };
 
   if (category) {
@@ -260,8 +271,8 @@ export const getUserPermissionsByCategory = async (user: LocalUser, category?: s
       codigo: true,
       nombre: true,
       categoria: true,
-      descripcion: true
-    }
+      descripcion: true,
+    },
   });
 
   return permisos;

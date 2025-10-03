@@ -1,19 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
-import { UserSyncService } from '../services/user-sync.service';
+import { Request, Response, NextFunction } from "express";
+import { UserSyncService } from "../services/user-sync.service";
 
 /**
  * Middleware híbrido que combina autenticación Auth0 con datos locales
  * Se ejecuta después de checkJwt de Auth0
  */
-export const hybridAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const hybridAuthMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     // Verificar que Auth0 haya validado el token
     const auth0User = (req as any).auth;
-    
+
     if (!auth0User || !auth0User.sub) {
       return res.status(401).json({
         success: false,
-        message: 'Token Auth0 inválido'
+        message: "Token Auth0 inválido",
       });
     }
 
@@ -21,27 +25,31 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
 
     try {
       // Obtener o crear usuario local
-      const localUser = await UserSyncService.getOrCreateLocalUser(auth0UserId, auth0User);
+      const localUser = await UserSyncService.getOrCreateLocalUser(
+        auth0UserId,
+        auth0User,
+      );
 
       if (!localUser) {
         return res.status(500).json({
           success: false,
-          message: 'Error sincronizando usuario local'
+          message: "Error sincronizando usuario local",
         });
       }
 
       // Verificar que el usuario local esté activo
-      if (localUser.estado !== 'activo') {
+      if (localUser.estado !== "activo") {
         return res.status(403).json({
           success: false,
-          message: 'Usuario inactivo en el sistema'
+          message: "Usuario inactivo en el sistema",
         });
       }
 
       // Extraer permisos del usuario local
-      const permisos = localUser.mom_rol?.rel_mom_rol__mom_permiso?.map(
-        (rp) => rp.mom_permiso.codigo
-      ) || [];
+      const permisos =
+        localUser.mom_rol?.rel_mom_rol__mom_permiso?.map(
+          (rp) => rp.mom_permiso.codigo,
+        ) || [];
 
       // Agregar datos del usuario local a la request
       (req as any).localUser = {
@@ -51,39 +59,39 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
         trabajador_id: localUser.trabajador_id || undefined,
         permisos,
         auth0_user_id: localUser.auth0_user_id,
-        rol_nombre: localUser.mom_rol?.nombre
+        rol_nombre: localUser.mom_rol?.nombre,
       };
 
       // Mantener también los datos de Auth0
       (req as any).auth0User = auth0User;
 
       next();
-
     } catch (syncError) {
-      console.error('Error en sincronización de usuario:', syncError);
-      
+      console.error("Error en sincronización de usuario:", syncError);
+
       // En caso de error de sincronización, permitir continuar solo con Auth0
       // pero con permisos limitados
       (req as any).localUser = {
         usuario_id: 0,
-        username: auth0User.email || auth0User.nickname || 'unknown',
+        username: auth0User.email || auth0User.nickname || "unknown",
         rol_id: 0,
-        permisos: ['basic:access'], // Permisos básicos
+        permisos: ["basic:access"], // Permisos básicos
         auth0_user_id: auth0UserId,
-        sync_error: true
+        sync_error: true,
       };
 
       (req as any).auth0User = auth0User;
-      
-      console.warn(`Usuario ${auth0UserId} continuando solo con Auth0 debido a error de sincronización`);
+
+      console.warn(
+        `Usuario ${auth0UserId} continuando solo con Auth0 debido a error de sincronización`,
+      );
       next();
     }
-
   } catch (error) {
-    console.error('Error en middleware híbrido:', error);
+    console.error("Error en middleware híbrido:", error);
     return res.status(500).json({
       success: false,
-      message: 'Error interno del servidor'
+      message: "Error interno del servidor",
     });
   }
 };
@@ -99,14 +107,14 @@ export const requireHybridPermission = (permissions: string[]) => {
     if (!localUser && !auth0User) {
       return res.status(401).json({
         success: false,
-        message: 'Usuario no autenticado'
+        message: "Usuario no autenticado",
       });
     }
 
     // Verificar permisos locales primero
     if (localUser?.permisos) {
-      const hasLocalPermission = permissions.some(permission => 
-        localUser.permisos.includes(permission)
+      const hasLocalPermission = permissions.some((permission) =>
+        localUser.permisos.includes(permission),
       );
 
       if (hasLocalPermission) {
@@ -118,9 +126,9 @@ export const requireHybridPermission = (permissions: string[]) => {
     // Por ahora, denegar acceso si no tiene permisos locales
     return res.status(403).json({
       success: false,
-      message: 'Permisos insuficientes',
+      message: "Permisos insuficientes",
       required_permissions: permissions,
-      user_permissions: localUser?.permisos || []
+      user_permissions: localUser?.permisos || [],
     });
   };
 };
@@ -135,27 +143,27 @@ export const requireRole = (roles: string[]) => {
     if (!localUser) {
       return res.status(401).json({
         success: false,
-        message: 'Usuario no autenticado'
+        message: "Usuario no autenticado",
       });
     }
 
     if (!localUser.rol_nombre) {
       return res.status(403).json({
         success: false,
-        message: 'Usuario sin rol asignado'
+        message: "Usuario sin rol asignado",
       });
     }
 
-    const hasRole = roles.some(role => 
-      localUser.rol_nombre.toLowerCase().includes(role.toLowerCase())
+    const hasRole = roles.some((role) =>
+      localUser.rol_nombre.toLowerCase().includes(role.toLowerCase()),
     );
 
     if (!hasRole) {
       return res.status(403).json({
         success: false,
-        message: 'Rol insuficiente',
+        message: "Rol insuficiente",
         required_roles: roles,
-        user_role: localUser.rol_nombre
+        user_role: localUser.rol_nombre,
       });
     }
 
@@ -166,27 +174,31 @@ export const requireRole = (roles: string[]) => {
 /**
  * Middleware para verificar si el usuario es administrador
  */
-export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const requireAdmin = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const localUser = (req as any).localUser;
 
   if (!localUser) {
     return res.status(401).json({
       success: false,
-      message: 'Usuario no autenticado'
+      message: "Usuario no autenticado",
     });
   }
 
-  const adminPermissions = ['admin:full', 'users:manage', 'roles:assign'];
-  const hasAdminPermission = localUser.permisos?.some((permiso: string) => 
-    adminPermissions.includes(permiso)
+  const adminPermissions = ["admin:full", "users:manage", "roles:assign"];
+  const hasAdminPermission = localUser.permisos?.some((permiso: string) =>
+    adminPermissions.includes(permiso),
   );
 
-  const isAdminRole = localUser.rol_nombre?.toLowerCase().includes('admin');
+  const isAdminRole = localUser.rol_nombre?.toLowerCase().includes("admin");
 
   if (!hasAdminPermission && !isAdminRole) {
     return res.status(403).json({
       success: false,
-      message: 'Se requieren permisos de administrador'
+      message: "Se requieren permisos de administrador",
     });
   }
 

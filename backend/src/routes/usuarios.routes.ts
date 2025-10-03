@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from "express";
 import {
   checkJwt,
   agroManoAuthMiddleware,
   requirePermiso,
-  requireAdmin
-} from '../middleware/agromano-auth.middleware';
-import { PrismaClient } from '@prisma/client';
+  requireAdmin,
+} from "../middleware/agromano-auth.middleware";
+import { PrismaClient } from "@prisma/client";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -18,11 +18,11 @@ const prisma = new PrismaClient();
  * GET /api/usuarios/health
  * Endpoint de salud - no requiere autenticación
  */
-router.get('/health', (req: Request, res: Response) => {
+router.get("/health", (req: Request, res: Response) => {
   res.json({
     success: true,
-    message: 'API de usuarios funcionando correctamente',
-    timestamp: new Date().toISOString()
+    message: "API de usuarios funcionando correctamente",
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -41,7 +41,7 @@ router.use(agroManoAuthMiddleware);
  * GET /api/usuarios/perfil
  * Obtener perfil del usuario autenticado
  */
-router.get('/perfil', async (req: Request, res: Response) => {
+router.get("/perfil", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
@@ -57,12 +57,12 @@ router.get('/perfil', async (req: Request, res: Response) => {
         usuario_id: user.usuario_id,
         username: user.username,
         email: user.email,
-        
+
         // Rol y permisos
         rol: {
           id: user.rol_id,
           codigo: user.rol_codigo,
-          nombre: user.rol_nombre
+          nombre: user.rol_nombre,
         },
         permisos: user.permisos,
 
@@ -71,15 +71,15 @@ router.get('/perfil', async (req: Request, res: Response) => {
 
         // Estado
         estado: user.estado,
-        last_login: new Date()
-      }
+        last_login: new Date(),
+      },
     });
   } catch (error) {
-    console.error('Error obteniendo perfil:', error);
+    console.error("Error obteniendo perfil:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error obteniendo perfil de usuario'
+      error: "INTERNAL_ERROR",
+      message: "Error obteniendo perfil de usuario",
     });
   }
 });
@@ -88,7 +88,7 @@ router.get('/perfil', async (req: Request, res: Response) => {
  * GET /api/usuarios/mis-permisos
  * Listar permisos del usuario autenticado
  */
-router.get('/mis-permisos', async (req: Request, res: Response) => {
+router.get("/mis-permisos", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
@@ -96,16 +96,16 @@ router.get('/mis-permisos', async (req: Request, res: Response) => {
     const permisosDetallados = await prisma.mom_permiso.findMany({
       where: {
         codigo: {
-          in: user.permisos
-        }
+          in: user.permisos,
+        },
       },
       select: {
         permiso_id: true,
         codigo: true,
         nombre: true,
         categoria: true,
-        descripcion: true
-      }
+        descripcion: true,
+      },
     });
 
     res.json({
@@ -114,18 +114,18 @@ router.get('/mis-permisos', async (req: Request, res: Response) => {
         usuario: {
           usuario_id: user.usuario_id,
           username: user.username,
-          rol: user.rol_nombre
+          rol: user.rol_nombre,
         },
         permisos: permisosDetallados,
-        total: permisosDetallados.length
-      }
+        total: permisosDetallados.length,
+      },
     });
   } catch (error) {
-    console.error('Error obteniendo permisos:', error);
+    console.error("Error obteniendo permisos:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error obteniendo permisos'
+      error: "INTERNAL_ERROR",
+      message: "Error obteniendo permisos",
     });
   }
 });
@@ -134,7 +134,7 @@ router.get('/mis-permisos', async (req: Request, res: Response) => {
  * PUT /api/usuarios/perfil
  * Actualizar datos del perfil propio
  */
-router.put('/perfil', async (req: Request, res: Response) => {
+router.put("/perfil", async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const { telefono, nombre_completo } = req.body;
@@ -147,21 +147,21 @@ router.put('/perfil', async (req: Request, res: Response) => {
           telefono,
           nombre_completo,
           updated_at: new Date(),
-          updated_by: user.usuario_id
-        }
+          updated_by: user.usuario_id,
+        },
       });
     }
 
     res.json({
       success: true,
-      message: 'Perfil actualizado correctamente'
+      message: "Perfil actualizado correctamente",
     });
   } catch (error) {
-    console.error('Error actualizando perfil:', error);
+    console.error("Error actualizando perfil:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error actualizando perfil'
+      error: "INTERNAL_ERROR",
+      message: "Error actualizando perfil",
     });
   }
 });
@@ -174,7 +174,7 @@ router.put('/perfil', async (req: Request, res: Response) => {
  * GET /api/usuarios
  * Listar todos los usuarios (solo administradores)
  */
-router.get('/', requireAdmin, async (req: Request, res: Response) => {
+router.get("/", requireAdmin, async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, estado, rol_id } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
@@ -196,8 +196,8 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
             select: {
               rol_id: true,
               codigo: true,
-              nombre: true
-            }
+              nombre: true,
+            },
           },
           mom_trabajador: {
             select: {
@@ -205,15 +205,15 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
               documento_identidad: true,
               nombre_completo: true,
               email: true,
-              telefono: true
-            }
-          }
+              telefono: true,
+            },
+          },
         },
         orderBy: {
-          created_at: 'desc'
-        }
+          created_at: "desc",
+        },
       }),
-      prisma.mot_usuario.count({ where })
+      prisma.mot_usuario.count({ where }),
     ]);
 
     res.json({
@@ -223,15 +223,15 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
         page: Number(page),
         limit: Number(limit),
         total,
-        total_pages: Math.ceil(total / Number(limit))
-      }
+        total_pages: Math.ceil(total / Number(limit)),
+      },
     });
   } catch (error) {
-    console.error('Error listando usuarios:', error);
+    console.error("Error listando usuarios:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error listando usuarios'
+      error: "INTERNAL_ERROR",
+      message: "Error listando usuarios",
     });
   }
 });
@@ -240,7 +240,7 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
  * GET /api/usuarios/:id
  * Obtener detalles de un usuario específico (solo administradores)
  */
-router.get('/:id', requireAdmin, async (req: Request, res: Response) => {
+router.get("/:id", requireAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -251,33 +251,33 @@ router.get('/:id', requireAdmin, async (req: Request, res: Response) => {
           include: {
             rel_mom_rol__mom_permiso: {
               include: {
-                mom_permiso: true
-              }
-            }
-          }
+                mom_permiso: true,
+              },
+            },
+          },
         },
-        mom_trabajador: true
-      }
+        mom_trabajador: true,
+      },
     });
 
     if (!usuario) {
       return res.status(404).json({
         success: false,
-        error: 'NOT_FOUND',
-        message: 'Usuario no encontrado'
+        error: "NOT_FOUND",
+        message: "Usuario no encontrado",
       });
     }
 
     res.json({
       success: true,
-      data: usuario
+      data: usuario,
     });
   } catch (error) {
-    console.error('Error obteniendo usuario:', error);
+    console.error("Error obteniendo usuario:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error obteniendo usuario'
+      error: "INTERNAL_ERROR",
+      message: "Error obteniendo usuario",
     });
   }
 });
@@ -286,7 +286,7 @@ router.get('/:id', requireAdmin, async (req: Request, res: Response) => {
  * PUT /api/usuarios/:id/rol
  * Cambiar rol de un usuario (solo administradores)
  */
-router.put('/:id/rol', requireAdmin, async (req: Request, res: Response) => {
+router.put("/:id/rol", requireAdmin, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const { id } = req.params;
@@ -295,26 +295,26 @@ router.put('/:id/rol', requireAdmin, async (req: Request, res: Response) => {
     if (!rol_id) {
       return res.status(400).json({
         success: false,
-        error: 'VALIDATION_ERROR',
-        message: 'El campo rol_id es requerido'
+        error: "VALIDATION_ERROR",
+        message: "El campo rol_id es requerido",
       });
     }
 
     // Verificar que el rol existe
     const rol = await prisma.mom_rol.findUnique({
-      where: { rol_id: Number(rol_id) }
+      where: { rol_id: Number(rol_id) },
     });
 
     if (!rol) {
       return res.status(404).json({
         success: false,
-        error: 'NOT_FOUND',
-        message: 'Rol no encontrado'
+        error: "NOT_FOUND",
+        message: "Rol no encontrado",
       });
     }
 
     const usuarioAntes = await prisma.mot_usuario.findUnique({
-      where: { usuario_id: Number(id) }
+      where: { usuario_id: Number(id) },
     });
 
     // Actualizar rol
@@ -324,41 +324,41 @@ router.put('/:id/rol', requireAdmin, async (req: Request, res: Response) => {
         rol_id: Number(rol_id),
         fecha_ultimo_cambio_rol_at: new Date(),
         updated_at: new Date(),
-        updated_by: user.usuario_id
-      }
+        updated_by: user.usuario_id,
+      },
     });
 
     // Registrar en auditoría
     await prisma.mol_audit_log.create({
       data: {
-        entidad: 'mot_usuario',
+        entidad: "mot_usuario",
         entidad_id: Number(id),
-        accion: 'CAMBIO_ROL',
+        accion: "CAMBIO_ROL",
         datos_antes: JSON.stringify({
-          rol_id: usuarioAntes?.rol_id
+          rol_id: usuarioAntes?.rol_id,
         }),
         datos_despues: JSON.stringify({
-          rol_id: Number(rol_id)
+          rol_id: Number(rol_id),
         }),
         usuario_id: user.usuario_id,
-        fecha_at: new Date()
-      }
+        fecha_at: new Date(),
+      },
     });
 
     res.json({
       success: true,
-      message: 'Rol actualizado correctamente',
+      message: "Rol actualizado correctamente",
       data: {
         usuario_id: Number(id),
-        nuevo_rol: rol.nombre
-      }
+        nuevo_rol: rol.nombre,
+      },
     });
   } catch (error) {
-    console.error('Error actualizando rol:', error);
+    console.error("Error actualizando rol:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error actualizando rol'
+      error: "INTERNAL_ERROR",
+      message: "Error actualizando rol",
     });
   }
 });
@@ -367,17 +367,17 @@ router.put('/:id/rol', requireAdmin, async (req: Request, res: Response) => {
  * PUT /api/usuarios/:id/estado
  * Activar/desactivar un usuario (solo administradores)
  */
-router.put('/:id/estado', requireAdmin, async (req: Request, res: Response) => {
+router.put("/:id/estado", requireAdmin, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const { id } = req.params;
     const { estado } = req.body;
 
-    if (!['activo', 'inactivo', 'ACTIVO', 'INACTIVO'].includes(estado)) {
+    if (!["activo", "inactivo", "ACTIVO", "INACTIVO"].includes(estado)) {
       return res.status(400).json({
         success: false,
-        error: 'VALIDATION_ERROR',
-        message: 'Estado inválido. Debe ser: activo o inactivo'
+        error: "VALIDATION_ERROR",
+        message: "Estado inválido. Debe ser: activo o inactivo",
       });
     }
 
@@ -386,32 +386,32 @@ router.put('/:id/estado', requireAdmin, async (req: Request, res: Response) => {
       data: {
         estado,
         updated_at: new Date(),
-        updated_by: user.usuario_id
-      }
+        updated_by: user.usuario_id,
+      },
     });
 
     // Registrar en auditoría
     await prisma.mol_audit_log.create({
       data: {
-        entidad: 'mot_usuario',
+        entidad: "mot_usuario",
         entidad_id: Number(id),
-        accion: 'CAMBIO_ESTADO',
+        accion: "CAMBIO_ESTADO",
         datos_despues: JSON.stringify({ estado }),
         usuario_id: user.usuario_id,
-        fecha_at: new Date()
-      }
+        fecha_at: new Date(),
+      },
     });
 
     res.json({
       success: true,
-      message: `Usuario ${estado} correctamente`
+      message: `Usuario ${estado} correctamente`,
     });
   } catch (error) {
-    console.error('Error actualizando estado:', error);
+    console.error("Error actualizando estado:", error);
     res.status(500).json({
       success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error actualizando estado'
+      error: "INTERNAL_ERROR",
+      message: "Error actualizando estado",
     });
   }
 });
@@ -420,52 +420,52 @@ router.put('/:id/estado', requireAdmin, async (req: Request, res: Response) => {
  * GET /api/usuarios/estadisticas/resumen
  * Estadísticas generales de usuarios (solo administradores)
  */
-router.get('/estadisticas/resumen', requireAdmin, async (req: Request, res: Response) => {
-  try {
-    const [
-      totalUsuarios,
-      usuariosActivos,
-      usuariosInactivos,
-      porRol
-    ] = await Promise.all([
-      prisma.mot_usuario.count(),
-      prisma.mot_usuario.count({
-        where: { estado: { in: ['activo', 'ACTIVO'] } }
-      }),
-      prisma.mot_usuario.count({
-        where: { estado: { in: ['inactivo', 'INACTIVO'] } }
-      }),
-      prisma.mom_rol.findMany({
-        include: {
-          _count: {
-            select: { mot_usuario: true }
-          }
-        }
-      })
-    ]);
+router.get(
+  "/estadisticas/resumen",
+  requireAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const [totalUsuarios, usuariosActivos, usuariosInactivos, porRol] =
+        await Promise.all([
+          prisma.mot_usuario.count(),
+          prisma.mot_usuario.count({
+            where: { estado: { in: ["activo", "ACTIVO"] } },
+          }),
+          prisma.mot_usuario.count({
+            where: { estado: { in: ["inactivo", "INACTIVO"] } },
+          }),
+          prisma.mom_rol.findMany({
+            include: {
+              _count: {
+                select: { mot_usuario: true },
+              },
+            },
+          }),
+        ]);
 
-    res.json({
-      success: true,
-      data: {
-        total: totalUsuarios,
-        activos: usuariosActivos,
-        inactivos: usuariosInactivos,
-        por_rol: porRol.map(rol => ({
-          rol_id: rol.rol_id,
-          nombre: rol.nombre,
-          codigo: rol.codigo,
-          cantidad: rol._count.mot_usuario
-        }))
-      }
-    });
-  } catch (error) {
-    console.error('Error obteniendo estadísticas:', error);
-    res.status(500).json({
-      success: false,
-      error: 'INTERNAL_ERROR',
-      message: 'Error obteniendo estadísticas'
-    });
-  }
-});
+      res.json({
+        success: true,
+        data: {
+          total: totalUsuarios,
+          activos: usuariosActivos,
+          inactivos: usuariosInactivos,
+          por_rol: porRol.map((rol) => ({
+            rol_id: rol.rol_id,
+            nombre: rol.nombre,
+            codigo: rol.codigo,
+            cantidad: rol._count.mot_usuario,
+          })),
+        },
+      });
+    } catch (error) {
+      console.error("Error obteniendo estadísticas:", error);
+      res.status(500).json({
+        success: false,
+        error: "INTERNAL_ERROR",
+        message: "Error obteniendo estadísticas",
+      });
+    }
+  },
+);
 
 export default router;

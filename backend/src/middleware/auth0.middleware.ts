@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { checkJwt } from '../config/auth0.config';
-import { Auth0User, LocalUser } from '../types/express'; // Importar desde el archivo único
+import { Request, Response, NextFunction } from "express";
+import { PrismaClient } from "@prisma/client";
+import { checkJwt } from "../config/auth0.config";
+import { Auth0User, LocalUser } from "../types/express"; // Importar desde el archivo único
 
 const prisma = new PrismaClient();
 
@@ -34,11 +34,14 @@ const prisma = new PrismaClient();
 //   }
 // }
 
-
 /**
  * Middleware combinado: Auth0 JWT + Permisos de base de datos local
  */
-export const authenticateAuth0 = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateAuth0 = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     // 1. Verificar JWT de Auth0
     checkJwt(req, res, async (jwtError: unknown) => {
@@ -46,21 +49,21 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
         const error = jwtError as Error;
         return res.status(401).json({
           success: false,
-          message: 'Token de Auth0 inválido',
-          error: error.message
+          message: "Token de Auth0 inválido",
+          error: error.message,
         });
       }
 
       try {
         // 2. Obtener información del usuario de Auth0
-  const auth0User = (req as any).user as unknown as Auth0User;
+        const auth0User = (req as any).user as unknown as Auth0User;
         const auth0UserId = auth0User?.sub;
         const userEmail = auth0User?.email;
 
         if (!auth0UserId) {
           return res.status(401).json({
             success: false,
-            message: 'ID de usuario de Auth0 no encontrado'
+            message: "ID de usuario de Auth0 no encontrado",
           });
         }
 
@@ -70,42 +73,42 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
             OR: [
               { username: userEmail },
               // Puedes agregar un campo auth0_id en el futuro
-              { username: auth0UserId }
+              { username: auth0UserId },
             ],
-            estado: 'activo'
+            estado: "activo",
           },
           include: {
             mom_rol: {
               include: {
                 rel_mom_rol__mom_permiso: {
                   include: {
-                    mom_permiso: true
-                  }
-                }
-              }
+                    mom_permiso: true,
+                  },
+                },
+              },
             },
-            mom_trabajador: true
-          }
+            mom_trabajador: true,
+          },
         });
 
         if (!usuario) {
           return res.status(403).json({
             success: false,
-            message: 'Usuario no encontrado en el sistema local. Contacte al administrador.'
+            message:
+              "Usuario no encontrado en el sistema local. Contacte al administrador.",
           });
         }
 
         // 4. Extraer permisos del usuario
         const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso
-          .map(rel => rel.mom_permiso.codigo)
+          .map((rel) => rel.mom_permiso.codigo)
           .filter((codigo): codigo is string => codigo !== null);
-
 
         // 5. Agregar información al request
         (req as any).auth0User = {
           sub: auth0UserId,
           email: userEmail,
-          permissions: auth0User?.permissions || []
+          permissions: auth0User?.permissions || [],
         };
 
         (req as any).localUser = {
@@ -113,29 +116,29 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
           username: usuario.username,
           rol_id: usuario.rol_id,
           trabajador_id: usuario.trabajador_id || undefined,
-          permisos: permisos
+          permisos: permisos,
         };
 
         (req as any).userPermissions = permisos;
         (req as any).userRoles = [usuario.mom_rol.codigo];
 
-        console.log(`✅ Usuario autenticado: ${userEmail} (${usuario.mom_rol.nombre})`);
+        console.log(
+          `✅ Usuario autenticado: ${userEmail} (${usuario.mom_rol.nombre})`,
+        );
         next();
-
       } catch (dbError) {
-        console.error('Error consultando base de datos:', dbError);
+        console.error("Error consultando base de datos:", dbError);
         return res.status(500).json({
           success: false,
-          message: 'Error interno del servidor'
+          message: "Error interno del servidor",
         });
       }
     });
-
   } catch (error) {
-    console.error('Error en autenticación Auth0:', error);
+    console.error("Error en autenticación Auth0:", error);
     return res.status(500).json({
       success: false,
-      message: 'Error en el proceso de autenticación'
+      message: "Error en el proceso de autenticación",
     });
   }
 };
@@ -148,7 +151,7 @@ export const requirePermission = (permission: string) => {
     if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
-        message: 'Permisos no cargados'
+        message: "Permisos no cargados",
       });
     }
     if (!(req as any).userPermissions.includes(permission)) {
@@ -156,11 +159,13 @@ export const requirePermission = (permission: string) => {
         success: false,
         message: `Acceso denegado. Se requiere permiso: ${permission}`,
         required_permission: permission,
-        user_permissions: (req as any).userPermissions
+        user_permissions: (req as any).userPermissions,
       });
     }
 
-    console.log(`✅ Permiso verificado: ${permission} para usuario ${(req as any).localUser?.username}`);
+    console.log(
+      `✅ Permiso verificado: ${permission} para usuario ${(req as any).localUser?.username}`,
+    );
     next();
   };
 };
@@ -173,20 +178,20 @@ export const requireAnyPermission = (permissions: string[]) => {
     if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
-        message: 'Permisos no cargados'
+        message: "Permisos no cargados",
       });
     }
 
     const hasPermission = permissions.some((permission) =>
-      (req as any).userPermissions!.includes(permission)
+      (req as any).userPermissions!.includes(permission),
     );
 
     if (!hasPermission) {
       return res.status(403).json({
         success: false,
-        message: 'Acceso denegado',
+        message: "Acceso denegado",
         required_permissions: permissions,
-        user_permissions: (req as any).userPermissions
+        user_permissions: (req as any).userPermissions,
       });
     }
 
@@ -202,24 +207,24 @@ export const requireAllPermissions = (permissions: string[]) => {
     if (!(req as any).userPermissions) {
       return res.status(403).json({
         success: false,
-        message: 'Permisos no cargados'
+        message: "Permisos no cargados",
       });
     }
 
     const hasAllPermissions = permissions.every((permission) =>
-      (req as any).userPermissions!.includes(permission)
+      (req as any).userPermissions!.includes(permission),
     );
 
     if (!hasAllPermissions) {
-      const missingPermissions = permissions.filter((permission) =>
-        !(req as any).userPermissions!.includes(permission)
+      const missingPermissions = permissions.filter(
+        (permission) => !(req as any).userPermissions!.includes(permission),
       );
 
       return res.status(403).json({
         success: false,
-        message: 'Acceso denegado',
+        message: "Acceso denegado",
         missing_permissions: missingPermissions,
-        user_permissions: (req as any).userPermissions
+        user_permissions: (req as any).userPermissions,
       });
     }
 
@@ -237,7 +242,7 @@ export const requireRole = (role: string) => {
         success: false,
         message: `Acceso denegado. Se requiere rol: ${role}`,
         required_role: role,
-        user_roles: (req as any).userRoles
+        user_roles: (req as any).userRoles,
       });
     }
 
@@ -248,9 +253,12 @@ export const requireRole = (role: string) => {
 /**
  * Middleware solo para administradores
  */
-export const requireAdmin = requireRole('ADMIN');
+export const requireAdmin = requireRole("ADMIN");
 
 /**
  * Middleware solo para supervisores o admin
  */
-export const requireSupervisorOrAdmin = requireAnyPermission(['supervisor:all', 'admin:all']);
+export const requireSupervisorOrAdmin = requireAnyPermission([
+  "supervisor:all",
+  "admin:all",
+]);
