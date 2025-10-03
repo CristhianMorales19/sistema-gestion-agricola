@@ -386,12 +386,12 @@ router.put('/:id',
                 orderBy: { info_laboral_id: 'desc' }
             });
 
-            const laboralData = {
+            const laboralData: any = {
                 trabajador_id: trabajadorId,
                 cargo: cargo ? String(cargo) : (existingInfo ? existingInfo.cargo : 'Sin definir'),
                 fecha_ingreso_at: req.body.fecha_ingreso_at ? new Date(req.body.fecha_ingreso_at) : (existingInfo ? existingInfo.fecha_ingreso_at : new Date()),
                 tipo_contrato: tipo_contrato ? String(tipo_contrato) : (existingInfo ? existingInfo.tipo_contrato : 'no_definido'),
-                salario_base: salario_base ? parseFloat(String(salario_base)) : (existingInfo ? parseFloat(String(existingInfo.salario_base)) : 0),
+                salario_base: salario_base ? parseFloat(String(salario_base)) : (existingInfo ? existingInfo.salario_base : 0),
                 codigo_nomina: req.body.codigo_nomina ? String(req.body.codigo_nomina) : (existingInfo ? existingInfo.codigo_nomina : null),
                 salario_bruto: req.body.salario_bruto ? parseFloat(String(req.body.salario_bruto)) : (existingInfo ? existingInfo.salario_bruto : null),
                 rebajas_ccss: req.body.rebajas_ccss ? parseFloat(String(req.body.rebajas_ccss)) : (existingInfo ? existingInfo.rebajas_ccss : null),
