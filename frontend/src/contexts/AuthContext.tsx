@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: fetchUserProfile,
-    enabled: isAuthenticated && !!user?.email,
+    enabled: isAuthenticated && Boolean(user?.email),
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });

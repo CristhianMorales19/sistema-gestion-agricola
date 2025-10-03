@@ -188,7 +188,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.position}
               onChange={handleChange}
               required
-              error={!!errors.position}
+              error={Boolean(errors.position)}
               helperText={errors.position}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
@@ -209,7 +209,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.payrollCode}
               onChange={handleChange}
               sx={mutedFieldSx}
-              error={!!errors.payrollCode}
+              error={Boolean(errors.payrollCode)}
               helperText={errors.payrollCode}
             />
           </Grid>
@@ -222,7 +222,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.baseSalary}
               onChange={handleChange}
               required
-              error={!!errors.baseSalary}
+              error={Boolean(errors.baseSalary)}
               helperText={errors.baseSalary}
               InputProps={{ startAdornment: '$' }}
               sx={{
@@ -245,7 +245,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.contractType}
               onChange={handleChange}
               required
-              error={!!errors.contractType}
+              error={Boolean(errors.contractType)}
               helperText={errors.contractType}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
@@ -273,7 +273,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               value={formData.department}
               onChange={handleChange}
               required
-              error={!!errors.department}
+              error={Boolean(errors.department)}
               helperText={errors.department}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },

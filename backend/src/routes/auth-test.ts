@@ -63,7 +63,7 @@ router.get('/config', (req: Request, res: Response) => {
       domain: process.env.AUTH0_DOMAIN,
       audience: process.env.AUTH0_AUDIENCE,
       client_id: process.env.AUTH0_CLIENT_ID?.substring(0, 8) + '...',
-      has_secret: !!process.env.AUTH0_CLIENT_SECRET,
+      has_secret: Boolean(process.env.AUTH0_CLIENT_SECRET),
       issuer_base_url: process.env.AUTH0_ISSUER_BASE_URL
     }
   });

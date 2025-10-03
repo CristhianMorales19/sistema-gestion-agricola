@@ -84,7 +84,7 @@ router.get('/verify-setup', (req, res) => {
       clientSecret: AUTH0_CLIENT_SECRET ? '✅ Configurado' : '❌ No configurado',
       audience: AUTH0_AUDIENCE ? `✅ ${AUTH0_AUDIENCE}` : '❌ No configurado'
     },
-    ready: !!(AUTH0_DOMAIN && AUTH0_CLIENT_ID && AUTH0_CLIENT_SECRET && AUTH0_AUDIENCE),
+    ready: Boolean(AUTH0_DOMAIN && AUTH0_CLIENT_ID && AUTH0_CLIENT_SECRET && AUTH0_AUDIENCE),
     nextSteps: [
       'POST /api/auth/test-token - Obtener token de prueba',
       'Usar token para probar endpoints protegidos'

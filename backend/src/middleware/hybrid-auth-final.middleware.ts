@@ -20,8 +20,8 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     console.log('⏰ Timestamp:', new Date().toISOString());
     
     // 1. Verificar que existe token Auth0 validado
-    console.log('🔍 Verificando req.auth:', !!(req as any).auth);
-    console.log('🔍 Verificando req.user:', !!(req as any).user);
+    console.log('🔍 Verificando req.auth:', Boolean((req as any).auth));
+    console.log('🔍 Verificando req.user:', Boolean((req as any).user));
     
     if (!(req as any).auth && !(req as any).user) {
       console.log('❌ No hay token Auth0 validado');

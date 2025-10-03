@@ -58,7 +58,7 @@ console.log('🔍 Variables de entorno cargadas:');
 console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
 console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
 console.log('AUTH0_CLIENT_ID:', process.env.AUTH0_CLIENT_ID ? '✅ Configurado' : '❌ Faltante');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('DATABASE_URL exists:', Boolean(process.env.DATABASE_URL));
 console.log('DATABASE_URL value:', process.env.DATABASE_URL || 'UNDEFINED!');
 console.log('PORT:', process.env.PORT || 3000);
 
