@@ -1,7 +1,27 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, mot_usuario, mom_rol, mom_permiso } from '@prisma/client';
 import { auth0ManagementService, Auth0User } from './auth0-management.service';
 
 const prisma = new PrismaClient();
+
+/**
+ * Tipos para el servicio de sincronización
+ */
+type LocalUser = mot_usuario;
+
+type LocalUserWithRole = mot_usuario & {
+  mom_rol: mom_rol & {
+    rel_mom_rol__mom_permiso: Array<{
+      mom_permiso: mom_permiso;
+    }>;
+  };
+};
+
+type OrphanedLocalUser = {
+  usuario_id: number;
+  auth0_user_id: string | null;
+  username: string;
+  estado: string;
+};
 
 /**
  * Servicio para sincronizar usuarios entre Auth0 y base de datos local
@@ -13,7 +33,7 @@ export class UserSyncService {
    */
   static async syncUserFromAuth0(auth0UserId: string): Promise<{
     success: boolean;
-    user?: any;
+    user?: LocalUser;
     message: string;
   }> {
     try {
@@ -82,7 +102,7 @@ export class UserSyncService {
   /**
    * Obtener o crear usuario local basado en usuario Auth0
    */
-  static async getOrCreateLocalUser(auth0UserId: string, auth0UserData?: any): Promise<any> {
+  static async getOrCreateLocalUser(auth0UserId: string, auth0UserData?: Auth0User): Promise<LocalUserWithRole | null> {
     try {
       // Buscar usuario local existente
       let localUser = await prisma.mot_usuario.findUnique({
@@ -202,8 +222,8 @@ export class UserSyncService {
   static async verifyUserIntegrity(): Promise<{
     auth0UsersCount: number;
     localUsersCount: number;
-    orphanedLocalUsers: any[];
-    missingLocalUsers: any[];
+    orphanedLocalUsers: OrphanedLocalUser[];
+    missingLocalUsers: Auth0User[];
   }> {
     try {
       // Obtener todos los usuarios de Auth0
@@ -252,7 +272,7 @@ export class UserSyncService {
    */
   static async cleanupOrphanedUsers(dryRun = true): Promise<{
     success: boolean;
-    orphanedUsers: any[];
+    orphanedUsers: OrphanedLocalUser[];
     deletedCount: number;
   }> {
     try {
