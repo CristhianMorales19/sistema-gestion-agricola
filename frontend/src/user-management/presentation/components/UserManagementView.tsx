@@ -652,7 +652,7 @@ export const UserManagementView: React.FC = () => {
 
       {/* Snackbars para mensajes */}
       <Snackbar 
-        open={!!error} 
+        open={Boolean(error)} 
         autoHideDuration={6000} 
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -663,7 +663,7 @@ export const UserManagementView: React.FC = () => {
       </Snackbar>
       
       <Snackbar 
-        open={!!success} 
+        open={Boolean(success)} 
         autoHideDuration={4000} 
         onClose={() => setSuccess(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

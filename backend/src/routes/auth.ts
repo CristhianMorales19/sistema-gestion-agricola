@@ -31,8 +31,8 @@ router.get('/public', (req, res) => {
 router.get('/protected', checkJwt, async (req, res) => {
   const user = (req as any).auth || (req as any).user;
   
-  console.log('🔍 DEBUG /protected - req.auth:', !!(req as any).auth);
-  console.log('🔍 DEBUG /protected - req.user:', !!(req as any).user);
+  console.log('🔍 DEBUG /protected - req.auth:', Boolean((req as any).auth));
+  console.log('🔍 DEBUG /protected - req.user:', Boolean((req as any).user));
   
   try {
     // Obtener información adicional del usuario desde Auth0 /userinfo

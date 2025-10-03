@@ -116,7 +116,7 @@ export const useAuth = () => {
     // Estado
     user,
     isLoading: isLoading || auth0.isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: Boolean(user),
     error,
 
     // Acciones

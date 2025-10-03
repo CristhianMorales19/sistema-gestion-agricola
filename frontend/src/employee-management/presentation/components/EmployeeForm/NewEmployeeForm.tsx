@@ -155,7 +155,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 name="documento_identidad"
                 value={formData.documento_identidad}
                 onChange={handleChange}
-                error={!!errors.documento_identidad}
+                error={Boolean(errors.documento_identidad)}
                 helperText={errors.documento_identidad}
                 required
                 InputProps={{
@@ -185,7 +185,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 name="nombre_completo"
                 value={formData.nombre_completo}
                 onChange={handleChange}
-                error={!!errors.nombre_completo}
+                error={Boolean(errors.nombre_completo)}
                 helperText={errors.nombre_completo}
                 required
                 InputProps={{
@@ -216,7 +216,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 type="date"
                 value={formData.fecha_nacimiento}
                 onChange={handleChange}
-                error={!!errors.fecha_nacimiento}
+                error={Boolean(errors.fecha_nacimiento)}
                 helperText={errors.fecha_nacimiento}
                 required
                 InputLabelProps={{ shrink: true }}
@@ -248,7 +248,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 type="date"
                 value={formData.fecha_registro_at}
                 onChange={handleChange}
-                error={!!errors.fecha_registro_at}
+                error={Boolean(errors.fecha_registro_at)}
                 helperText={errors.fecha_registro_at}
                 required
                 InputLabelProps={{ shrink: true }}
@@ -280,7 +280,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 value={formData.telefono}
                 required
                 onChange={handleChange}
-                error={!!errors.telefono}
+                error={Boolean(errors.telefono)}
                 helperText={errors.telefono}
                 InputProps={{
                   startAdornment: (
@@ -311,7 +311,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 required
                 value={formData.email}
                 onChange={handleChange}
-                error={!!errors.email}
+                error={Boolean(errors.email)}
                 helperText={errors.email}
                 InputProps={{
                   startAdornment: (
