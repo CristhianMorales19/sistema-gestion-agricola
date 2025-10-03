@@ -179,7 +179,10 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
     const { page = 1, limit = 10, estado, rol_id } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const where: any = {};
+    const where: {
+      estado?: string;
+      rol_id?: number;
+    } = {};
     if (estado) where.estado = String(estado);
     if (rol_id) where.rol_id = Number(rol_id);
 

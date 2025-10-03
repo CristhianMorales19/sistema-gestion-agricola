@@ -61,7 +61,7 @@ app.use('*', (req, res) => {
 });
 
 // Manejo global de errores
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error & { status?: number }, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error Global:', error);
   
   res.status(error.status || 500).json({

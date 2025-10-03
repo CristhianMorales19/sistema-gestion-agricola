@@ -40,7 +40,7 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
 
       // Extraer permisos del usuario local
       const permisos = localUser.mom_rol?.rel_mom_rol__mom_permiso?.map(
-        (rp: any) => rp.mom_permiso.codigo
+        (rp) => rp.mom_permiso.codigo
       ) || [];
 
       // Agregar datos del usuario local a la request

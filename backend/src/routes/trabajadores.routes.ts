@@ -304,7 +304,10 @@ router.get('/', async (req: Request, res: Response) => {
     const { page = 1, limit = 10, tiene_usuario } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const where: any = { is_activo: true };
+    const where: {
+      is_activo: boolean;
+      mot_usuario?: { some?: object; none?: object };
+    } = { is_activo: true };
 
     // Filtrar por si tiene usuario o no
     if (tiene_usuario === 'true') {
