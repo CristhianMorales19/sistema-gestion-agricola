@@ -1,0 +1,65 @@
+version = 1
+
+# Configuración para análisis de TypeScript/JavaScript (Backend y Frontend)
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+  [analyzers.meta]
+  plugins = ["react"]
+  environment = [
+    "nodejs",
+    "browser"
+  ]
+  # Dependencias externas
+  dependencies_file_paths = [
+    "backend/package.json",
+    "frontend/package.json",
+    "package.json"
+  ]
+
+# Configuración para análisis de SQL
+[[analyzers]]
+name = "sql"
+enabled = true
+
+# Configuración para análisis de secretos y credenciales
+[[analyzers]]
+name = "secrets"
+enabled = true
+
+# Configuración para análisis de Docker (si usas Docker)
+[[analyzers]]
+name = "docker"
+enabled = true
+
+# Configuración para análisis de test coverage
+[[analyzers]]
+name = "test-coverage"
+enabled = true
+
+# Transformers para auto-fix de problemas
+[[transformers]]
+name = "prettier"
+enabled = true
+
+[[transformers]]
+name = "autopep8"
+enabled = false
+
+# Exclusiones - archivos/carpetas que no se deben analizar
+exclude_patterns = [
+  "node_modules/**",
+  "dist/**",
+  "build/**",
+  "coverage/**",
+  "*.min.js",
+  "*.bundle.js",
+  "backend/prisma/migrations/**",
+  "database/migraciones/**",
+  "*.log",
+  "*.lock",
+  ".git/**",
+  ".vscode/**",
+  "backup_antes_limpieza/**"
+]

@@ -584,11 +584,16 @@ model mot_tarea_programada {
 model mot_usuario {
   usuario_id                 Int             @id @default(autoincrement())
   auth0_user_id              String?         @unique
+  auth0_id                   String?         @unique @db.VarChar(255)
   trabajador_id              Int?
   username                   String          @unique(map: "username") @db.VarChar(100)
+  email                      String?         @db.VarChar(255)
   password_hash              String          @db.VarChar(255)
   rol_id                     Int
   estado                     String          @default("activo") @db.VarChar(50)
+  auth_provider              String?         @default("local") @db.VarChar(50)
+  email_verified             Boolean?        @default(false)
+  last_login_at              DateTime?       @db.DateTime(0)
   fecha_ultimo_cambio_rol_at DateTime?       @db.DateTime(0)
   created_at                 DateTime        @db.DateTime(0)
   updated_at                 DateTime?       @db.DateTime(0)

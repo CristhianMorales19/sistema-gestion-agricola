@@ -18,6 +18,7 @@ import debugRoutes from './routes/debug-routes';
 import debugPrismaRoutes from './routes/debug-prisma';
 import userRoleManagementRoutes from './routes/user-role-management';
 import testUserManagementRoutes from './routes/test-user-management';
+import usuariosSistemaRoutes from './routes/usuarios-sistema.routes';
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
@@ -118,6 +119,9 @@ app.use('/api/debug-prisma', debugPrismaRoutes);
 
 // Rutas de administración de usuarios y roles
 app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
 
 // Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
 app.use('/api/test', testUserManagementRoutes);

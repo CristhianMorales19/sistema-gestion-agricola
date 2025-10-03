@@ -39,12 +39,14 @@ import {
 } from '@mui/icons-material';
 import { useAuth0 } from '@auth0/auth0-react';
 import { UserManagementService } from '../../services/UserManagementService';
+import { UsuariosSistemaService } from '../../../services/usuarios-sistema.service';
 import { UserWithRoles, Role, UserFilters } from '../../types';
 
 export const UserManagementView: React.FC = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [databaseRoles, setDatabaseRoles] = useState<any[]>([]); // Roles de BD para crear usuarios
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -59,22 +61,34 @@ export const UserManagementView: React.FC = () => {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithRoles | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  
+  // Estados para modal crear usuario
+  const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    email: '',
+    nombre: '',
+    password: '',
+    rol_id: ''
+  });
 
   // Inicializar servicio
   const userService = new UserManagementService(getAccessTokenSilently);
+  const usuariosService = new UsuariosSistemaService(getAccessTokenSilently);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const [usersResponse, rolesData] = await Promise.all([
+      const [usersResponse, rolesData, dbRolesResponse] = await Promise.all([
         userService.getUsers(filters),
-        userService.getRoles()
+        userService.getRoles(),
+        usuariosService.getRolesDisponibles() // Cargar roles de BD
       ]);
       
       setUsers(usersResponse.users);
       setRoles(rolesData);
+      setDatabaseRoles(dbRolesResponse.data || []); // Guardar roles de BD
     } catch (err) {
       setError('Error cargando datos de usuarios');
       console.error('Error loading users:', err);
@@ -97,6 +111,67 @@ export const UserManagementView: React.FC = () => {
     } catch (err) {
       setError('Error sincronizando usuarios');
       console.error('Error syncing users:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCrearUsuario = () => {
+    setNewUserData({
+      email: '',
+      nombre: '',
+      password: '',
+      rol_id: ''
+    });
+    setCreateUserModalOpen(true);
+  };
+
+  const handleCloseCreateUserModal = () => {
+    setCreateUserModalOpen(false);
+    setNewUserData({
+      email: '',
+      nombre: '',
+      password: '',
+      rol_id: ''
+    });
+  };
+
+  const handleSubmitCreateUser = async () => {
+    try {
+      if (!newUserData.email || !newUserData.nombre || !newUserData.password || !newUserData.rol_id) {
+        setError('Todos los campos son requeridos');
+        return;
+      }
+
+      if (newUserData.password.length < 8) {
+        setError('La contraseña debe tener al menos 8 caracteres');
+        return;
+      }
+
+      // Sugerir dominio @agromano.com si no lo tiene
+      if (!newUserData.email.includes('@agromano.com')) {
+        const confirmDomain = window.confirm(
+          `¿Estás seguro de usar "${newUserData.email}"?\n\n` +
+          `Se recomienda usar el dominio @agromano.com para consistencia con otros usuarios del sistema.\n\n` +
+          `¿Continuar con este email?`
+        );
+        if (!confirmDomain) return;
+      }
+
+      setLoading(true);
+      await usuariosService.crearUsuarioHibrido({
+        email: newUserData.email,
+        nombre: newUserData.nombre,
+        password: newUserData.password,
+        rol_id: Number(newUserData.rol_id)
+      });
+
+      setSuccess('Usuario híbrido creado exitosamente');
+      handleCloseCreateUserModal();
+      await loadData();
+    } catch (err: any) {
+      setError(err.message || 'Error creando usuario');
+      console.error('Error creating user:', err);
     } finally {
       setLoading(false);
     }
@@ -197,6 +272,17 @@ export const UserManagementView: React.FC = () => {
             }}
           >
             Actualizar
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<PersonAdd />}
+            onClick={handleCrearUsuario}
+            sx={{ 
+              backgroundColor: '#10b981',
+              '&:hover': { backgroundColor: '#059669' }
+            }}
+          >
+            Crear Usuario
           </Button>
           <Button
             variant="contained"
@@ -440,6 +526,126 @@ export const UserManagementView: React.FC = () => {
             sx={{ backgroundColor: '#3b82f6', '&:hover': { backgroundColor: '#2563eb' } }}
           >
             Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal para crear usuario */}
+      <Dialog 
+        open={createUserModalOpen} 
+        onClose={handleCloseCreateUserModal}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { backgroundColor: '#1e293b', color: '#ffffff' }
+        }}
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #334155' }}>
+          Crear Nuevo Usuario Híbrido
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography variant="body2" sx={{ color: '#94a3b8', mb: 3 }}>
+            El usuario se creará en Auth0 y en la base de datos local
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="Email"
+            type="email"
+            value={newUserData.email}
+            onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+            placeholder="usuario@agromano.com"
+            helperText="Usar dominio @agromano.com para consistencia"
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#475569' },
+                '&:hover fieldset': { borderColor: '#64748b' },
+                '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+              },
+              '& .MuiInputLabel-root': { color: '#94a3b8' },
+              '& .MuiFormHelperText-root': { color: '#64748b' }
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Nombre Completo"
+            value={newUserData.nombre}
+            onChange={(e) => setNewUserData(prev => ({ ...prev, nombre: e.target.value }))}
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#475569' },
+                '&:hover fieldset': { borderColor: '#64748b' },
+                '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+              },
+              '& .MuiInputLabel-root': { color: '#94a3b8' }
+            }}
+          />
+
+          <TextField
+            fullWidth
+            label="Contraseña"
+            type="password"
+            value={newUserData.password}
+            onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
+            helperText="Mínimo 8 caracteres"
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#475569' },
+                '&:hover fieldset': { borderColor: '#64748b' },
+                '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+              },
+              '& .MuiInputLabel-root': { color: '#94a3b8' },
+              '& .MuiFormHelperText-root': { color: '#64748b' }
+            }}
+          />
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel sx={{ color: '#94a3b8' }}>Rol</InputLabel>
+            <Select
+              value={newUserData.rol_id}
+              label="Rol"
+              onChange={(e) => setNewUserData(prev => ({ ...prev, rol_id: e.target.value }))}
+              sx={{
+                color: '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#64748b' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3b82f6' },
+              }}
+            >
+              {databaseRoles.map((role) => (
+                <MenuItem key={role.rol_id} value={role.rol_id}>
+                  <Box>
+                    <Typography>{role.nombre}</Typography>
+                    <Typography variant="body2" sx={{ color: '#64748b' }}>
+                      {role.descripcion || role.codigo}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ borderTop: '1px solid #334155', pt: 2 }}>
+          <Button 
+            onClick={handleCloseCreateUserModal}
+            sx={{ color: '#64748b' }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSubmitCreateUser}
+            variant="contained"
+            disabled={loading}
+            sx={{ backgroundColor: '#10b981', '&:hover': { backgroundColor: '#059669' } }}
+          >
+            {loading ? 'Creando...' : 'Crear Usuario'}
           </Button>
         </DialogActions>
       </Dialog>
