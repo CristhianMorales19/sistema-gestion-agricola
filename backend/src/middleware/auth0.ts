@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
 // Función para obtener la llave de firma
-function getKey(header: any, callback: any) {
+function getKey(header: jwt.JwtHeader, callback: (err: Error | null, signingKey?: string) => void) {
   // Crear el cliente dinámicamente para asegurar que las variables de entorno estén cargadas
   const client = jwksClient({
     jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`

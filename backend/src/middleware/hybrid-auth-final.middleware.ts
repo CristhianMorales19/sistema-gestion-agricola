@@ -60,7 +60,14 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
     console.log('🔍 Criterios de búsqueda: userSub O userEmail + estado ACTIVO/activo');
     // Intentamos usar auth0_user_id primero (rama 'Sebastian'). Si la columna no existe
     // (Prisma P2022) usamos un fallback que busca por username usando SQL crudo.
-    let user: any = null;
+    let user: { 
+      usuario_id: number; 
+      trabajador_id?: number | null;
+      username: string; 
+      rol_id: number;
+      estado: string;
+      [key: string]: unknown;
+    } | null = null;
     try {
       user = await prisma.mot_usuario.findFirst({
         where: {
@@ -82,12 +89,21 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
           ]
         }
       });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error & { code?: string };
       // Manejar error conocido de Prisma cuando la columna no existe (P2022)
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2022') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2022') {
         console.warn('⚠️ Prisma P2022 detectado (columna ausente). Usando fallback SQL para búsqueda de usuario.');
         try {
-          const rows: any = await prisma.$queryRawUnsafe(
+          const rows = await prisma.$queryRawUnsafe<Array<{
+            usuario_id: number;
+            trabajador_id?: number | null;
+            username: string;
+            password_hash: string;
+            rol_id: number;
+            estado: string;
+            [key: string]: unknown;
+          }>>(
             `SELECT usuario_id, trabajador_id, username, password_hash, rol_id, estado, fecha_ultimo_cambio_rol_at, created_at, updated_at, created_by, updated_by, deleted_at
              FROM mot_usuario
              WHERE (username = ? OR username = ?) AND (estado = 'ACTIVO' OR estado = 'activo')
@@ -144,6 +160,11 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       }
     }
 
+    if (!user) {
+      console.warn('⚠️ Usuario no encontrado después de búsqueda');
+      return res.status(401).json({ message: 'Usuario no encontrado en la base de datos' });
+    }
+
     console.log(`✅ Usuario encontrado: ID ${user.usuario_id}, username: ${user.username}, estado: ${user.estado}`);
 
     // 5. Obtener rol del usuario
@@ -188,7 +209,12 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
   // Si después de unir no hay permisos, intentar consulta menos restrictiva (sin is_activo)
   if (mergedPermissions.length === 0) {
     try {
-      const fallbackRows: any = await prisma.$queryRawUnsafe(
+      const fallbackRows = await prisma.$queryRawUnsafe<Array<{
+        permiso_id: number;
+        permiso_codigo: string;
+        is_activo: number;
+        deleted_at: Date | null;
+      }>>(
         `SELECT p.permiso_id, p.codigo as permiso_codigo, p.is_activo, rp.deleted_at
          FROM rel_mom_rol__mom_permiso rp
          INNER JOIN mom_permiso p ON rp.permiso_id = p.permiso_id
@@ -198,9 +224,8 @@ export const hybridAuthMiddleware = async (req: Request, res: Response, next: Ne
       );
       console.log('🔎 Fallback - rows sin filtro is_activo:', JSON.stringify(fallbackRows, null, 2));
       if (Array.isArray(fallbackRows) && fallbackRows.length > 0) {
-        const fallbackPerms = fallbackRows.map((r: any) => r.permiso_codigo).filter(Boolean);
+        const fallbackPerms = fallbackRows.map((r) => r.permiso_codigo).filter(Boolean);
         mergedPermissions = Array.from(new Set([...fallbackPerms, ...mergedPermissions]));
-      const tokenPermissions = ((req as any).auth as any)?.permissions || ((req as any).user as any)?.permissions || [];
       }
     } catch (fbErr) {
       console.warn('⚠️ Fallback menos restrictivo falló:', fbErr);

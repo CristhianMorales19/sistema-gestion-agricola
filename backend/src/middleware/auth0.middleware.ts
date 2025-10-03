@@ -41,12 +41,13 @@ const prisma = new PrismaClient();
 export const authenticateAuth0 = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Verificar JWT de Auth0
-    checkJwt(req, res, async (jwtError: any) => {
+    checkJwt(req, res, async (jwtError: unknown) => {
       if (jwtError) {
+        const error = jwtError as Error;
         return res.status(401).json({
           success: false,
           message: 'Token de Auth0 inválido',
-          error: jwtError.message
+          error: error.message
         });
       }
 

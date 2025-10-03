@@ -233,7 +233,15 @@ export const userHasPermission = (user: LocalUser, permission: string): boolean 
 export const getUserPermissionsByCategory = async (user: LocalUser, category?: string) => {
   if (!user) return [];
 
-  const whereClause: any = {
+  const whereClause: {
+    rel_mom_rol__mom_permiso: {
+      some: {
+        rol_id: number;
+      };
+    };
+    is_activo: boolean;
+    categoria?: string;
+  } = {
     rel_mom_rol__mom_permiso: {
       some: {
         rol_id: user.rol_id

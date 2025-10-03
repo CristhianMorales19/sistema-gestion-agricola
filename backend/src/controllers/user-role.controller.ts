@@ -405,7 +405,10 @@ export class UserRoleController {
       const { userId } = req.params;
       const { page = 0, limit = 20 } = req.query;
 
-      const whereClause: any = {
+      const whereClause: {
+        entidad: string;
+        entidad_id?: number;
+      } = {
         entidad: 'auth0_user_roles'
       };
 

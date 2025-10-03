@@ -219,7 +219,11 @@ declare global {
                 sub: string;
                 permissions?: string[];
                 'https://agromano.com/roles'?: string[];
-                'https://agromano.com/user_metadata'?: any;
+                'https://agromano.com/user_metadata'?: {
+                    usuario_id?: number;
+                    rol_id?: number;
+                    [key: string]: unknown;
+                };
             };
         }
     }

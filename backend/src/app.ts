@@ -34,12 +34,13 @@ async function verificarConexionBD() {
     try {
       const usuarios = await prisma.mot_usuario.count();
       console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error & { code?: string };
       // Manejo suave si la tabla/columna no existe (p. ej. entorno con esquema distinto)
-      if (err && (err.code === 'P2022' || err.code === 'P2025')) {
+      if (error && (error.code === 'P2022' || error.code === 'P2025')) {
         console.warn('⚠️ Advertencia: tabla o columna ausente al verificar mot_usuario. Omitiendo verificación.');
       } else {
-        console.warn('⚠️ Advertencia al verificar tabla mot_usuario:', err instanceof Error ? err.message : String(err));
+        console.warn('⚠️ Advertencia al verificar tabla mot_usuario:', error instanceof Error ? error.message : String(error));
       }
     }
 
@@ -145,7 +146,7 @@ app.use('*', (req, res) => {
 });
 
 // Manejo global de errores
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error & { status?: number; stack?: string }, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error Global:', error);
   
   res.status(error.status || 500).json({

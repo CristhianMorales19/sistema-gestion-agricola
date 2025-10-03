@@ -17,18 +17,33 @@ if (!serverSecret) {
 
 const client = auth0Domain ? jwksClient({ jwksUri: `https://${auth0Domain}/.well-known/jwks.json` }) : null;
 
-async function verifyAuth0Token(token: string): Promise<any> {
+interface DecodedToken {
+  header: {
+    kid: string;
+    alg: string;
+  };
+  payload: unknown;
+}
+
+interface JwtPayload {
+  sub?: string;
+  aud?: string;
+  [key: string]: unknown;
+}
+
+async function verifyAuth0Token(token: string): Promise<JwtPayload> {
   if (!client) throw new Error('Auth0 client not configured');
-  const decodedHeader: any = jwt.decode(token, { complete: true }) as any;
+  const decodedHeader = jwt.decode(token, { complete: true }) as DecodedToken | null;
   if (!decodedHeader || !decodedHeader.header) throw new Error('Invalid token header');
   const kid = decodedHeader.header.kid;
-  const getSigningKey = promisify(client.getSigningKey) as any;
+  const getSigningKey = promisify(client.getSigningKey) as (kid: string) => Promise<{ publicKey?: string; rsaPublicKey?: string; getPublicKey?: () => string }>;
   const key = await getSigningKey(kid);
-  const pub = key.getPublicKey ? key.getPublicKey() : key.publicKey;
+  const pub = key.getPublicKey ? key.getPublicKey() : (key.publicKey || key.rsaPublicKey);
+  if (!pub) throw new Error('Unable to retrieve public key');
   return new Promise((resolve, reject) => {
-    jwt.verify(token, pub, { audience: auth0Audience, issuer: `https://${auth0Domain}/`, algorithms: ['RS256'] }, (err, decoded) => {
+    jwt.verify(token, pub, { audience: auth0Audience, issuer: `https://${auth0Domain}/`, algorithms: ['RS256'] }, (err: Error | null, decoded: unknown) => {
       if (err) return reject(err);
-      resolve(decoded);
+      resolve(decoded as JwtPayload);
     });
   });
 }
@@ -45,9 +60,9 @@ export const flexibleAuth = async (req: Request, res: Response, next: NextFuncti
     // 1) Try server-signed token (HS256)
     if (serverSecret) {
       try {
-        const payload = jwt.verify(token, serverSecret, { algorithms: ['HS256'] }) as any;
+        const payload = jwt.verify(token, serverSecret, { algorithms: ['HS256'] }) as JwtPayload;
         // Normalize to shape expected by downstream middleware
-        (req as any).auth = payload;
+        (req as { auth?: JwtPayload }).auth = payload;
         return next();
       } catch (e) {
         // continue to try Auth0
@@ -58,18 +73,19 @@ export const flexibleAuth = async (req: Request, res: Response, next: NextFuncti
     if (auth0Domain && auth0Audience) {
       try {
         const payload = await verifyAuth0Token(token);
-        (req as any).auth = payload;
+        (req as { auth?: JwtPayload }).auth = payload;
         return next();
       } catch (err: unknown) {
-        const e: any = err;
+        const e = err as { message?: string };
         console.warn('Auth0 verification failed:', e?.message || e);
         return res.status(401).json({ success: false, message: 'Invalid token' });
       }
     }
 
     return res.status(401).json({ success: false, message: 'No valid authentication method configured' });
-  } catch (error: any) {
-    console.error('Error en flexibleAuth:', error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error en flexibleAuth:', err);
     return res.status(500).json({ success: false, message: 'Internal auth error' });
   }
 };

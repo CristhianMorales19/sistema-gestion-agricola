@@ -51,7 +51,33 @@ export const agroManoAuthMiddleware = async (
     console.log(`🔐 Autenticando usuario Auth0: ${auth0UserId}`);
 
     // Sincronizar/obtener usuario local
-    let localUser: any;
+    let localUser: {
+      usuario_id: number;
+      username?: string;
+      email?: string;
+      rol_id?: number;
+      estado: string;
+      trabajador_id?: number | null;
+      mom_rol?: {
+        codigo?: string;
+        nombre?: string;
+        rel_mom_rol__mom_permiso?: Array<{
+          mom_permiso?: {
+            codigo?: string;
+            nombre?: string;
+            categoria?: string;
+          };
+        }>;
+      };
+      mom_trabajador?: {
+        trabajador_id: number;
+        documento_identidad?: string | null;
+        nombre_completo?: string | null;
+        email?: string | null;
+        telefono?: string | null;
+      } | null;
+      [key: string]: unknown;
+    };
     try {
       localUser = await AgroManoUserSyncService.getOrCreateUser(auth0UserId, {
         email: auth0Email,
@@ -87,11 +113,9 @@ export const agroManoAuthMiddleware = async (
     }
 
     // Extraer permisos del rol (ya incluidos en localUser por getOrCreateUser)
-    const permisos = localUser.mom_rol?.rel_mom_rol__mom_permiso?.map((rp: any) => ({
-      codigo: rp.mom_permiso?.codigo,
-      nombre: rp.mom_permiso?.nombre,
-      categoria: rp.mom_permiso?.categoria
-    })) || [];
+    const permisos = localUser.mom_rol?.rel_mom_rol__mom_permiso?.map((rp) => 
+      rp.mom_permiso?.codigo
+    ).filter((codigo): codigo is string => codigo !== undefined) || [];
 
     // Agregar datos a la request para usar en los controladores
     (req as any).user = {
