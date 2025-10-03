@@ -2,11 +2,61 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Tipos para resultados de consultas SQL
+type RawSQLResult = Record<string, unknown>;
+
+type PermisoRaw = {
+  permiso_id: number;
+  codigo: string;
+  nombre: string;
+  descripcion: string | null;
+  categoria: string;
+};
+
+type Auth0UserData = {
+  email?: string;
+  name?: string;
+  picture?: string;
+  email_verified?: boolean;
+  [key: string]: unknown;
+};
+
+type UsuarioCompleto = {
+  usuario_id: number;
+  auth0_id: string;
+  auth0_user_id?: string | null;
+  username: string;
+  email: string;
+  estado: string;
+  auth_provider?: string | null;
+  email_verified?: boolean | null;
+  last_login_at?: Date | null;
+  created_at?: Date;
+  updated_at?: Date | null;
+  mom_rol: {
+    rol_id: number;
+    codigo: string;
+    nombre: string;
+    descripcion?: string | null;
+    is_critico?: boolean;
+    rel_mom_rol__mom_permiso: Array<{
+      mom_permiso: PermisoRaw;
+    }>;
+  };
+  mom_trabajador?: {
+    trabajador_id: number;
+    nombre_completo: string;
+    documento_identidad: string;
+    telefono: string | null;
+    email: string;
+  } | null;
+};
+
 // Helper para ejecutar SQL directo (compatible con MySQL 5.5)
-async function executeRawSQL(query: string, params: any[] = []): Promise<any[]> {
+async function executeRawSQL(query: string, params: unknown[] = []): Promise<RawSQLResult[]> {
   try {
     const result = await prisma.$queryRawUnsafe(query, ...params);
-    return result as any[];
+    return result as RawSQLResult[];
   } catch (error) {
     console.error('❌ [SQL] Error ejecutando consulta:', error);
     throw error;
@@ -26,14 +76,8 @@ export class AgroManoUserSyncService {
    */
   static async getOrCreateUser(
     auth0UserId: string,
-    auth0UserData: {
-      email?: string;
-      name?: string;
-      picture?: string;
-      email_verified?: boolean;
-      [key: string]: any;
-    }
-  ): Promise<any> {
+    auth0UserData: Auth0UserData
+  ): Promise<UsuarioCompleto> {
     try {
       console.log(`🔍 Buscando usuario con Auth0 ID: ${auth0UserId}`);
 
@@ -114,7 +158,7 @@ export class AgroManoUserSyncService {
             nombre: usuario.rol_nombre,
             descripcion: usuario.rol_descripcion,
             is_critico: usuario.is_critico,
-            rel_mom_rol__mom_permiso: permisos.map((p: any) => ({
+            rel_mom_rol__mom_permiso: (permisos as PermisoRaw[]).map((p) => ({
               mom_permiso: {
                 permiso_id: p.permiso_id,
                 codigo: p.codigo,
@@ -229,7 +273,7 @@ export class AgroManoUserSyncService {
           rol_id: nuevoUsuario.rol_id,
           codigo: nuevoUsuario.rol_codigo,
           nombre: nuevoUsuario.rol_nombre,
-          rel_mom_rol__mom_permiso: permisos.map((p: any) => ({
+          rel_mom_rol__mom_permiso: (permisos as PermisoRaw[]).map((p) => ({
             mom_permiso: {
               permiso_id: p.permiso_id,
               codigo: p.codigo,

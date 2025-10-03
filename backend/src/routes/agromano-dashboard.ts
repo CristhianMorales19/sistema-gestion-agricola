@@ -71,7 +71,7 @@ router.get('/general',
                     where: {
                         is_activo: true
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando trabajadores:', err.message);
                     return 0;
                 });
@@ -84,7 +84,7 @@ router.get('/general',
                             { estado: 'activo' }
                         ]
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando usuarios:', err.message);
                     return 0;
                 });
@@ -95,7 +95,7 @@ router.get('/general',
                     where: {
                         is_activo: true
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando roles:', err.message);
                     return 0;
                 });
@@ -105,7 +105,7 @@ router.get('/general',
                     where: {
                         is_activo: 1
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando permisos:', err.message);
                     return 0;
                 });

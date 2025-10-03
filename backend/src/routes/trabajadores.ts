@@ -91,10 +91,11 @@ router.post('/',
         data: nuevoTrabajador,
         message: 'Trabajador creado exitosamente'
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al crear trabajador:', error);
+      const err = error as Error & { code?: string };
       
-      if (error.code === 'P2002') {
+      if (err.code === 'P2002') {
         return res.status(409).json({
           success: false,
           message: 'El documento de identidad ya existe'
@@ -144,10 +145,11 @@ router.put('/:id',
         data: trabajadorActualizado,
         message: 'Trabajador actualizado exitosamente'
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al actualizar trabajador:', error);
+      const err = error as Error & { code?: string };
       
-      if (error.code === 'P2025') {
+      if (err.code === 'P2025') {
         return res.status(404).json({
           success: false,
           message: 'Trabajador no encontrado'
@@ -187,10 +189,11 @@ router.delete('/:id',
         success: true,
         message: 'Trabajador eliminado exitosamente'
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al eliminar trabajador:', error);
+      const err = error as Error & { code?: string };
       
-      if (error.code === 'P2025') {
+      if (err.code === 'P2025') {
         return res.status(404).json({
           success: false,
           message: 'Trabajador no encontrado'

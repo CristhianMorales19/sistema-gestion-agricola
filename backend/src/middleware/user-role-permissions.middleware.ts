@@ -187,11 +187,11 @@ export const requireUserRoleManagementPermission = async (req: Request, res: Res
 export const auditRoleManagement = (action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const localUser = (req as any).localUser;
+      const localUser = (req as Request & { localUser?: { usuario_id: number } }).localUser;
       const originalJson = res.json;
 
       // Interceptar la respuesta para auditoría
-      res.json = function(body: any) {
+      res.json = function(body: { success?: boolean; [key: string]: unknown }) {
         // Solo auditar si la operación fue exitosa
         if (body.success) {
           prisma.mol_audit_log.create({

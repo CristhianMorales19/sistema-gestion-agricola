@@ -33,13 +33,14 @@ router.post('/test-token', async (req: Request, res: Response) => {
       }
     });
 
-  } catch (error: any) {
-    console.error('❌ Error obteniendo token:', error.response?.data || error.message);
+  } catch (error) {
+    const err = error as Error & { response?: { data?: unknown } };
+    console.error('❌ Error obteniendo token:', err.response?.data || err.message);
     
     res.status(500).json({
       success: false,
       message: 'Error obteniendo token de Auth0',
-      error: error.response?.data || error.message,
+      error: err.response?.data || err.message,
       debug: {
         domain: process.env.AUTH0_DOMAIN,
         audience: process.env.AUTH0_AUDIENCE,

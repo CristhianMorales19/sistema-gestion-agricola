@@ -10,11 +10,44 @@ import { Auth0ManagementService } from '../services/auth0-management.service';
 const router = Router();
 const prisma = new PrismaClient();
 
+// Tipos para resultados de consultas SQL
+type RawSQLResult = Record<string, unknown>;
+
+type UsuarioConRol = {
+  usuario_id: number;
+  auth0_id: string | null;
+  auth0_user_id: string | null;
+  username: string;
+  email: string | null;
+  estado: string;
+  auth_provider: string | null;
+  email_verified: boolean | null;
+  last_login_at: Date | null;
+  created_at: Date;
+  updated_at: Date | null;
+  rol_id: number;
+  rol_codigo: string;
+  rol_nombre: string;
+  rol_descripcion: string | null;
+  trabajador_id: number | null;
+  nombre_completo: string | null;
+  documento_identidad: string | null;
+  telefono: string | null;
+  trabajador_email: string | null;
+};
+
+type PermisoData = {
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  descripcion: string | null;
+};
+
 // Helper para consultas SQL directas (para MySQL 5.5 compatibility)
-async function executeRawSQL(query: string, params: any[] = []): Promise<any[]> {
+async function executeRawSQL(query: string, params: unknown[] = []): Promise<RawSQLResult[]> {
   try {
     const result = await prisma.$queryRawUnsafe(query, ...params);
-    return result as any[];
+    return result as RawSQLResult[];
   } catch (error) {
     console.error('❌ [SQL] Error ejecutando consulta:', error);
     throw error;
@@ -65,7 +98,7 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      data: usuarios.map((u: any) => ({
+      data: (usuarios as UsuarioConRol[]).map((u) => ({
         usuario_id: u.usuario_id,
         auth0_id: u.auth0_id,
         auth0_user_id: u.auth0_user_id,
@@ -440,7 +473,7 @@ router.get('/:id', requireAdmin, async (req: Request, res: Response) => {
           is_critico: usuario.is_critico
         },
         
-        permisos: permisos.map((p: any) => ({
+        permisos: (permisos as PermisoData[]).map((p) => ({
           codigo: p.codigo,
           nombre: p.nombre,
           categoria: p.categoria,
@@ -581,20 +614,21 @@ router.post('/crear-hibrido', requireAdmin, async (req: Request, res: Response) 
       }
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ [CREAR-HIBRIDO] Error al crear usuario:', error);
-    console.error('❌ [CREAR-HIBRIDO] Stack:', error.stack);
+    const err = error as Error & { statusCode?: number; data?: unknown };
+    console.error('❌ [CREAR-HIBRIDO] Stack:', err.stack);
     console.error('❌ [CREAR-HIBRIDO] Detalles:', {
-      message: error.message,
-      statusCode: error.statusCode,
-      data: error.data
+      message: err.message,
+      statusCode: err.statusCode,
+      data: err.data
     });
     
     res.status(500).json({
       success: false,
       error: 'CREATION_FAILED',
-      message: error.message || 'Error al crear usuario híbrido',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: err.message || 'Error al crear usuario híbrido',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 });
