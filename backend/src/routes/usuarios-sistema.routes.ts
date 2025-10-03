@@ -10,6 +10,17 @@ import { Auth0ManagementService } from '../services/auth0-management.service';
 const router = Router();
 const prisma = new PrismaClient();
 
+// Tipos extendidos para Request con usuario autenticado
+interface AuthenticatedRequest extends Request {
+  user?: {
+    usuario_id?: number;
+    sub?: string;
+    email?: string;
+    permissions?: string[];
+    dbUser?: unknown;
+  };
+}
+
 // Tipos para resultados de consultas SQL
 type RawSQLResult = Record<string, unknown>;
 
@@ -210,9 +221,16 @@ router.get('/roles-disponibles', requireAdmin, async (req: Request, res: Respons
  */
 router.put('/:id/asignar-rol', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const userAdmin = (req as any).user;
+    const userAdmin = (req as AuthenticatedRequest).user;
     const { id } = req.params;
     const { rol_id } = req.body;
+
+    if (!userAdmin?.usuario_id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autenticado'
+      });
+    }
 
     if (!rol_id) {
       return res.status(400).json({
@@ -308,9 +326,16 @@ router.put('/:id/asignar-rol', requireAdmin, async (req: Request, res: Response)
  */
 router.put('/:id/cambiar-estado', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const userAdmin = (req as any).user;
+    const userAdmin = (req as AuthenticatedRequest).user;
     const { id } = req.params;
     const { estado } = req.body;
+
+    if (!userAdmin?.usuario_id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autenticado'
+      });
+    }
 
     if (!['activo', 'inactivo', 'ACTIVO', 'INACTIVO'].includes(estado)) {
       return res.status(400).json({
@@ -548,7 +573,7 @@ router.post('/crear-hibrido', requireAdmin, async (req: Request, res: Response) 
 
     // Crear en BD remota usando SQL directo
     console.log('📤 [CREAR-HIBRIDO] Creando usuario en BD remota...');
-    const adminUserId = (req as any).user?.usuario_id || 1;
+    const adminUserId = (req as AuthenticatedRequest).user?.usuario_id || 1;
     const username = email.split('@')[0];
     
     await executeRawSQL(`

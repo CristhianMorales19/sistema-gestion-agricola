@@ -13,6 +13,49 @@ type PermisoRaw = {
   categoria: string;
 };
 
+type RolBasico = {
+  rol_id: number;
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+  is_critico?: boolean;
+};
+
+type UsuarioRaw = {
+  usuario_id: number;
+  auth0_id: string;
+  auth0_user_id: string | null;
+  username: string;
+  email: string;
+  estado: string;
+  auth_provider: string | null;
+  email_verified: boolean | null;
+  last_login_at: Date | null;
+  rol_id: number;
+  trabajador_id: number | null;
+  created_at: Date;
+  updated_at: Date | null;
+  rol_codigo: string;
+  rol_nombre: string;
+  rol_descripcion: string | null;
+  is_critico: boolean;
+  nombre_completo: string | null;
+  documento_identidad: string | null;
+  telefono: string | null;
+  trabajador_email: string | null;
+};
+
+type NuevoUsuarioRaw = {
+  usuario_id: number;
+  auth0_id: string;
+  username: string;
+  email: string;
+  estado: string;
+  rol_id: number;
+  rol_codigo: string;
+  rol_nombre: string;
+};
+
 type Auth0UserData = {
   email?: string;
   name?: string;
@@ -45,10 +88,10 @@ type UsuarioCompleto = {
   };
   mom_trabajador?: {
     trabajador_id: number;
-    nombre_completo: string;
-    documento_identidad: string;
+    nombre_completo: string | null;
+    documento_identidad: string | null;
     telefono: string | null;
-    email: string;
+    email: string | null;
   } | null;
 };
 
@@ -113,7 +156,7 @@ export class AgroManoUserSyncService {
       `, [auth0UserId]);
 
       if (usuarios.length > 0) {
-        const usuario: any = usuarios[0];
+        const usuario = usuarios[0] as UsuarioRaw;
         
         // Actualizar último login usando SQL directo
         await executeRawSQL(`
@@ -197,7 +240,7 @@ export class AgroManoUserSyncService {
         throw new Error('❌ No se encontró un rol por defecto para asignar');
       }
 
-      const rolPorDefecto: any = roles[0];
+      const rolPorDefecto = roles[0] as RolBasico;
       const username = auth0UserData.email || `user_${auth0UserId.slice(-8)}`;
 
       // Crear el usuario usando SQL directo
@@ -246,7 +289,7 @@ export class AgroManoUserSyncService {
         LIMIT 1
       `, [auth0UserId]);
 
-      const nuevoUsuario: any = nuevosUsuarios[0];
+      const nuevoUsuario = nuevosUsuarios[0] as NuevoUsuarioRaw;
 
       console.log(`✅ Usuario creado exitosamente: ${nuevoUsuario.username}`);
 
