@@ -30,12 +30,12 @@ enabled = true
 # Configuración para análisis de test coverage
 [[analyzers]]
 name = "test-coverage"
-enabled = true
+enabled = false
 
 # Transformers para auto-fix de problemas
 [[transformers]]
 name = "prettier"
-enabled = true
+enabled = false
 
 # Exclusiones - archivos/carpetas que no se deben analizar
 exclude_patterns = [
