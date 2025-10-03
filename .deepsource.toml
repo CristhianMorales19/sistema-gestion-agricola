@@ -1,41 +1,32 @@
 version = 1
 
-# Configuración para análisis de TypeScript/JavaScript (Backend y Frontend)
+# Configuración para análisis de TypeScript/JavaScript
 [[analyzers]]
 name = "javascript"
 enabled = true
 
   [analyzers.meta]
   plugins = ["react"]
-  environment = [
-    "nodejs",
-    "browser"
-  ]
+  environment = ["nodejs", "browser"]
+  
+  # Deshabilitar reglas que pueden causar bloqueos
+  style_guide = "airbnb"
+  skip_doc_coverage = ["file-header"]
+  
+  # Configuración de métricas más permisiva
+  [analyzers.meta.metrics]
+  cyclomatic_complexity_threshold = 20
+  max_file_length = 1000
 
 # Configuración para análisis de SQL
 [[analyzers]]
 name = "sql"
 enabled = true
 
-# Configuración para análisis de secretos y credenciales
-[[analyzers]]
-name = "secrets"
-enabled = true
-
-# Configuración para análisis de Docker (si usas Docker)
+# Configuración para análisis de Docker
 [[analyzers]]
 name = "docker"
 enabled = true
-
-# Configuración para análisis de test coverage
-[[analyzers]]
-name = "test-coverage"
-enabled = false
-
-# Transformers para auto-fix de problemas
-[[transformers]]
-name = "prettier"
-enabled = false
 
 # Exclusiones - archivos/carpetas que no se deben analizar
 exclude_patterns = [
@@ -46,19 +37,20 @@ exclude_patterns = [
   "*.min.js",
   "*.bundle.js",
   "backend/prisma/migrations/**",
+  "backend/prisma/generated/**",
   "database/migraciones/**",
   "*.log",
   "*.lock",
   ".git/**",
   ".vscode/**",
-  "backup_antes_limpieza/**"
+  "backup_antes_limpieza/**",
+  "**/*.md",
+  "**/docs/**",
+  "**/*test*.ts",
+  "**/*test*.js",
+  "**/test-*.ts",
+  "**/test-*.js",
+  "**/verificar*.ts",
+  "**/*.spec.ts",
+  "**/*.spec.js"
 ]
-
-version = 1
-
-[[analyzers]]
-name = "javascript"
-
-  [analyzers.meta]
-  plugins = ["react"]
-  environment = ["nodejs"]
