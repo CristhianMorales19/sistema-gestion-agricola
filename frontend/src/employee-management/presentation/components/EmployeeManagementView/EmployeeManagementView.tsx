@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -57,16 +57,16 @@ export const EmployeeManagementView: React.FC = () => {
     }
   };
 
-  const handleAddLaborInfo = () => {
+  const handleAddLaborInfo = useCallback(() => {
     if (selectedEmployee) {
       setCurrentView('labor-info');
     }
-  };
+  }, [selectedEmployee]);
 
-  const handleAddEmployeeClick = () => {
+  const handleAddEmployeeClick = useCallback(() => {
     setCurrentView('new-employee');
     setSelectedEmployee(null); // Limpiar selección al agregar nuevo empleado
-  };
+  }, []);
 
   const handleBackToList = () => {
     setCurrentView('list');
@@ -84,12 +84,12 @@ export const EmployeeManagementView: React.FC = () => {
     }
   };
 
-  const handleEdit = (employee: Employee) => {
+  const handleEdit = useCallback((employee: Employee) => {
     console.log('Editar empleado:', employee);
     setSelectedEmployee({ id: employee.id, name: employee.name });
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
       try {
         await deleteEmployee(id);
@@ -102,11 +102,11 @@ export const EmployeeManagementView: React.FC = () => {
         console.error('Error al eliminar empleado:', err);
       }
     }
-  };
+  }, [deleteEmployee, selectedEmployee, refreshEmployees]);
 
-  const handleEmployeeSelect = (employee: Employee) => {
+  const handleEmployeeSelect = useCallback((employee: Employee) => {
     setSelectedEmployee({ id: employee.id, name: employee.name });
-  };
+  }, []);
 
   const { updateEmployeeLaborInfo } = useEmployeeManagement();
 

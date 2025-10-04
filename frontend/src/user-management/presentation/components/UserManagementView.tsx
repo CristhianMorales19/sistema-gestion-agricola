@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -73,10 +73,10 @@ export const UserManagementView: React.FC = () => {
   });
 
   // Inicializar servicio
-  const userService = new UserManagementService(getAccessTokenSilently);
-  const usuariosService = new UsuariosSistemaService(getAccessTokenSilently);
+  const userService = useMemo(() => new UserManagementService(getAccessTokenSilently), [getAccessTokenSilently]);
+  const usuariosService = useMemo(() => new UsuariosSistemaService(getAccessTokenSilently), [getAccessTokenSilently]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -96,7 +96,7 @@ export const UserManagementView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, userService, usuariosService]);
 
   useEffect(() => {
     loadData();
@@ -230,6 +230,10 @@ export const UserManagementView: React.FC = () => {
         : [...prev, roleId]
     );
   }, []);
+
+  const createRoleToggleHandler = useCallback((roleId: string) => {
+    return () => handleRoleToggle(roleId);
+  }, [handleRoleToggle]);
 
   const getRoleColor = useCallback((roleName: string | undefined): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' => {
     if (!roleName) return 'default';
@@ -463,7 +467,7 @@ export const UserManagementView: React.FC = () => {
                 control={
                   <Checkbox
                     checked={selectedRoles.includes(role.id)}
-                    onChange={() => handleRoleToggle(role.id!)}
+                    onChange={createRoleToggleHandler(role.id)}
                     sx={{
                       color: '#64748b',
                       '&.Mui-checked': { color: '#3b82f6' }
