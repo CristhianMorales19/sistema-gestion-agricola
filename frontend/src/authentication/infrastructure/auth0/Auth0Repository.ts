@@ -236,7 +236,7 @@ export class Auth0Repository implements AuthRepository {
     return permissionsMap;
   }
 
-  private mapToUserEntity(userData: any): User {
+  private mapToUserEntity(userData: Record<string, unknown>): User {
     // Por ahora, crear un rol de administrador por defecto basado en los permisos
     // TODO: Implementar consulta real a la base de datos para obtener roles
     const adminRole = new RoleEntity(
@@ -246,18 +246,18 @@ export class Auth0Repository implements AuthRepository {
       'Acceso completo al sistema',
       '#1976d2',
       'admin_panel_settings',
-      userData.permissions || [],
+      Array.isArray(userData.permissions) ? userData.permissions as string[] : [],
       true
     );
 
     return new UserEntity(
-      userData.sub || '1',
-      userData.email || 'usuario@ejemplo.com',
-      userData.email?.split('@')[0] || 'Usuario',
+      typeof userData.sub === 'string' ? userData.sub : '1',
+      typeof userData.email === 'string' ? userData.email : 'usuario@ejemplo.com',
+      typeof userData.email === 'string' ? userData.email.split('@')[0] : 'Usuario',
       [adminRole],
       true,
       new Date(),
-      userData.picture,
+      typeof userData.picture === 'string' ? userData.picture : undefined,
       new Date()
     );
   }
