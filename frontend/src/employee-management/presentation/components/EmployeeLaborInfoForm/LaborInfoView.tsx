@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/LaborInfoView/LaborInfoView.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -97,7 +97,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     }
   } as const;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -105,9 +105,9 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
         ? (parseFloat(value) || 0)
         : value
     }));
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!employee) return;
 
@@ -124,7 +124,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [employee, formData, onSave]);
 
   if (!employee) {
     return (

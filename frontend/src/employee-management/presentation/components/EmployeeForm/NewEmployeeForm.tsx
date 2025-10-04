@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/NewEmployeeForm/NewEmployeeForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -51,7 +51,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
   const [errors, setErrors] = useState<Partial<Record<keyof NewEmployeeFormData, string>>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     // Limpiar espacios en blanco al escribir
@@ -71,15 +71,18 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     }));
 
     // Limpiar error del campo al escribir
-    if (errors[name as keyof NewEmployeeFormData]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
-  };
+    setErrors(prev => {
+      if (prev[name as keyof NewEmployeeFormData]) {
+        return {
+          ...prev,
+          [name]: '',
+        };
+      }
+      return prev;
+    });
+  }, []);
 
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     const newErrors: Partial<Record<keyof NewEmployeeFormData, string>> = {};
 
     if (!formData.documento_identidad.trim()) {
@@ -96,9 +99,9 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData.documento_identidad, formData.email, formData.telefono]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -132,7 +135,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
         setFormError(error.message || 'Error al crear el empleado');
       }
     }
-  };
+  }, [validateForm, formData, onSubmit]);
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
