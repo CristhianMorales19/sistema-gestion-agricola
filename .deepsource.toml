@@ -1,47 +1,11 @@
 version = 1
 
-# Configuración para análisis de TypeScript/JavaScript
 [[analyzers]]
 name = "javascript"
-enabled = true
 
   [analyzers.meta]
   plugins = ["react"]
-  environment = ["nodejs", "browser"]
-
-# Configuración para análisis de SQL
-[[analyzers]]
-name = "sql"
-enabled = true
-
-# Configuración para análisis de Docker
-[[analyzers]]
-name = "docker"
-enabled = true
-
-# Exclusiones - archivos/carpetas que no se deben analizar
-exclude_patterns = [
-  "node_modules/**",
-  "dist/**",
-  "build/**",
-  "coverage/**",
-  "*.min.js",
-  "*.bundle.js",
-  "backend/prisma/migrations/**",
-  "backend/prisma/generated/**",
-  "database/migraciones/**",
-  "*.log",
-  "*.lock",
-  ".git/**",
-  ".vscode/**",
-  "backup_antes_limpieza/**",
-  "**/*.md",
-  "**/docs/**",
-  "**/*test*.ts",
-  "**/*test*.js",
-  "**/test-*.ts",
-  "**/test-*.js",
-  "**/verificar*.ts",
-  "**/*.spec.ts",
-  "**/*.spec.js"
-]
+  environment = [
+    "nodejs",
+    "browser"
+  ]
