@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -19,6 +19,23 @@ import { ProtectedComponent, usePermissions } from './ProtectedComponent';
 // Ejemplo de página que se adapta según permisos
 export const ExampleRBACPage: React.FC = () => {
   const { user, hasPermission } = usePermissions();
+
+  // Memoizar los handlers
+  const handleGestionarPersonal = useCallback(() => {
+    alert('Gestionar personal');
+  }, []);
+
+  const handleConsultarPersonal = useCallback(() => {
+    alert('Consultar personal');
+  }, []);
+
+  const handleGestionarUsuarios = useCallback(() => {
+    alert('Gestionar usuarios');
+  }, []);
+
+  const handleAgregarEmpleado = useCallback(() => {
+    alert('Agregar nuevo empleado');
+  }, []);
 
   return (
     <Box>
@@ -81,7 +98,7 @@ export const ExampleRBACPage: React.FC = () => {
                 <Button
                   variant="contained"
                   startIcon={<EditIcon />}
-                  onClick={() => alert('Gestionar personal')}
+                  onClick={handleGestionarPersonal}
                 >
                   Gestionar Personal
                 </Button>
@@ -94,7 +111,7 @@ export const ExampleRBACPage: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<ViewIcon />}
-                  onClick={() => alert('Consultar personal')}
+                  onClick={handleConsultarPersonal}
                 >
                   Consultar Personal
                 </Button>
@@ -108,7 +125,7 @@ export const ExampleRBACPage: React.FC = () => {
                   variant="contained"
                   color="secondary"
                   startIcon={<EditIcon />}
-                  onClick={() => alert('Gestionar usuarios')}
+                  onClick={handleGestionarUsuarios}
                 >
                   Gestionar Usuarios
                 </Button>
@@ -135,7 +152,7 @@ export const ExampleRBACPage: React.FC = () => {
             bottom: 16,
             right: 16,
           }}
-          onClick={() => alert('Agregar nuevo empleado')}
+          onClick={handleAgregarEmpleado}
         >
           <AddIcon />
         </Fab>

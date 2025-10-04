@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { CircularProgress, Box, Typography, Button } from '@mui/material';
 import { LockOutlined, ErrorOutline } from '@mui/icons-material';
@@ -30,6 +30,11 @@ const LoadingComponent = () => (
   </Box>
 );
 
+// Handler para volver atrás en el historial
+const handleGoBack = () => {
+  window.history.back();
+};
+
 // Componente de acceso denegado
 const AccessDeniedComponent = ({ reason }: { reason: string }) => (
   <Box
@@ -50,7 +55,7 @@ const AccessDeniedComponent = ({ reason }: { reason: string }) => (
     </Typography>
     <Button
       variant="outlined"
-      onClick={() => window.history.back()}
+      onClick={handleGoBack}
       sx={{ mt: 2 }}
     >
       Volver
@@ -104,6 +109,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     loginWithRedirect
   } = useAuthContext();
 
+  // Memoizar el handler de reintento
+  const handleRetry = useCallback(() => {
+    refetchProfile();
+  }, [refetchProfile]);
+
   // Si Auth0 está cargando
   if (isLoading) {
     return <LoadingComponent />;
@@ -125,7 +135,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return (
       <ErrorComponent
         error={profileError.message}
-        onRetry={() => refetchProfile()}
+        onRetry={handleRetry}
       />
     );
   }

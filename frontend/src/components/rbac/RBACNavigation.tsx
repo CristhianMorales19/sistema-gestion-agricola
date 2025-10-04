@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Drawer,
   List,
@@ -128,6 +128,11 @@ export const RBACNavigation: React.FC<RBACNavigationProps> = ({
 }) => {
   const { user } = usePermissions();
 
+  // Memoizar el handler para evitar recrear funciones en cada render
+  const handleItemClick = useCallback((path: string) => {
+    onItemClick(path);
+  }, [onItemClick]);
+
   return (
     <Drawer
       variant="persistent"
@@ -173,7 +178,7 @@ export const RBACNavigation: React.FC<RBACNavigationProps> = ({
           >
             <ListItem 
               button 
-              onClick={() => onItemClick(item.path)}
+              onClick={() => handleItemClick(item.path)}
               sx={{
                 '&:hover': {
                   backgroundColor: 'action.hover',

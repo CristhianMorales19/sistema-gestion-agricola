@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/EmployeeTable/EmployeeTable.tsx
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -49,9 +49,20 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
     return new Date(date).toLocaleDateString('es-ES');
   };
 
-  const handleRowClick = (employee: Employee) => {
+  // Memoizar los handlers
+  const handleRowClick = useCallback((employee: Employee) => {
     onSelect(employee);
-  };
+  }, [onSelect]);
+
+  const handleEditClick = useCallback((e: React.MouseEvent, employee: Employee) => {
+    e.stopPropagation();
+    onEdit(employee);
+  }, [onEdit]);
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    onDelete(id);
+  }, [onDelete]);
 
   return (
     <TableContainer component={Paper} sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
@@ -98,20 +109,14 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton 
                     size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
-                      onEdit(employee);
-                    }}
+                    onClick={(e) => handleEditClick(e, employee)}
                     sx={{ color: '#3b82f6' }}
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton 
                     size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
-                      onDelete(employee.id);
-                    }}
+                    onClick={(e) => handleDeleteClick(e, employee.id)}
                     sx={{ color: '#ef4444' }}
                   >
                     <DeleteIcon />
