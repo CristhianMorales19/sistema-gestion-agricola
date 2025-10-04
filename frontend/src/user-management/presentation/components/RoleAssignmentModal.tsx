@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -44,6 +44,11 @@ export const RoleAssignmentModal: React.FC<RoleAssignmentModalProps> = ({
   const [loading, setLoading] = useState(false);
 
   const selectedRol = rolesDisponibles.find(r => r.rol_id === selectedRolId);
+
+  // Memoizar el handler de cambio de rol
+  const handleRoleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedRolId(Number(e.target.value));
+  }, []);
 
   const handleAsignar = async () => {
     if (selectedRolId === usuario.rol.rol_id) {
@@ -116,7 +121,7 @@ export const RoleAssignmentModal: React.FC<RoleAssignmentModalProps> = ({
         {/* Lista de roles */}
         <RadioGroup
           value={selectedRolId}
-          onChange={(e) => setSelectedRolId(Number(e.target.value))}
+          onChange={handleRoleChange}
         >
           {rolesDisponibles.map((rol) => (
             <Box

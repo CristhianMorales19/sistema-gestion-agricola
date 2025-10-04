@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -40,13 +40,26 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
     { id: 'settings', icon: <Settings />, text: 'Configuración', active: currentView === 'settings' },
   ];
 
-  const handleViewAsRole = async (roleName: string) => {
+  // Memoizar los handlers
+  const handleViewAsRole = useCallback(async (roleName: string) => {
     try {
       await loginWithDemoRole(roleName);
     } catch (error) {
       console.error('Error changing view:', error);
     }
-  };
+  }, [loginWithDemoRole]);
+
+  const handleViewAsManager = useCallback(() => {
+    handleViewAsRole('Gerente de Granja');
+  }, [handleViewAsRole]);
+
+  const handleViewAsWorker = useCallback(() => {
+    handleViewAsRole('Trabajador de Campo');
+  }, [handleViewAsRole]);
+
+  const handleNavigationClick = useCallback((itemId: string) => {
+    onNavigationChange(itemId);
+  }, [onNavigationChange]);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
@@ -89,7 +102,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             {sidebarItems.map((item) => (
               <ListItem key={item.id} sx={{ p: 0, mb: 1 }}>
                 <ListItemButton
-                  onClick={() => onNavigationChange(item.id)} // Nuevo cambio
+                  onClick={() => handleNavigationClick(item.id)}
                   sx={{
                     borderRadius: 2,
                     backgroundColor: item.active ? '#334155' : 'transparent',
@@ -140,7 +153,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -154,7 +167,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -232,7 +245,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             <Button
               variant="outlined"
               size="small"
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',
@@ -248,7 +261,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             <Button
               variant="outlined"  
               size="small"
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',

@@ -110,6 +110,50 @@ export const UserManagementView: React.FC = () => {
     setSuccess(null);
   }, []);
 
+  // Memoizar handlers de filtros
+  const handleNameFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev: UserFilters) => ({ ...prev, name: e.target.value, page: 0 }));
+  }, []);
+
+  const handleRoleFilterChange = useCallback((e: any) => {
+    setFilters((prev: UserFilters) => ({ ...prev, role: e.target.value, page: 0 }));
+  }, []);
+
+  const handleHasRoleFilterChange = useCallback((e: any) => {
+    setFilters((prev: UserFilters) => ({ 
+      ...prev, 
+      hasRole: e.target.value === '' ? undefined : e.target.value === 'true',
+      page: 0 
+    }));
+  }, []);
+
+  // Memoizar handlers de formulario de nuevo usuario
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handleNombreChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, nombre: e.target.value }));
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, password: e.target.value }));
+  }, []);
+
+  const handleRolIdChange = useCallback((e: any) => {
+    setNewUserData(prev => ({ ...prev, rol_id: e.target.value }));
+  }, []);
+
+  // Memoizar handler de apertura de diálogo
+  const handleOpenRoleDialogCallback = useCallback((user: UserWithRoles) => {
+    handleOpenRoleDialog(user);
+  }, []);
+
+  // Memoizar handler de toggle de rol
+  const handleRoleToggleCallback = useCallback((roleId: string) => {
+    handleRoleToggle(roleId);
+  }, []);
+
   const handleSyncUsers = async () => {
     try {
       setLoading(true);
@@ -328,7 +372,7 @@ export const UserManagementView: React.FC = () => {
                   },
                 }}
                 value={filters.name || ''}
-                onChange={(e) => setFilters((prev: UserFilters) => ({ ...prev, name: e.target.value, page: 0 }))}
+                onChange={handleNameFilterChange}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
@@ -337,7 +381,7 @@ export const UserManagementView: React.FC = () => {
                 <Select
                   value={filters.role || ''}
                   label="Filtrar por rol"
-                  onChange={(e) => setFilters((prev: UserFilters) => ({ ...prev, role: e.target.value, page: 0 }))}
+                  onChange={handleRoleFilterChange}
                   sx={{
                     color: '#ffffff',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
@@ -358,11 +402,7 @@ export const UserManagementView: React.FC = () => {
                 <Select
                   value={filters.hasRole === undefined ? '' : filters.hasRole.toString()}
                   label="Estado de roles"
-                  onChange={(e) => setFilters((prev: UserFilters) => ({ 
-                    ...prev, 
-                    hasRole: e.target.value === '' ? undefined : e.target.value === 'true',
-                    page: 0 
-                  }))}
+                  onChange={handleHasRoleFilterChange}
                   sx={{
                     color: '#ffffff',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
@@ -463,7 +503,7 @@ export const UserManagementView: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <IconButton
-                        onClick={() => handleOpenRoleDialog(userWithRoles)}
+                        onClick={() => handleOpenRoleDialogCallback(userWithRoles)}
                         sx={{ color: '#3b82f6', '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.1)' } }}
                       >
                         <Edit />
@@ -501,7 +541,7 @@ export const UserManagementView: React.FC = () => {
                 control={
                   <Checkbox
                     checked={selectedRoles.includes(role.id)}
-                    onChange={() => handleRoleToggle(role.id!)}
+                    onChange={() => handleRoleToggleCallback(role.id!)}
                     sx={{
                       color: '#64748b',
                       '&.Mui-checked': { color: '#3b82f6' }
@@ -561,7 +601,7 @@ export const UserManagementView: React.FC = () => {
             label="Email"
             type="email"
             value={newUserData.email}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+            onChange={handleEmailChange}
             placeholder="usuario@agromano.com"
             helperText="Usar dominio @agromano.com para consistencia"
             sx={{
@@ -581,7 +621,7 @@ export const UserManagementView: React.FC = () => {
             fullWidth
             label="Nombre Completo"
             value={newUserData.nombre}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, nombre: e.target.value }))}
+            onChange={handleNombreChange}
             sx={{
               mb: 2,
               '& .MuiOutlinedInput-root': {
@@ -599,7 +639,7 @@ export const UserManagementView: React.FC = () => {
             label="Contraseña"
             type="password"
             value={newUserData.password}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
+            onChange={handlePasswordChange}
             helperText="Mínimo 8 caracteres"
             sx={{
               mb: 2,
@@ -619,7 +659,7 @@ export const UserManagementView: React.FC = () => {
             <Select
               value={newUserData.rol_id}
               label="Rol"
-              onChange={(e) => setNewUserData(prev => ({ ...prev, rol_id: e.target.value }))}
+              onChange={handleRolIdChange}
               sx={{
                 color: '#ffffff',
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
