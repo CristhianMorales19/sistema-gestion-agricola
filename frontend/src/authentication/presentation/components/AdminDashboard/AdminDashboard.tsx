@@ -21,36 +21,36 @@ export const AdminDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setError(null);
-        // Dependency injection siguiendo Clean Architecture con datos reales
-        const repository = new ApiDashboardRepository(getAccessTokenSilently);
-        const getDashboardDataUseCase = new GetDashboardDataUseCase(repository);
-        const refreshStatsUseCase = new RefreshDashboardStatsUseCase(repository);
-        const service = new DashboardService(getDashboardDataUseCase, refreshStatsUseCase);
-        
-        // Obtener datos reales de la API
-        const data = await service.getDashboardData();
-        setDashboardData(data);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        setError('Error cargando datos del dashboard. Verifica la conexión con el servidor.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadDashboardData = React.useCallback(async () => {
+    try {
+      setError(null);
+      // Dependency injection siguiendo Clean Architecture con datos reales
+      const repository = new ApiDashboardRepository(getAccessTokenSilently);
+      const getDashboardDataUseCase = new GetDashboardDataUseCase(repository);
+      const refreshStatsUseCase = new RefreshDashboardStatsUseCase(repository);
+      const service = new DashboardService(getDashboardDataUseCase, refreshStatsUseCase);
+      
+      // Obtener datos reales de la API
+      const data = await service.getDashboardData();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      setError('Error cargando datos del dashboard. Verifica la conexión con el servidor.');
+    } finally {
+      setLoading(false);
+    }
+  }, [getAccessTokenSilently]);
 
+  useEffect(() => {
     // Solo cargar datos del dashboard si estamos en esa vista
     if (currentView === 'dashboard') {
       loadDashboardData();
     }
-  }, [getAccessTokenSilently, currentView]); // Dependencia de currentView
+  }, [currentView, loadDashboardData]); // Dependencia de currentView
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = React.useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   if (loading) {
     return (

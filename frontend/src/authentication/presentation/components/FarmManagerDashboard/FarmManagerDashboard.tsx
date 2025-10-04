@@ -60,6 +60,67 @@ const mockData = {
   ]
 };
 
+// Componente optimizado para las estadísticas
+const FarmStatCard = React.memo<{ stat: typeof mockData.farmStats[0]; index: number }>(({ stat, index }) => (
+  <Grid item xs={12} sm={6} md={3}>
+    <Card sx={{ height: '100%' }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          {stat.title}
+        </Typography>
+        <Typography variant="h3" fontWeight="bold" sx={{ color: stat.color, mb: 1 }}>
+          {stat.value}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+          {stat.change}
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={stat.progress}
+          sx={{
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: '#e2e8f0',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: stat.color,
+              borderRadius: 4
+            }
+          }}
+        />
+      </CardContent>
+    </Card>
+  </Grid>
+));
+
+FarmStatCard.displayName = 'FarmStatCard';
+
+// Componente optimizado para las tareas recientes
+const RecentTaskItem = React.memo<{ task: string; index: number }>(({ task, index }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      p: 2,
+      backgroundColor: index % 2 === 0 ? '#f8fafc' : 'transparent',
+      borderRadius: 1,
+      mb: 1
+    }}
+  >
+    <Box
+      sx={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        backgroundColor: '#22c55e',
+        mr: 2
+      }}
+    />
+    <Typography variant="body2">{task}</Typography>
+  </Box>
+));
+
+RecentTaskItem.displayName = 'RecentTaskItem';
+
 export const FarmManagerDashboard: React.FC = () => {
   const { user, logout } = useAuth();
 
@@ -119,34 +180,7 @@ export const FarmManagerDashboard: React.FC = () => {
         {/* Estadísticas de la Granja */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {mockData.farmStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {stat.title}
-                  </Typography>
-                  <Typography variant="h3" fontWeight="bold" sx={{ color: stat.color, mb: 1 }}>
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    {stat.change}
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={stat.progress}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      backgroundColor: '#e2e8f0',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: stat.color,
-                        borderRadius: 4
-                      }
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
+            <FarmStatCard key={index} stat={stat} index={index} />
           ))}
         </Grid>
 
@@ -211,28 +245,7 @@ export const FarmManagerDashboard: React.FC = () => {
                 </Typography>
                 <Box sx={{ mt: 2 }}>
                   {mockData.recentTasks.map((task, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        p: 2,
-                        backgroundColor: index % 2 === 0 ? '#f8fafc' : 'transparent',
-                        borderRadius: 1,
-                        mb: 1
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          backgroundColor: '#22c55e',
-                          mr: 2
-                        }}
-                      />
-                      <Typography variant="body2">{task}</Typography>
-                    </Box>
+                    <RecentTaskItem key={index} task={task} index={index} />
                   ))}
                 </Box>
               </CardContent>

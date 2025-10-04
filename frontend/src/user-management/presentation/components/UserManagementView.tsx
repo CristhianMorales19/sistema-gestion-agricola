@@ -41,6 +41,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { UserManagementService } from '../../services/UserManagementService';
 import { UsuariosSistemaService } from '../../../services/usuarios-sistema.service';
 import { UserWithRoles, Role, UserFilters } from '../../types';
+import { UserRow } from './UserRow';
 
 export const UserManagementView: React.FC = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -110,7 +111,7 @@ export const UserManagementView: React.FC = () => {
     setSuccess(null);
   }, []);
 
-  const handleSyncUsers = async () => {
+  const handleSyncUsers = useCallback(async () => {
     try {
       setLoading(true);
       await userService.syncUsers();
@@ -122,9 +123,9 @@ export const UserManagementView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userService, loadData]);
 
-  const handleCrearUsuario = () => {
+  const handleCrearUsuario = useCallback(() => {
     setNewUserData({
       email: '',
       nombre: '',
@@ -132,9 +133,9 @@ export const UserManagementView: React.FC = () => {
       rol_id: ''
     });
     setCreateUserModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseCreateUserModal = () => {
+  const handleCloseCreateUserModal = useCallback(() => {
     setCreateUserModalOpen(false);
     setNewUserData({
       email: '',
@@ -142,9 +143,9 @@ export const UserManagementView: React.FC = () => {
       password: '',
       rol_id: ''
     });
-  };
+  }, []);
 
-  const handleSubmitCreateUser = async () => {
+  const handleSubmitCreateUser = useCallback(async () => {
     try {
       if (!newUserData.email || !newUserData.nombre || !newUserData.password || !newUserData.rol_id) {
         setError('Todos los campos son requeridos');
@@ -183,21 +184,21 @@ export const UserManagementView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [newUserData, usuariosService, handleCloseCreateUserModal, loadData]);
 
-  const handleOpenRoleDialog = (user: UserWithRoles) => {
+  const handleOpenRoleDialog = useCallback((user: UserWithRoles) => {
     setSelectedUser(user);
-    setSelectedRoles(user.roles.map((role: Role) => role.id).filter((id): id is string => id !== undefined));
+    setSelectedRoles(user.roles.map((role: Role) => role.id).filter((id: string | undefined): id is string => id !== undefined));
     setRoleDialogOpen(true);
-  };
+  }, []);
 
-  const handleCloseRoleDialog = () => {
+  const handleCloseRoleDialog = useCallback(() => {
     setRoleDialogOpen(false);
     setSelectedUser(null);
     setSelectedRoles([]);
-  };
+  }, []);
 
-  const handleAssignRoles = async () => {
+  const handleAssignRoles = useCallback(async () => {
     if (!selectedUser || !selectedUser.user.user_id) return;
     
     try {
@@ -209,9 +210,9 @@ export const UserManagementView: React.FC = () => {
       setError('Error asignando roles');
       console.error('Error assigning roles:', err);
     }
-  };
+  }, [selectedUser, selectedRoles, userService, handleCloseRoleDialog, loadData]);
 
-  const handleRemoveRole = async (userId: string, roleId: string) => {
+  const handleRemoveRole = useCallback(async (userId: string, roleId: string) => {
     try {
       await userService.removeRole(userId, roleId);
       setSuccess('Rol removido exitosamente');
@@ -220,17 +221,17 @@ export const UserManagementView: React.FC = () => {
       setError('Error removiendo rol');
       console.error('Error removing role:', err);
     }
-  };
+  }, [userService, loadData]);
 
-  const handleRoleToggle = (roleId: string) => {
+  const handleRoleToggle = useCallback((roleId: string) => {
     setSelectedRoles(prev => 
       prev.includes(roleId) 
         ? prev.filter(id => id !== roleId)
         : [...prev, roleId]
     );
-  };
+  }, []);
 
-  const getRoleColor = (roleName: string | undefined): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' => {
+  const getRoleColor = useCallback((roleName: string | undefined): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' => {
     if (!roleName) return 'default';
     
     const colors: { [key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' } = {
@@ -250,7 +251,39 @@ export const UserManagementView: React.FC = () => {
       'visualizador': 'primary'
     };
     return colors[roleName.toLowerCase()] || 'primary';
-  };
+  }, []);
+
+  const handleNameFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev: UserFilters) => ({ ...prev, name: e.target.value, page: 0 }));
+  }, []);
+
+  const handleRoleFilterChange = useCallback((e: any) => {
+    setFilters((prev: UserFilters) => ({ ...prev, role: e.target.value, page: 0 }));
+  }, []);
+
+  const handleHasRoleFilterChange = useCallback((e: any) => {
+    setFilters((prev: UserFilters) => ({ 
+      ...prev, 
+      hasRole: e.target.value === '' ? undefined : e.target.value === 'true',
+      page: 0 
+    }));
+  }, []);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handleNombreChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, nombre: e.target.value }));
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUserData(prev => ({ ...prev, password: e.target.value }));
+  }, []);
+
+  const handleRolIdChange = useCallback((e: any) => {
+    setNewUserData(prev => ({ ...prev, rol_id: e.target.value }));
+  }, []);
 
   if (loading && users.length === 0) {
     return (
@@ -328,7 +361,7 @@ export const UserManagementView: React.FC = () => {
                   },
                 }}
                 value={filters.name || ''}
-                onChange={(e) => setFilters((prev: UserFilters) => ({ ...prev, name: e.target.value, page: 0 }))}
+                onChange={handleNameFilterChange}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
@@ -337,7 +370,7 @@ export const UserManagementView: React.FC = () => {
                 <Select
                   value={filters.role || ''}
                   label="Filtrar por rol"
-                  onChange={(e) => setFilters((prev: UserFilters) => ({ ...prev, role: e.target.value, page: 0 }))}
+                  onChange={handleRoleFilterChange}
                   sx={{
                     color: '#ffffff',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
@@ -358,11 +391,7 @@ export const UserManagementView: React.FC = () => {
                 <Select
                   value={filters.hasRole === undefined ? '' : filters.hasRole.toString()}
                   label="Estado de roles"
-                  onChange={(e) => setFilters((prev: UserFilters) => ({ 
-                    ...prev, 
-                    hasRole: e.target.value === '' ? undefined : e.target.value === 'true',
-                    page: 0 
-                  }))}
+                  onChange={handleHasRoleFilterChange}
                   sx={{
                     color: '#ffffff',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },
@@ -396,80 +425,13 @@ export const UserManagementView: React.FC = () => {
               </TableHead>
               <TableBody>
                 {users.map((userWithRoles) => (
-                  <TableRow 
+                  <UserRow
                     key={userWithRoles.user.user_id}
-                    sx={{ 
-                      '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
-                      backgroundColor: '#1e293b'
-                    }}
-                  >
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: '#3b82f6' }}>
-                          {(userWithRoles.user.name || userWithRoles.user.email || userWithRoles.localUserData?.username || 'U').charAt(0).toUpperCase()}
-                        </Avatar>
-                        <Box>
-                          <Typography sx={{ color: '#ffffff', fontWeight: 'medium' }}>
-                            {userWithRoles.user.name || userWithRoles.localUserData?.username || 'Usuario sin nombre'}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#64748b' }}>
-                            {userWithRoles.localUserData?.username ? `@${userWithRoles.localUserData.username}` : userWithRoles.user.user_id}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ color: '#94a3b8' }}>
-                        {userWithRoles.user.email || 'No especificado'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                        {userWithRoles.roles.length > 0 ? (
-                          userWithRoles.roles.map((role: Role) => (
-                            role.id && (
-                              <Chip
-                                key={role.id}
-                                label={role.name}
-                                size="small"
-                                color={getRoleColor(role.name)}
-                                onDelete={
-                                  userWithRoles.user.user_id && role.id
-                                    ? () => handleRemoveRole(userWithRoles.user.user_id!, role.id!)
-                                    : undefined
-                                }
-                                sx={{ 
-                                  '& .MuiChip-deleteIcon': { 
-                                    color: 'inherit',
-                                    '&:hover': { color: '#ef4444' }
-                                  }
-                                }}
-                              />
-                            )
-                          ))
-                        ) : (
-                          <Typography variant="body2" sx={{ color: '#64748b', fontStyle: 'italic' }}>
-                            Sin roles asignados
-                          </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={userWithRoles.localUserData?.estado === 'activo' ? 'Activo' : 'Inactivo'}
-                        size="small"
-                        color={userWithRoles.localUserData?.estado === 'activo' ? 'success' : 'error'}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={() => handleOpenRoleDialog(userWithRoles)}
-                        sx={{ color: '#3b82f6', '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.1)' } }}
-                      >
-                        <Edit />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                    userWithRoles={userWithRoles}
+                    getRoleColor={getRoleColor}
+                    onRemoveRole={handleRemoveRole}
+                    onOpenRoleDialog={handleOpenRoleDialog}
+                  />
                 ))}
               </TableBody>
             </Table>
@@ -561,7 +523,7 @@ export const UserManagementView: React.FC = () => {
             label="Email"
             type="email"
             value={newUserData.email}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+            onChange={handleEmailChange}
             placeholder="usuario@agromano.com"
             helperText="Usar dominio @agromano.com para consistencia"
             sx={{
@@ -581,7 +543,7 @@ export const UserManagementView: React.FC = () => {
             fullWidth
             label="Nombre Completo"
             value={newUserData.nombre}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, nombre: e.target.value }))}
+            onChange={handleNombreChange}
             sx={{
               mb: 2,
               '& .MuiOutlinedInput-root': {
@@ -599,7 +561,7 @@ export const UserManagementView: React.FC = () => {
             label="Contraseña"
             type="password"
             value={newUserData.password}
-            onChange={(e) => setNewUserData(prev => ({ ...prev, password: e.target.value }))}
+            onChange={handlePasswordChange}
             helperText="Mínimo 8 caracteres"
             sx={{
               mb: 2,
@@ -619,7 +581,7 @@ export const UserManagementView: React.FC = () => {
             <Select
               value={newUserData.rol_id}
               label="Rol"
-              onChange={(e) => setNewUserData(prev => ({ ...prev, rol_id: e.target.value }))}
+              onChange={handleRolIdChange}
               sx={{
                 color: '#ffffff',
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: '#475569' },

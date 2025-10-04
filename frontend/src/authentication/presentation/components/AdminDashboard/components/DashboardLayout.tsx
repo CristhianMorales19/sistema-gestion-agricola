@@ -31,22 +31,63 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user, onNavigationChange, currentView }) => {
   const { logout, loginWithDemoRole } = useAuth();
 
-  const sidebarItems = [
+  const sidebarItems = React.useMemo(() => [
     { id: 'dashboard', icon: <DashboardIcon />, text: 'Dashboard', active: currentView === 'dashboard' },
     { id: 'employee-management', icon: <People />, text: 'Gestión de Personal', active: currentView === 'employee-management' },
     { id: 'farms', icon: <Agriculture />, text: 'Granjas', active: currentView === '-farms' },
     { id: 'users', icon: <People />, text: 'Usuarios', active: currentView === 'users' },
     { id: 'reports', icon: <Assessment />, text: 'Reportes', active: currentView === 'reports' },
     { id: 'settings', icon: <Settings />, text: 'Configuración', active: currentView === 'settings' },
-  ];
+  ], [currentView]);
 
-  const handleViewAsRole = async (roleName: string) => {
+  const handleViewAsRole = React.useCallback(async (roleName: string) => {
     try {
       await loginWithDemoRole(roleName);
     } catch (error) {
       console.error('Error changing view:', error);
     }
-  };
+  }, [loginWithDemoRole]);
+
+  const handleViewAsManager = React.useCallback(() => {
+    handleViewAsRole('Gerente de Granja');
+  }, [handleViewAsRole]);
+
+  const handleViewAsWorker = React.useCallback(() => {
+    handleViewAsRole('Trabajador de Campo');
+  }, [handleViewAsRole]);
+
+  // Crear un componente optimizado para los items de navegación
+  const NavigationItem = React.memo<{ item: typeof sidebarItems[0] }>(({ item }) => {
+    const handleClick = React.useCallback(() => {
+      onNavigationChange(item.id);
+    }, [item.id]);
+
+    return (
+      <ListItem sx={{ p: 0, mb: 1 }}>
+        <ListItemButton
+          onClick={handleClick}
+          sx={{
+            borderRadius: 2,
+            backgroundColor: item.active ? '#334155' : 'transparent',
+            border: item.active ? '1px solid #475569' : '1px solid transparent',
+            '&:hover': {
+              backgroundColor: '#334155'
+            }
+          }}
+        >
+          <ListItemIcon sx={{ color: '#ffffff', minWidth: 40 }}>
+            {item.icon}
+          </ListItemIcon>
+          <ListItemText 
+            primary={item.text}
+            sx={{ '& .MuiTypography-root': { fontSize: '0.875rem' } }}
+          />
+        </ListItemButton>
+      </ListItem>
+    );
+  });
+
+  NavigationItem.displayName = 'NavigationItem';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
@@ -87,27 +128,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
         <Box sx={{ flex: 1, p: 2 }}>
           <List sx={{ p: 0 }}>
             {sidebarItems.map((item) => (
-              <ListItem key={item.id} sx={{ p: 0, mb: 1 }}>
-                <ListItemButton
-                  onClick={() => onNavigationChange(item.id)} // Nuevo cambio
-                  sx={{
-                    borderRadius: 2,
-                    backgroundColor: item.active ? '#334155' : 'transparent',
-                    border: item.active ? '1px solid #475569' : '1px solid transparent',
-                    '&:hover': {
-                      backgroundColor: '#334155'
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ color: '#ffffff', minWidth: 40 }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    sx={{ '& .MuiTypography-root': { fontSize: '0.875rem' } }}
-                  />
-                </ListItemButton>
-              </ListItem>
+              <NavigationItem key={item.id} item={item} />
             ))}
           </List>
         </Box>
@@ -140,7 +161,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -154,7 +175,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -232,7 +253,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             <Button
               variant="outlined"
               size="small"
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',
@@ -248,7 +269,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
             <Button
               variant="outlined"  
               size="small"
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',

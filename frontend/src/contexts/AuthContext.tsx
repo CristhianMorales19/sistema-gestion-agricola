@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   } = useAuth0();
 
   // Función para obtener el perfil del usuario desde la BD
-  const fetchUserProfile = async (): Promise<UserProfile> => {
+  const fetchUserProfile = React.useCallback(async (): Promise<UserProfile> => {
     if (!isAuthenticated || !user?.email) {
       throw new Error('Usuario no autenticado');
     }
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     return response.data;
-  };
+  }, [isAuthenticated, user?.email, getAccessTokenSilently]);
 
   // Query para obtener el perfil del usuario
   const {
@@ -101,31 +101,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   });
 
   // Función para verificar permisos
-  const hasPermission = (resource: string, action: string): boolean => {
+  const hasPermission = React.useCallback((resource: string, action: string): boolean => {
     if (!userProfile || !userProfile.permissions) return false;
     
     return userProfile.permissions.some(
-      permission => 
+      (permission: Permission) => 
         permission.resource === resource && 
         permission.action === action
     );
-  };
+  }, [userProfile]);
 
   // Función para verificar roles
-  const hasRole = (roleName: string): boolean => {
+  const hasRole = React.useCallback((roleName: string): boolean => {
     if (!userProfile || !userProfile.roles) return false;
     
-    return userProfile.roles.some(role => role.name === roleName);
-  };
+    return userProfile.roles.some((role: Role) => role.name === roleName);
+  }, [userProfile]);
 
   // Función de logout personalizada
-  const logout = () => {
+  const logout = React.useCallback(() => {
     auth0Logout({
       logoutParams: {
         returnTo: window.location.origin
       }
     });
-  };
+  }, [auth0Logout]);
 
   const contextValue: AuthContextType = {
     // Auth0 básico
