@@ -239,6 +239,18 @@ export class Auth0Repository implements AuthRepository {
   private mapToUserEntity(userData: Record<string, unknown>): User {
     // Por ahora, crear un rol de administrador por defecto basado en los permisos
     // TODO: Implementar consulta real a la base de datos para obtener roles
+    
+    // Convert permissions from strings to Permission objects
+    const permissionsArray = Array.isArray(userData.permissions) ? userData.permissions : [];
+    const permissions = permissionsArray
+      .filter((p): p is string => typeof p === 'string')
+      .map((permStr, index) => ({
+        id: `perm-${index}`,
+        name: permStr,
+        description: permStr,
+        module: permStr.split(':')[0] || 'general'
+      }));
+    
     const adminRole = new RoleEntity(
       '1',
       'admin',
@@ -246,7 +258,7 @@ export class Auth0Repository implements AuthRepository {
       'Acceso completo al sistema',
       '#1976d2',
       'admin_panel_settings',
-      Array.isArray(userData.permissions) ? userData.permissions as string[] : [],
+      permissions,
       true
     );
 
