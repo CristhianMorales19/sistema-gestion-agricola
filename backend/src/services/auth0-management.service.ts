@@ -35,24 +35,54 @@ export interface Auth0Role {
  */
 export class Auth0ManagementService {
   private management: ManagementClient;
+  private isInitialized: boolean = false;
 
   constructor() {
-    // Validar configuración antes de crear el cliente
-    this.validateConfig();
-    
-    this.management = new ManagementClient({
-      domain: auth0Config.domain,
-      clientId: auth0Config.clientId,
-      clientSecret: auth0Config.clientSecret
-    });
+    try {
+      // Validar configuración antes de crear el cliente
+      this.validateConfig();
+      
+      this.management = new ManagementClient({
+        domain: auth0Config.domain,
+        clientId: auth0Config.clientId,
+        clientSecret: auth0Config.clientSecret
+      });
+
+      this.isInitialized = true;
+      console.log('✅ Auth0ManagementService inicializado correctamente');
+    } catch (error: any) {
+      console.error('❌ Error inicializando Auth0ManagementService:', error.message);
+      throw error;
+    }
   }
 
   /**
    * Validar configuración de Auth0
    */
   private validateConfig(): void {
-    if (!auth0Config.domain || !auth0Config.clientId || !auth0Config.clientSecret) {
-      throw new Error('Auth0 configuration is incomplete. Please check your environment variables.');
+    const errors: string[] = [];
+
+    if (!auth0Config.domain) {
+      errors.push('AUTH0_DOMAIN no está definido');
+    }
+    if (!auth0Config.clientId) {
+      errors.push('AUTH0_CLIENT_ID no está definido');
+    }
+    if (!auth0Config.clientSecret) {
+      errors.push('AUTH0_CLIENT_SECRET no está definido');
+    }
+
+    if (errors.length > 0) {
+      throw new Error(`Error de configuración de Auth0:\n  - ${errors.join('\n  - ')}`);
+    }
+  }
+
+  /**
+   * Verificar si el servicio está inicializado correctamente
+   */
+  private checkInitialized(): void {
+    if (!this.isInitialized) {
+      throw new Error('Auth0ManagementService no está inicializado correctamente. Verifica las variables de entorno.');
     }
   }
 
@@ -65,6 +95,8 @@ export class Auth0ManagementService {
     start: number;
     limit: number;
   }> {
+    this.checkInitialized();
+    
     try {
       const result = await this.management.users.getAll({
         page,
@@ -89,6 +121,8 @@ export class Auth0ManagementService {
    * Obtener un usuario específico por ID
    */
   async getUserById(userId: string): Promise<Auth0User> {
+    this.checkInitialized();
+    
     try {
       const user = await this.management.users.get({ id: userId }) as any;
       return user.data || user;
@@ -102,6 +136,8 @@ export class Auth0ManagementService {
    * Obtener todos los roles disponibles en Auth0
    */
   async getRoles(): Promise<Auth0Role[]> {
+    this.checkInitialized();
+    
     try {
       const result = await this.management.roles.getAll() as any;
       return result.data || result || [];
@@ -115,6 +151,8 @@ export class Auth0ManagementService {
    * Obtener roles asignados a un usuario específico
    */
   async getUserRoles(userId: string): Promise<Auth0Role[]> {
+    this.checkInitialized();
+    
     try {
       const result = await this.management.users.getRoles({ id: userId }) as any;
       return result.data || result || [];
