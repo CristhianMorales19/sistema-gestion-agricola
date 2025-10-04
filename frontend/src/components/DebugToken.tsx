@@ -9,20 +9,43 @@ export default function DebugToken() {
       if (!isAuthenticated) return;
       try {
         // Auth0 SDK versions differ: newer versions expect `authorizationParams`.
-        // Try the modern option first, then fallback to other shapes. Use `any` here
-        // because this is a temporary debug helper.
-  let token: string | undefined;
+        // Try the modern option first, then fallback to other shapes.
+        let token: string | undefined;
         try {
-          const maybe = await getAccessTokenSilently({ authorizationParams: { audience: 'https://agromano-api.com' } } as any);
-          token = (maybe && typeof maybe === 'string') ? maybe : (maybe as any)?.access_token || (maybe as any)?.token;
+          const maybe = await getAccessTokenSilently({ 
+            authorizationParams: { audience: 'https://agromano-api.com' } 
+          } as { authorizationParams: { audience: string } });
+          
+          if (typeof maybe === 'string') {
+            token = maybe;
+          } else if (typeof maybe === 'object' && maybe !== null) {
+            const maybeObj = maybe as Record<string, unknown>;
+            token = (typeof maybeObj.access_token === 'string' ? maybeObj.access_token : undefined) || 
+                    (typeof maybeObj.token === 'string' ? maybeObj.token : undefined);
+          }
         } catch (e) {
           try {
-            const maybe2 = await getAccessTokenSilently({ audience: 'https://agromano-api.com' } as any);
-            token = (maybe2 && typeof maybe2 === 'string') ? maybe2 : (maybe2 as any)?.access_token || (maybe2 as any)?.token;
+            const maybe2 = await getAccessTokenSilently({ 
+              audience: 'https://agromano-api.com' 
+            } as { audience: string });
+            
+            if (typeof maybe2 === 'string') {
+              token = maybe2;
+            } else if (typeof maybe2 === 'object' && maybe2 !== null) {
+              const maybe2Obj = maybe2 as Record<string, unknown>;
+              token = (typeof maybe2Obj.access_token === 'string' ? maybe2Obj.access_token : undefined) || 
+                      (typeof maybe2Obj.token === 'string' ? maybe2Obj.token : undefined);
+            }
           } catch (e2) {
             // Final fallback: call without options (may return cached token)
             const maybe3 = await getAccessTokenSilently();
-            token = (maybe3 && typeof maybe3 === 'string') ? maybe3 : (maybe3 as any)?.access_token || (maybe3 as any)?.token;
+            if (typeof maybe3 === 'string') {
+              token = maybe3;
+            } else if (typeof maybe3 === 'object' && maybe3 !== null) {
+              const maybe3Obj = maybe3 as Record<string, unknown>;
+              token = (typeof maybe3Obj.access_token === 'string' ? maybe3Obj.access_token : undefined) || 
+                      (typeof maybe3Obj.token === 'string' ? maybe3Obj.token : undefined);
+            }
           }
         }
 

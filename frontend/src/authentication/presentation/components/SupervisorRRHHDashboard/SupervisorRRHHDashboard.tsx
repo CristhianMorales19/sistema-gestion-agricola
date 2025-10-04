@@ -8,13 +8,13 @@ import { ConditionsPanel } from '../../../../dashboard/presentation/components/C
 interface SupervisorRRHHDashboardProps {
   user: {
     permisos?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
   };
   dashboardData: {
-    stats?: any;
-    activities?: any;
-    conditions?: any;
-    [key: string]: any;
+    stats?: unknown;
+    activities?: unknown;
+    conditions?: unknown;
+    [key: string]: unknown;
   };
 }
 

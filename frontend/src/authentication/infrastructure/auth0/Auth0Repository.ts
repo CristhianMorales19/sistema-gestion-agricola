@@ -236,9 +236,21 @@ export class Auth0Repository implements AuthRepository {
     return permissionsMap;
   }
 
-  private mapToUserEntity(userData: any): User {
+  private mapToUserEntity(userData: Record<string, unknown>): User {
     // Por ahora, crear un rol de administrador por defecto basado en los permisos
     // TODO: Implementar consulta real a la base de datos para obtener roles
+    
+    // Convert permissions from strings to Permission objects
+    const permissionsArray = Array.isArray(userData.permissions) ? userData.permissions : [];
+    const permissions = permissionsArray
+      .filter((p): p is string => typeof p === 'string')
+      .map((permStr, index) => ({
+        id: `perm-${index}`,
+        name: permStr,
+        description: permStr,
+        module: permStr.split(':')[0] || 'general'
+      }));
+    
     const adminRole = new RoleEntity(
       '1',
       'admin',
@@ -246,18 +258,18 @@ export class Auth0Repository implements AuthRepository {
       'Acceso completo al sistema',
       '#1976d2',
       'admin_panel_settings',
-      userData.permissions || [],
+      permissions,
       true
     );
 
     return new UserEntity(
-      userData.sub || '1',
-      userData.email || 'usuario@ejemplo.com',
-      userData.email?.split('@')[0] || 'Usuario',
+      typeof userData.sub === 'string' ? userData.sub : '1',
+      typeof userData.email === 'string' ? userData.email : 'usuario@ejemplo.com',
+      typeof userData.email === 'string' ? userData.email.split('@')[0] : 'Usuario',
       [adminRole],
       true,
       new Date(),
-      userData.picture,
+      typeof userData.picture === 'string' ? userData.picture : undefined,
       new Date()
     );
   }
