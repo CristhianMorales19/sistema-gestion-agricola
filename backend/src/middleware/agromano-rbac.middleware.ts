@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 
 // Helper: obtener permisos del request (soporta req.auth y req.user)
 const getUserPermissionsFromRequest = (req: Request): string[] => {
-    const anyReq = req as any;
-
     // Helper para normalizar cadenas de scope a array
     const scopesToArray = (s: string | undefined): string[] => {
         if (!s || typeof s !== 'string') return [];
@@ -11,35 +9,35 @@ const getUserPermissionsFromRequest = (req: Request): string[] => {
     };
 
     // 1) Intentar claims estándar en req.auth
-    if (anyReq.auth) {
-        if (Array.isArray(anyReq.auth.permissions) && anyReq.auth.permissions.length > 0) return anyReq.auth.permissions;
-        if (Array.isArray(anyReq.auth['https://agromano.com/permissions']) && anyReq.auth['https://agromano.com/permissions'].length > 0) return anyReq.auth['https://agromano.com/permissions'];
-        const fromScope = scopesToArray(anyReq.auth.scope);
+    if (req.auth) {
+        if (Array.isArray(req.auth.permissions) && req.auth.permissions.length > 0) return req.auth.permissions;
+        if (Array.isArray(req.auth['https://agromano.com/permissions']) && req.auth['https://agromano.com/permissions'].length > 0) return req.auth['https://agromano.com/permissions'];
+        const fromScope = scopesToArray(req.auth.scope);
         if (fromScope.length > 0) return fromScope;
     }
 
     // 2) Intentar en req.user (algunos middlewares mapean claims a req.user)
-    if (anyReq.user) {
-        if (Array.isArray(anyReq.user.permissions) && anyReq.user.permissions.length > 0) return anyReq.user.permissions;
-        if (Array.isArray(anyReq.user['https://agromano.com/permissions']) && anyReq.user['https://agromano.com/permissions'].length > 0) return anyReq.user['https://agromano.com/permissions'];
-        const fromUserScope = scopesToArray(anyReq.user.scope);
+    if (req.user) {
+        if (Array.isArray(req.user.permissions) && req.user.permissions.length > 0) return req.user.permissions;
+        if (req.user.permisos && Array.isArray(req.user.permisos) && req.user.permisos.length > 0) return req.user.permisos;
+        const userScope = typeof req.user === 'object' && 'scope' in req.user && typeof req.user.scope === 'string' ? req.user.scope : undefined;
+        const fromUserScope = scopesToArray(userScope);
         if (fromUserScope.length > 0) return fromUserScope;
     }
 
     // 3) Otros fallbacks: propiedades auxiliares que podrían contener permisos
-    if (Array.isArray(anyReq.userPermissions) && anyReq.userPermissions.length > 0) return anyReq.userPermissions;
-    if (Array.isArray(anyReq.auth0User?.permissions) && anyReq.auth0User.permissions.length > 0) return anyReq.auth0User.permissions;
+    if (Array.isArray(req.userPermissions) && req.userPermissions.length > 0) return req.userPermissions;
+    if (req.auth0User && Array.isArray(req.auth0User.permissions) && req.auth0User.permissions.length > 0) return req.auth0User.permissions;
 
     return [];
 };
 
 // Helper: obtener roles del request (soporta claims en req.auth o propiedades en req.user)
 const getUserRolesFromRequest = (req: Request): string[] => {
-    const anyReq = req as any;
     // Auth0 custom claim: 'https://agromano.com/roles'
-    if (Array.isArray(anyReq.auth?.['https://agromano.com/roles']) && anyReq.auth['https://agromano.com/roles'].length > 0) return anyReq.auth['https://agromano.com/roles'];
-    if (Array.isArray(anyReq.user?.roles) && anyReq.user.roles.length > 0) return anyReq.user.roles;
-    if (typeof anyReq.user?.role === 'string' && anyReq.user.role) return [anyReq.user.role];
+    if (req.auth && Array.isArray(req.auth['https://agromano.com/roles']) && req.auth['https://agromano.com/roles'].length > 0) return req.auth['https://agromano.com/roles'];
+    if (req.user && typeof req.user === 'object' && 'roles' in req.user && Array.isArray(req.user.roles) && req.user.roles.length > 0) return req.user.roles;
+    if (req.user && typeof req.user === 'object' && 'role' in req.user && typeof req.user.role === 'string' && req.user.role) return [req.user.role];
     return [];
 };
 
@@ -212,22 +210,7 @@ export const ROLE_PERMISSIONS: Record<string, AgroManoPermission[]> = {
 };
 
 // Extender el tipo Request para incluir información del usuario Auth0
-declare global {
-    namespace Express {
-        interface Request {
-            auth?: {
-                sub: string;
-                permissions?: string[];
-                'https://agromano.com/roles'?: string[];
-                'https://agromano.com/user_metadata'?: {
-                    usuario_id?: number;
-                    rol_id?: number;
-                    [key: string]: unknown;
-                };
-            };
-        }
-    }
-}
+// (Definiciones principales en types/express.ts)
 
 /**
  * Middleware para verificar un permiso específico
@@ -237,7 +220,7 @@ export const requirePermission = (permission: AgroManoPermission) => {
         const userPermissions = getUserPermissionsFromRequest(req);
         
         if (!userPermissions.includes(permission)) {
-            console.warn(`RBAC: requirePermission FAILED -> required=${permission} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify((req as any).auth)} user=${JSON.stringify((req as any).user)}`);
+            console.warn(`RBAC: requirePermission FAILED -> required=${permission} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify(req.auth)} user=${JSON.stringify(req.user)}`);
             return res.status(403).json({
                 success: false,
                 message: `Permiso requerido: ${permission}`,
@@ -265,7 +248,7 @@ export const requirePermissions = (permissions: AgroManoPermission[]) => {
             const missingPermissions = permissions.filter(
                 permission => !userPermissions.includes(permission)
             );
-            console.warn(`RBAC: requirePermissions FAILED -> required=${permissions.join(', ')} missing=${JSON.stringify(missingPermissions)} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify((req as any).auth)} user=${JSON.stringify((req as any).user)}`);
+            console.warn(`RBAC: requirePermissions FAILED -> required=${permissions.join(', ')} missing=${JSON.stringify(missingPermissions)} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify(req.auth)} user=${JSON.stringify(req.user)}`);
             return res.status(403).json({
                 success: false,
                 message: `Permisos requeridos: ${permissions.join(', ')}`,
@@ -291,7 +274,7 @@ export const requireAnyPermission = (permissions: AgroManoPermission[]) => {
         );
         
         if (!hasAnyPermission) {
-            console.warn(`RBAC: requireAnyPermission FAILED -> requiredAny=${permissions.join(', ')} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify((req as any).auth)} user=${JSON.stringify((req as any).user)}`);
+            console.warn(`RBAC: requireAnyPermission FAILED -> requiredAny=${permissions.join(', ')} userPermissions=${JSON.stringify(userPermissions)} auth=${JSON.stringify(req.auth)} user=${JSON.stringify(req.user)}`);
             return res.status(403).json({
                 success: false,
                 message: `Se requiere al menos uno de: ${permissions.join(', ')}`,
@@ -314,7 +297,7 @@ export const requireRole = (role: keyof typeof AGROMANO_ROLES) => {
         const requiredRole = AGROMANO_ROLES[role];
         
         if (!userRoles.includes(requiredRole)) {
-            console.warn(`RBAC: requireRole FAILED -> requiredRole=${requiredRole} userRoles=${JSON.stringify(userRoles)} auth=${JSON.stringify((req as any).auth)} user=${JSON.stringify((req as any).user)}`);
+            console.warn(`RBAC: requireRole FAILED -> requiredRole=${requiredRole} userRoles=${JSON.stringify(userRoles)} auth=${JSON.stringify(req.auth)} user=${JSON.stringify(req.user)}`);
             return res.status(403).json({
                 success: false,
                 message: `Rol requerido: ${requiredRole}`,

@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export const requireUserManagementPermission = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Verificar si hay un usuario autenticado localmente
-    const localUser = (req as any).localUser;
+    const localUser = req.localUser;
     
     if (!localUser) {
       return res.status(401).json({
@@ -36,7 +36,7 @@ export const requireUserManagementPermission = async (req: Request, res: Respons
     }
 
     // Si no tiene permisos locales, verificar en Auth0
-    const auth0User = (req as any).auth?.sub;
+    const auth0User = req.auth?.sub;
     
     if (auth0User) {
       try {
@@ -80,7 +80,7 @@ export const requireUserManagementPermission = async (req: Request, res: Respons
 export const requireRolePermission = (action: 'create' | 'read' | 'update' | 'delete') => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const localUser = (req as any).localUser;
+      const localUser = req.localUser;
       
       if (!localUser) {
         return res.status(401).json({
@@ -128,7 +128,7 @@ export const requireRolePermission = (action: 'create' | 'read' | 'update' | 'de
  */
 export const requireUserRoleManagementPermission = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const localUser = (req as any).localUser;
+    const localUser = req.localUser;
     const { userId } = req.params;
     
     if (!localUser) {

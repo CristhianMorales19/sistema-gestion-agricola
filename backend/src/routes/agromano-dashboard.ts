@@ -34,7 +34,7 @@ router.get('/general',
     requireAnyPermission(['dashboard:view:basic', 'dashboard:view:advanced']),
     async (req, res) => {
         try {
-            console.log('� ===== DASHBOARD GENERAL REQUEST =====');
+            console.log('📊 ===== DASHBOARD GENERAL REQUEST =====');
             console.log('⏰ Timestamp:', new Date().toISOString());
             console.log('🔍 Headers recibidos:', {
                 authorization: req.headers.authorization ? '✅ Presente' : '❌ Ausente',
@@ -42,13 +42,13 @@ router.get('/general',
                 origin: req.headers.origin
             });
             
-            console.log('👤 Usuario Auth0 después de checkJwt:', (req as any).user?.sub);
-            console.log('📧 Email usuario:', (req as any).user?.email);
-            console.log('� Estado después de hybridAuthMiddleware:');
-            console.log('   - dbUser:', (req as any).user?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
-            console.log('   - permissions length:', ((req as any).user?.permissions || []).length);
+            console.log('👤 Usuario Auth0 después de checkJwt:', req.user?.auth0_id);
+            console.log('📧 Email usuario:', req.user?.email);
+            console.log('📊 Estado después de hybridAuthMiddleware:');
+            console.log('   - dbUser:', req.user?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
+            console.log('   - permissions length:', (req.user?.permissions || req.user?.permisos || []).length);
             
-            const userPermissions = (req as any).user?.permissions || [];
+            const userPermissions = req.user?.permissions || req.user?.permisos || [];
             console.log('🎭 Permisos completos del usuario:', userPermissions);
             const isAdvanced = userPermissions.includes('dashboard:view:advanced');
             
@@ -237,11 +237,10 @@ router.get('/general',
             console.log('💥 ===== ERROR EN DASHBOARD GENERAL =====');
             console.error('❌ Error obteniendo datos del dashboard:', error);
             console.error('🔍 Stack trace:', error instanceof Error ? error.stack : 'No disponible');
-            console.error('👤 Usuario en error:', (req as any).user?.sub);
+            console.error('👤 Usuario en error:', req.user?.auth0_id);
             console.log('=======================================');
             // Si detectamos un error de Prisma P2022 (columna inexistente), devolver datos por defecto en vez de 500
-            const anyErr = error as any;
-            if (anyErr && anyErr.code === 'P2022') {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2022') {
                 console.warn('Prisma P2022 detectado en dashboard.general, devolviendo datos por defecto');
                 return res.json({
                     success: true,

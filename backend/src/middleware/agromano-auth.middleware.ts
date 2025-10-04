@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { expressjwt } from 'express-jwt';
+import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 import { AgroManoUserSyncService } from '../services/agromano-user-sync.service';
 
@@ -13,7 +13,7 @@ export const checkJwt = expressjwt({
     rateLimit: true,
     jwksRequestsPerMinute: 5,
     jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }) as any,
+  }) as GetVerificationKey,
   audience: process.env.AUTH0_AUDIENCE,
   issuer: `https://${process.env.AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
@@ -34,7 +34,7 @@ export const agroManoAuthMiddleware = async (
   try {
     // El token ya fue validado por checkJwt
     // Extraer datos del token Auth0
-    const auth0User = (req as any).auth;
+    const auth0User = req.auth;
 
     if (!auth0User || !auth0User.sub) {
       return res.status(401).json({
@@ -118,7 +118,7 @@ export const agroManoAuthMiddleware = async (
     ).filter((codigo): codigo is string => codigo !== undefined) || [];
 
     // Agregar datos a la request para usar en los controladores
-    (req as any).user = {
+    req.user = {
       // Datos de Auth0
       auth0_id: auth0UserId,
       auth0_email: auth0Email,
@@ -171,7 +171,7 @@ export const agroManoAuthMiddleware = async (
     console.error('❌ Error en agroManoAuthMiddleware:', error);
 
     // Si es un error de JWT, devolver 401
-    if ((error as any).name === 'UnauthorizedError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'UnauthorizedError') {
       return res.status(401).json({
         success: false,
         error: 'INVALID_TOKEN',
@@ -193,7 +193,7 @@ export const agroManoAuthMiddleware = async (
  */
 export const requirePermiso = (...permisos: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user;
+    const user = req.user;
 
     if (!user) {
       return res.status(401).json({
@@ -223,7 +223,7 @@ export const requirePermiso = (...permisos: string[]) => {
  * Middleware para verificar que el usuario tenga rol de administrador
  */
 export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-  const user = (req as any).user;
+  const user = req.user;
 
   if (!user) {
     return res.status(401).json({
@@ -253,7 +253,7 @@ export const requireSupervisorOrAdmin = (
   res: Response,
   next: NextFunction
 ) => {
-  const user = (req as any).user;
+  const user = req.user;
 
   if (!user) {
     return res.status(401).json({
