@@ -187,7 +187,7 @@ export const requireUserRoleManagementPermission = async (req: Request, res: Res
 export const auditRoleManagement = (action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const localUser = (req as Request & { localUser?: { usuario_id: number } }).localUser;
+      const localUser = req.localUser;
       const originalJson = res.json;
 
       // Interceptar la respuesta para auditoría
@@ -205,7 +205,7 @@ export const auditRoleManagement = (action: string) => {
               fecha_at: new Date(),
               ip_origen: req.ip || 'unknown'
             }
-          }).catch(error => {
+          }).catch((error: Error) => {
             console.error('Error en auditoría:', error);
           });
         }

@@ -86,8 +86,8 @@ export class UserRoleController {
           }
 
           return {
-            user: user as any,
-            roles: roles as any,
+            user: user,
+            roles: roles,
             localUserData
           };
         })
@@ -142,7 +142,7 @@ export class UserRoleController {
       const roles = await auth0ManagementService.getRoles();
 
       const response: RolesListResponse = {
-        roles: roles as any,
+        roles: roles,
         total: roles.length
       };
 
@@ -220,8 +220,8 @@ export class UserRoleController {
       }
 
       const userWithRoles: UserWithRoles = {
-        user: user as any,
-        roles: roles as any,
+        user: user,
+        roles: roles,
         localUserData
       };
 
@@ -276,7 +276,7 @@ export class UserRoleController {
       await auth0ManagementService.updateUserRoles(userId, roleIds);
 
       // Registrar auditoría en base de datos local
-      const adminUser = (req as any).localUser;
+      const adminUser = req.localUser;
       await prisma.mol_audit_log.create({
         data: {
           entidad: 'auth0_user_roles',
@@ -352,7 +352,7 @@ export class UserRoleController {
       await auth0ManagementService.removeRolesFromUser(userId, roleIds);
 
       // Registrar auditoría
-      const adminUser = (req as any).localUser;
+      const adminUser = req.localUser;
       await prisma.mol_audit_log.create({
         data: {
           entidad: 'auth0_user_roles',
@@ -488,7 +488,7 @@ export class UserRoleController {
           }
 
           usersWithoutRoles.push({
-            user: user as any,
+            user: user,
             roles: [],
             localUserData
           });
