@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
 import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
@@ -23,9 +23,9 @@ interface SoloLecturaDashboardProps {
 export const SoloLecturaDashboard: React.FC<SoloLecturaDashboardProps> = ({ user, dashboardData }) => {
   const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);

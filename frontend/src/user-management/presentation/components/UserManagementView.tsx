@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -101,6 +101,14 @@ export const UserManagementView: React.FC = () => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
+
+  const handleCloseError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const handleCloseSuccess = useCallback(() => {
+    setSuccess(null);
+  }, []);
 
   const handleSyncUsers = async () => {
     try {
@@ -654,10 +662,10 @@ export const UserManagementView: React.FC = () => {
       <Snackbar 
         open={Boolean(error)} 
         autoHideDuration={6000} 
-        onClose={() => setError(null)}
+        onClose={handleCloseError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
           {error}
         </Alert>
       </Snackbar>
@@ -665,10 +673,10 @@ export const UserManagementView: React.FC = () => {
       <Snackbar 
         open={Boolean(success)} 
         autoHideDuration={4000} 
-        onClose={() => setSuccess(null)}
+        onClose={handleCloseSuccess}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={() => setSuccess(null)} severity="success" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSuccess} severity="success" sx={{ width: '100%' }}>
           {success}
         </Alert>
       </Snackbar>

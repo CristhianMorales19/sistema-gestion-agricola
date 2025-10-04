@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Grid } from '@mui/material';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAuth } from '../../../application/hooks/useAuth';
@@ -33,9 +33,9 @@ export const EmpleadoCampoDashboard: React.FC = () => {
     loadDashboardData();
   }, [getAccessTokenSilently, currentView]);
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   const hasPermission = (permission: string) => {
     if (!user) return false;
