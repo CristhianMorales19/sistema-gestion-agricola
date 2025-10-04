@@ -6,19 +6,14 @@ import {
 } from '../middleware/agromano-auth.middleware';
 import { PrismaClient } from '@prisma/client';
 import { Auth0ManagementService } from '../services/auth0-management.service';
+import { AgroManoUser } from '../types/express';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Tipos extendidos para Request con usuario autenticado
 interface AuthenticatedRequest extends Request {
-  user?: {
-    usuario_id?: number;
-    sub?: string;
-    email?: string;
-    permissions?: string[];
-    dbUser?: unknown;
-  };
+  user?: AgroManoUser;
 }
 
 // Tipos para resultados de consultas SQL

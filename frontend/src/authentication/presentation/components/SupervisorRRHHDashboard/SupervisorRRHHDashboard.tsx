@@ -4,6 +4,7 @@ import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components'
 import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
 import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
+import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../dashboard/domain/entities/Dashboard';
 
 interface SupervisorRRHHDashboardProps {
   user: {
@@ -11,9 +12,9 @@ interface SupervisorRRHHDashboardProps {
     [key: string]: unknown;
   };
   dashboardData: {
-    stats?: unknown;
-    activities?: unknown;
-    conditions?: unknown;
+    stats?: DashboardStatistic[];
+    activities?: DashboardActivity[];
+    conditions?: DashboardCondition[];
     [key: string]: unknown;
   };
 }
@@ -39,7 +40,7 @@ export const SupervisorRRHHDashboard: React.FC<SupervisorRRHHDashboardProps> = (
         <Grid container spacing={3}>
           {hasPermission('dashboard:view:advanced') && (
             <Grid item xs={12}>
-              <StatsCards stats={dashboardData.stats} />
+              <StatsCards stats={dashboardData.stats || []} />
             </Grid>
           )}
           <Grid item xs={12}>
@@ -48,12 +49,12 @@ export const SupervisorRRHHDashboard: React.FC<SupervisorRRHHDashboardProps> = (
           <Grid container spacing={3} item xs={12}>
             {hasPermission('reportes:read:advanced') && (
               <Grid item xs={12} md={6}>
-                <ActivityFeed activities={dashboardData.activities} />
+                <ActivityFeed activities={dashboardData.activities || []} />
               </Grid>
             )}
             {hasPermission('dashboard:view:advanced') && (
               <Grid item xs={12} md={6}>
-                <ConditionsPanel conditions={dashboardData.conditions} />
+                <ConditionsPanel conditions={dashboardData.conditions || []} />
               </Grid>
             )}
           </Grid>

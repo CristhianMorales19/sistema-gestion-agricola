@@ -25,9 +25,7 @@ export default function DebugToken() {
           }
         } catch (e) {
           try {
-            const maybe2 = await getAccessTokenSilently({ 
-              audience: 'https://agromano-api.com' 
-            } as { audience: string });
+            const maybe2 = await getAccessTokenSilently();
             
             if (typeof maybe2 === 'string') {
               token = maybe2;
