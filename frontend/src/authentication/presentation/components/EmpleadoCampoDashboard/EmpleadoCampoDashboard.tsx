@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Grid } from '@mui/material';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAuth } from '../../../application/hooks/useAuth';
@@ -33,19 +33,30 @@ export const EmpleadoCampoDashboard: React.FC = () => {
     loadDashboardData();
   }, [getAccessTokenSilently, currentView]);
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   const hasPermission = (permission: string) => {
     if (!user) return false;
-    if (typeof (user as any).hasPermission === 'function') {
-      return (user as any).hasPermission(permission);
+    if (typeof user === 'object' && 'hasPermission' in user && typeof user.hasPermission === 'function') {
+      return user.hasPermission(permission);
     }
     // fallback: check permissions in roles
-    return Array.isArray(user.roles)
-      ? user.roles.some((role: any) => Array.isArray(role.permissions) && role.permissions.some((p: any) => p.name === permission))
-      : false;
+    if (typeof user === 'object' && 'roles' in user && Array.isArray(user.roles)) {
+      return user.roles.some((role: unknown) => {
+        if (typeof role === 'object' && role !== null && 'permissions' in role) {
+          const roleObj = role as { permissions?: unknown };
+          return Array.isArray(roleObj.permissions) && 
+                 roleObj.permissions.some((p: unknown) => 
+                   typeof p === 'object' && p !== null && 'name' in p && 
+                   (p as { name: unknown }).name === permission
+                 );
+        }
+        return false;
+      });
+    }
+    return false;
   };
 
   if (loading) {

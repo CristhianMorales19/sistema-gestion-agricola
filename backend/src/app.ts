@@ -16,36 +16,34 @@ import agroManoDashboardRoutes from './routes/agromano-dashboard';
 import dashboardSimpleRoutes from './routes/dashboard-simple';
 import debugRoutes from './routes/debug-routes';
 import debugPrismaRoutes from './routes/debug-prisma';
+import userRoleManagementRoutes from './routes/user-role-management';
+import testUserManagementRoutes from './routes/test-user-management';
+import usuariosSistemaRoutes from './routes/usuarios-sistema.routes';
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
   try {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
-    
+
     console.log('🔄 Intentando conectar a la base de datos...');
     await prisma.$connect();
     console.log('✅ Conexión a la base de datos exitosa');
-    
-    // Verificar que existe la tabla de usuarios
-    const usuarios = await prisma.mot_usuario.count();
-    console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
-    
-    // Verificar usuario Auth0
-    const usuarioAuth0 = await prisma.mot_usuario.findFirst({
-      where: {
-        username: {
-          contains: 'admin@agromano.com'
-        }
+
+    // Verificar que existe la tabla de usuarios (si la tabla no existe esto lanzará)
+    try {
+      const usuarios = await prisma.mot_usuario.count();
+      console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
+    } catch (err) {
+      const error = err as Error & { code?: string };
+      // Manejo suave si la tabla/columna no existe (p. ej. entorno con esquema distinto)
+      if (error && (error.code === 'P2022' || error.code === 'P2025')) {
+        console.warn('⚠️ Advertencia: tabla o columna ausente al verificar mot_usuario. Omitiendo verificación.');
+      } else {
+        console.warn('⚠️ Advertencia al verificar tabla mot_usuario:', error instanceof Error ? error.message : String(error));
       }
-    });
-    
-    if (usuarioAuth0) {
-      console.log('✅ Usuario Auth0 encontrado:', usuarioAuth0.username);
-    } else {
-      console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
     }
-    
+
     await prisma.$disconnect();
     return true;
   } catch (error) {
@@ -60,7 +58,7 @@ console.log('🔍 Variables de entorno cargadas:');
 console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
 console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
 console.log('AUTH0_CLIENT_ID:', process.env.AUTH0_CLIENT_ID ? '✅ Configurado' : '❌ Faltante');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('DATABASE_URL exists:', Boolean(process.env.DATABASE_URL));
 console.log('DATABASE_URL value:', process.env.DATABASE_URL || 'UNDEFINED!');
 console.log('PORT:', process.env.PORT || 3000);
 
@@ -72,8 +70,19 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares globales
 app.use(helmet());
+// Configurar CORS permitiendo múltiples orígenes desde la variable de entorno
+// FRONTEND_URLS (coma-separados) o FRONTEND_URL.
+const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000';
+const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, or same-origin)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn(`CORS: origin not allowed -> ${origin}. Allowed: ${allowedOrigins.join(',')}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -109,6 +118,15 @@ app.use('/api/dashboard-simple', dashboardSimpleRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/debug-prisma', debugPrismaRoutes);
 
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
+
+// Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
+app.use('/api/test', testUserManagementRoutes);
+
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {
   res.json({
@@ -128,7 +146,7 @@ app.use('*', (req, res) => {
 });
 
 // Manejo global de errores
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error & { status?: number; stack?: string }, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error Global:', error);
   
   res.status(error.status || 500).json({

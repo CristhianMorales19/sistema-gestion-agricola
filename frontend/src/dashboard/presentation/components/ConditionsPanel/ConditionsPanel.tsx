@@ -7,6 +7,7 @@ interface ConditionsPanelProps {
   conditions: DashboardCondition[];
 }
 
+// Mover la función fuera del componente
 const getConditionIcon = (type: DashboardCondition['type']) => {
   switch (type) {
     case 'temperature': return <Thermostat sx={{ fontSize: 20, color: '#f59e0b' }} />;
@@ -16,6 +17,25 @@ const getConditionIcon = (type: DashboardCondition['type']) => {
     default: return <Cloud sx={{ fontSize: 20 }} />;
   }
 };
+
+// Componente separado para cada condición
+const ConditionItem = React.memo<{ condition: DashboardCondition }>(({ condition }) => (
+  <Grid item xs={6}>
+    <Box sx={{ textAlign: 'center' }}>
+      <Box sx={{ mb: 1 }}>
+        {getConditionIcon(condition.type)}
+      </Box>
+      <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 'bold', mb: 0.5 }}>
+        {condition.value}{condition.unit}
+      </Typography>
+      <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+        {condition.label}
+      </Typography>
+    </Box>
+  </Grid>
+));
+
+ConditionItem.displayName = 'ConditionItem';
 
 export const ConditionsPanel: React.FC<ConditionsPanelProps> = ({ conditions }) => {
   return (
@@ -37,19 +57,7 @@ export const ConditionsPanel: React.FC<ConditionsPanelProps> = ({ conditions }) 
         
         <Grid container spacing={3}>
           {conditions.map((condition) => (
-            <Grid item xs={6} key={condition.id}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Box sx={{ mb: 1 }}>
-                  {getConditionIcon(condition.type)}
-                </Box>
-                <Typography variant="h5" sx={{ color: '#ffffff', fontWeight: 'bold', mb: 0.5 }}>
-                  {condition.value}{condition.unit}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                  {condition.label}
-                </Typography>
-              </Box>
-            </Grid>
+            <ConditionItem key={condition.id} condition={condition} />
           ))}
         </Grid>
       </CardContent>

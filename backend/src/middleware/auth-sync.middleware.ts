@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export const syncAuth0User = async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Obtener información del usuario desde el token Auth0
-        const auth0User = (req as any).auth;
+        const auth0User = req.auth;
         
         if (!auth0User) {
             return next(); // Si no hay auth, continuar (otros middlewares manejarán el error)
@@ -112,11 +112,11 @@ export const syncAuth0User = async (req: Request, res: Response, next: NextFunct
             });
         }
 
-        // Agregar información del usuario de BD al request
-        (req as any).dbUser = usuario;
-        (req as any).userPermissions = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
-            rp => rp.mom_permiso.codigo
-        );
+        // // Agregar información del usuario de BD al request
+        // req.localUser = usuario;
+        // req.userPermissions = usuario.mom_rol.rel_mom_rol__mom_permiso.map(
+        //     (rp: { mom_permiso: { codigo: string } }) => rp.mom_permiso.codigo
+        // );
 
         next();
 

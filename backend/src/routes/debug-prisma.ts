@@ -55,9 +55,9 @@ router.get('/prisma-connection', async (req, res) => {
             message: 'Conexión Prisma exitosa',
             data: {
                 userCount,
-                auth0User: !!testUser,
+                auth0User: Boolean(testUser),
                 envVars: {
-                    DATABASE_URL: !!process.env.DATABASE_URL,
+                    DATABASE_URL: Boolean(process.env.DATABASE_URL),
                     DB_HOST: process.env.DB_HOST || 'UNDEFINED',
                     DB_PORT: process.env.DB_PORT || 'UNDEFINED',
                     DB_USER: process.env.DB_USER || 'UNDEFINED',
@@ -76,7 +76,7 @@ router.get('/prisma-connection', async (req, res) => {
                 message: (error as Error).message,
                 stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined,
                 envVars: {
-                    DATABASE_URL: !!process.env.DATABASE_URL,
+                    DATABASE_URL: Boolean(process.env.DATABASE_URL),
                     DB_HOST: process.env.DB_HOST || 'UNDEFINED',
                     DB_PORT: process.env.DB_PORT || 'UNDEFINED',
                     DB_USER: process.env.DB_USER || 'UNDEFINED',
@@ -132,8 +132,8 @@ router.get('/auth0-user-search', async (req, res) => {
         res.json({
             success: true,
             searches: {
-                byExactUsername: !!userByUsername,
-                byPartialUsername: !!userByPartial,
+                byExactUsername: Boolean(userByUsername),
+                byPartialUsername: Boolean(userByPartial),
                 allActiveUsersCount: allActiveUsers.length
             },
             data: {

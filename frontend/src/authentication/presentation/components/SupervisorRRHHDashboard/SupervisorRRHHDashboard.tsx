@@ -1,20 +1,21 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
 import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
 import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
+import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../dashboard/domain/entities/Dashboard';
 
 interface SupervisorRRHHDashboardProps {
   user: {
     permisos?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
   };
   dashboardData: {
-    stats?: any;
-    activities?: any;
-    conditions?: any;
-    [key: string]: any;
+    stats?: DashboardStatistic[];
+    activities?: DashboardActivity[];
+    conditions?: DashboardCondition[];
+    [key: string]: unknown;
   };
 }
 
@@ -22,9 +23,9 @@ interface SupervisorRRHHDashboardProps {
 export const SupervisorRRHHDashboard: React.FC<SupervisorRRHHDashboardProps> = ({ user, dashboardData }) => {
   const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);
@@ -39,7 +40,7 @@ export const SupervisorRRHHDashboard: React.FC<SupervisorRRHHDashboardProps> = (
         <Grid container spacing={3}>
           {hasPermission('dashboard:view:advanced') && (
             <Grid item xs={12}>
-              <StatsCards stats={dashboardData.stats} />
+              <StatsCards stats={dashboardData.stats || []} />
             </Grid>
           )}
           <Grid item xs={12}>
@@ -48,12 +49,12 @@ export const SupervisorRRHHDashboard: React.FC<SupervisorRRHHDashboardProps> = (
           <Grid container spacing={3} item xs={12}>
             {hasPermission('reportes:read:advanced') && (
               <Grid item xs={12} md={6}>
-                <ActivityFeed activities={dashboardData.activities} />
+                <ActivityFeed activities={dashboardData.activities || []} />
               </Grid>
             )}
             {hasPermission('dashboard:view:advanced') && (
               <Grid item xs={12} md={6}>
-                <ConditionsPanel conditions={dashboardData.conditions} />
+                <ConditionsPanel conditions={dashboardData.conditions || []} />
               </Grid>
             )}
           </Grid>

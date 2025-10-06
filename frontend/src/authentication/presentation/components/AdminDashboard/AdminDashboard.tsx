@@ -11,6 +11,7 @@ import { ActivityFeed } from '../../../../dashboard/presentation/components/Acti
 import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
 import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView';
+import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,36 +21,36 @@ export const AdminDashboard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setError(null);
-        // Dependency injection siguiendo Clean Architecture con datos reales
-        const repository = new ApiDashboardRepository(getAccessTokenSilently);
-        const getDashboardDataUseCase = new GetDashboardDataUseCase(repository);
-        const refreshStatsUseCase = new RefreshDashboardStatsUseCase(repository);
-        const service = new DashboardService(getDashboardDataUseCase, refreshStatsUseCase);
-        
-        // Obtener datos reales de la API
-        const data = await service.getDashboardData();
-        setDashboardData(data);
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        setError('Error cargando datos del dashboard. Verifica la conexión con el servidor.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadDashboardData = React.useCallback(async () => {
+    try {
+      setError(null);
+      // Dependency injection siguiendo Clean Architecture con datos reales
+      const repository = new ApiDashboardRepository(getAccessTokenSilently);
+      const getDashboardDataUseCase = new GetDashboardDataUseCase(repository);
+      const refreshStatsUseCase = new RefreshDashboardStatsUseCase(repository);
+      const service = new DashboardService(getDashboardDataUseCase, refreshStatsUseCase);
+      
+      // Obtener datos reales de la API
+      const data = await service.getDashboardData();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      setError('Error cargando datos del dashboard. Verifica la conexión con el servidor.');
+    } finally {
+      setLoading(false);
+    }
+  }, [getAccessTokenSilently]);
 
+  useEffect(() => {
     // Solo cargar datos del dashboard si estamos en esa vista
     if (currentView === 'dashboard') {
       loadDashboardData();
     }
-  }, [getAccessTokenSilently, currentView]); // Dependencia de currentView
+  }, [currentView, loadDashboardData]); // Dependencia de currentView
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = React.useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -84,34 +85,40 @@ export const AdminDashboard: React.FC = () => {
     switch (currentView) {
       case 'dashboard':
         return (
-          /* Stats Cards */
-          <Grid container spacing={3}>
+          <>
+            {/* Stats Cards */}
+            <Grid container spacing={3}>
             <Grid item xs={12}>
               <StatsCards stats={dashboardData?.stats || []} />
             </Grid>
 
-            /* Permissions Panel */
+            {/* Permissions Panel */}
             <Grid item xs={12}>
               <PermissionsPanel user={user} />
             </Grid>
 
-            /* Activity Feed */
+            {/* Activity Feed */}
             <Grid container spacing={3} item xs={12}>
               <Grid item xs={12} md={6}>
                 <ActivityFeed activities={dashboardData?.activities || []} />
               </Grid>
-
-              /* Conditions Panel */
+              {/* Conditions Panel */}
               <Grid item xs={12} md={6}>
                 <ConditionsPanel conditions={dashboardData?.conditions || []} />
               </Grid>
             </Grid>
-          </Grid>
+            </Grid>
+          </>
         );
 
       case 'employee-management':
         return (
           <EmployeeManagementView/>
+        );
+
+      case 'users':
+        return (
+          <UserManagementView/>
         );
 
       case 'farms':

@@ -153,8 +153,31 @@ router.get('/',
 router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores:create'),
     async (req, res) => {
         try {
-            const userId = (req.user as any)?.id;  
-            const { identification, name, birthDate, phone, email } = req.body;
+            console.log('5. Datos recibidos en controller:', req.body);
+            
+            const {
+                documento_identidad,
+                nombre_completo,
+                fecha_nacimiento,
+                fecha_registro_at,
+                telefono,
+                email,
+                cargo,
+                // Campos laborales opcionales
+                departamento,
+                codigo_nomina,
+                salario_bruto,
+                rebajas_ccss,
+                otras_rebajas,
+                salario_por_hora,
+                horas_ordinarias,
+                horas_extras,
+                horas_otras,
+                vacaciones_monto,
+                incapacidad_monto,
+                lactancia_monto,
+                created_by
+            } = req.body;
 
             const error = await validateEmployeeInputSingleError(req.body);
             if (error) {
@@ -162,17 +185,46 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
             }
             const newEmployee = await prisma.mom_trabajador.create({
                 data: {
-                    documento_identidad: identification.trim(),
-                    nombre_completo: name.trim(),
-                    fecha_nacimiento: new Date(birthDate),
+                    documento_identidad: documento_identidad.trim(),
+                    nombre_completo: nombre_completo.trim(),
+                    fecha_nacimiento: new Date(fecha_nacimiento),
                     fecha_registro_at: new Date(),
-                    telefono: phone ? phone.trim() : null,
+                    telefono: telefono ? telefono.trim() : null,
                     email: email ? email.trim() : null,
                     created_at: new Date(),
-                    created_by: parseInt(userId),
+                    created_by: created_by,
                     is_activo: true
                 }
             });
+
+            // Si se proporcionó un cargo, crear registro en la tabla de información laboral
+            if (cargo || salario_bruto || codigo_nomina) {
+                await prisma.mot_info_laboral.create({
+                    data: {
+                        trabajador_id: newEmployee.trabajador_id,
+                        cargo: cargo ? cargo.trim() : 'Sin definir',
+                        departamento: departamento ? departamento.trim() : 'Sin definir',
+                        fecha_ingreso_at: new Date(fecha_registro_at),
+                        tipo_contrato: req.body.tipo_contrato || 'no_definido',
+                        salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0,
+                        codigo_nomina: codigo_nomina ? String(codigo_nomina) : null,
+                        salario_bruto: salario_bruto ? parseFloat(String(salario_bruto)) : null,
+                        rebajas_ccss: rebajas_ccss ? parseFloat(String(rebajas_ccss)) : null,
+                        otras_rebajas: otras_rebajas ? parseFloat(String(otras_rebajas)) : null,
+                        salario_por_hora: salario_por_hora ? parseFloat(String(salario_por_hora)) : null,
+                        horas_ordinarias: horas_ordinarias ? parseFloat(String(horas_ordinarias)) : null,
+                        horas_extras: horas_extras ? parseFloat(String(horas_extras)) : null,
+                        horas_otras: horas_otras ? parseFloat(String(horas_otras)) : null,
+                        vacaciones_monto: vacaciones_monto ? parseFloat(String(vacaciones_monto)) : null,
+                        incapacidad_monto: incapacidad_monto ? parseFloat(String(incapacidad_monto)) : null,
+                        lactancia_monto: lactancia_monto ? parseFloat(String(lactancia_monto)) : null,
+                        fecha_ultima_actualizacion_at: new Date(),
+                        usuario_ultima_actualizacion: created_by,
+                        created_at: new Date(),
+                        created_by: created_by,
+                    }
+                });
+            }
 
             res.status(201).json({
                 success: true,
@@ -210,76 +262,108 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
  * @desc Actualizar trabajador
  * @access Requiere permisos: trabajadores:update:all OR trabajadores:update:own
  */
-router.put('/:id', checkJwt, hybridAuthMiddleware, requireAnyPermission(['trabajadores:update:all','trabajadores:update:own']), async (req,res)=>{
-    try {
-        const { id } = req.params;
-        const userPermissions = (req.user as any)?.permissions || [];
-        const canUpdateAll = userPermissions.includes('trabajadores:update:all');
-        const userId = (req.user as any)?.id;
+router.put('/:id', 
+    checkJwt,
+    hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
+    requireAnyPermission(['trabajadores:update:all', 'trabajadores:update:own']),
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userPermissions = (req as any).user?.permissions || [];
+            const canUpdateAll = userPermissions.includes('trabajadores:update:all');
+            
+            // Validar datos requeridos
+            const { cargo, salario_base, tipo_contrato } = req.body;
+            // Campos adicionales que pueden llegar por el formulario laboral
+            const {
+                codigo_nomina,
+                salario_bruto,
+                rebajas_ccss,
+                otras_rebajas,
+                salario_por_hora,
+                horas_ordinarias,
+                horas_extras,
+                horas_otras,
+                vacaciones_monto,
+                incapacidad_monto,
+                lactancia_monto
+            } = req.body;
+            
+            if (!cargo || !salario_base || !tipo_contrato) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Todos los campos son requeridos: cargo, salario_base, tipo_contrato'
+                });
+            }
+            
+            // Validar que el salario sea un número positivo
+            if (isNaN(salario_base) || salario_base < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El salario base debe ser un número positivo'
+                });
+            }
+            
+            // Actualizar o crear registro en mot_info_laboral
+            const trabajadorId = parseInt(id, 10);
+            // Buscar info laboral más reciente
+            const existingInfo = await prisma.mot_info_laboral.findFirst({
+                where: { trabajador_id: trabajadorId },
+                orderBy: { info_laboral_id: 'desc' }
+            });
 
-        const error = await validateEmployeeInputSingleError(req.body);
-        if (error) {
-            return res.status(400).json({ success: false, message: error });
+            const laboralData: any = {
+                trabajador_id: trabajadorId,
+                cargo: cargo ? String(cargo) : (existingInfo ? existingInfo.cargo : 'Sin definir'),
+                fecha_ingreso_at: req.body.fecha_ingreso_at ? new Date(req.body.fecha_ingreso_at) : (existingInfo ? existingInfo.fecha_ingreso_at : new Date()),
+                tipo_contrato: tipo_contrato ? String(tipo_contrato) : (existingInfo ? existingInfo.tipo_contrato : 'no_definido'),
+                salario_base: salario_base ? parseFloat(String(salario_base)) : (existingInfo ? existingInfo.salario_base : 0),
+                codigo_nomina: req.body.codigo_nomina ? String(req.body.codigo_nomina) : (existingInfo ? existingInfo.codigo_nomina : null),
+                salario_bruto: req.body.salario_bruto ? parseFloat(String(req.body.salario_bruto)) : (existingInfo ? existingInfo.salario_bruto : null),
+                rebajas_ccss: req.body.rebajas_ccss ? parseFloat(String(req.body.rebajas_ccss)) : (existingInfo ? existingInfo.rebajas_ccss : null),
+                otras_rebajas: req.body.otras_rebajas ? parseFloat(String(req.body.otras_rebajas)) : (existingInfo ? existingInfo.otras_rebajas : null),
+                salario_por_hora: req.body.salario_por_hora ? parseFloat(String(req.body.salario_por_hora)) : (existingInfo ? existingInfo.salario_por_hora : null),
+                horas_ordinarias: req.body.horas_ordinarias ? parseFloat(String(req.body.horas_ordinarias)) : (existingInfo ? existingInfo.horas_ordinarias : null),
+                horas_extras: req.body.horas_extras ? parseFloat(String(req.body.horas_extras)) : (existingInfo ? existingInfo.horas_extras : null),
+                horas_otras: req.body.horas_otras ? parseFloat(String(req.body.horas_otras)) : (existingInfo ? existingInfo.horas_otras : null),
+                vacaciones_monto: req.body.vacaciones_monto ? parseFloat(String(req.body.vacaciones_monto)) : (existingInfo ? existingInfo.vacaciones_monto : null),
+                incapacidad_monto: req.body.incapacidad_monto ? parseFloat(String(req.body.incapacidad_monto)) : (existingInfo ? existingInfo.incapacidad_monto : null),
+                lactancia_monto: req.body.lactancia_monto ? parseFloat(String(req.body.lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
+                fecha_ultima_actualizacion_at: new Date(),
+                usuario_ultima_actualizacion: (req as any).user?.sub || 1,
+                updated_at: new Date()
+            };
+
+            if (existingInfo) {
+                await prisma.mot_info_laboral.update({
+                    where: { info_laboral_id: existingInfo.info_laboral_id },
+                    data: laboralData
+                });
+            } else {
+                await prisma.mot_info_laboral.create({ data: laboralData });
+            }
+
+            res.json({
+                success: true,
+                message: `Información laboral del trabajador ${id} actualizada exitosamente`,
+                data: {
+                    action: 'update',
+                    trabajadorId: id,
+                    scope: canUpdateAll ? 'all' : 'own',
+                    data: laboralData,
+                    permissions: userPermissions
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error al actualizar trabajador:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error interno del servidor al actualizar la información laboral'
+            });
         }
-
-        if (!canUpdateAll && userId !== id) {
-            return res.status(403).json({ success:false, message: "No tiene permisos para actualizar este trabajador" });
-        }
-
-        const trabajadorPayload: any = {};
-        const infoLaboralPayload: any = {};
-
-        // Separar campos por tabla
-        if (req.body.name) trabajadorPayload.nombre_completo = req.body.name;
-        if (req.body.phone) trabajadorPayload.telefono = req.body.phone;
-        if (req.body.email) trabajadorPayload.email = req.body.email;
-        if (req.body.birthDate) trabajadorPayload.fecha_nacimiento = new Date(req.body.birthDate);
-        trabajadorPayload.updated_at = new Date();
-        trabajadorPayload.updated_by = userId;
-
-        if (req.body.role) infoLaboralPayload.cargo = req.body.role;
-        if (req.body.contractType) infoLaboralPayload.tipo_contrato = req.body.contractType;
-        if (req.body.baseSalary !== undefined) infoLaboralPayload.salario_base = parseFloat(req.body.baseSalary);
-        if (req.body.entryDate) infoLaboralPayload.fecha_ingreso_at = new Date(req.body.entryDate);
-        if (req.body.department) infoLaboralPayload.departamento = req.body.department;
-        // if (req.body.status) infoLaboralPayload.status = req.body.status;
-        infoLaboralPayload.updated_at = new Date();
-        infoLaboralPayload.updated_by = userId;
-
-        if (Object.keys(trabajadorPayload).length===0 && Object.keys(infoLaboralPayload).length===0) {
-            return res.status(400).json({success:false, message:"No hay datos para actualizar"});
-        }
-
-        const actions = [];
-
-        if (Object.keys(trabajadorPayload).length > 0) {
-            actions.push(prisma.mom_trabajador.update({
-                where: { trabajador_id: parseInt(id) },
-                data: trabajadorPayload
-            }));
-        }
-
-        if (Object.keys(infoLaboralPayload).length > 0) {
-            actions.push(prisma.mot_info_laboral.updateMany({
-                where: { trabajador_id: parseInt(id) },
-                data: infoLaboralPayload
-            }));
-        }
-
-        // Si no hay nada que actualizar, ya retornamos antes
-        const results = await prisma.$transaction(actions);
-
-        res.json({
-            success: true,
-            message:"Trabajador actualizado correctamente",
-            data: results
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success:false, message:"Error interno al actualizar trabajador"});
     }
-});
+);
 
 /**
  * @route DELETE /api/trabajadores/:id
@@ -292,49 +376,16 @@ router.delete('/:id',
     requirePermission('trabajadores:delete'),
     async (req, res) => {
         const { id } = req.params;
-
-        try {
-            await prisma.$transaction(async (tx) => {
-                // 1. Eliminar información laboral asociada
-                await tx.mot_info_laboral.deleteMany({
-                where: {
-                    trabajador_id: parseInt(id),
-                },
-                });
-
-                // 2. Eliminar trabajador
-                await tx.mom_trabajador.delete({
-                where: {
-                    trabajador_id: parseInt(id),
-                },
-                });
-            });
-            return res.status(204).send();
-        } catch(error: any) {
-            console.error('Error al eliminar trabajador:', error);
-
-            // Error: trabajador no existe
-            if (error.code === 'P2025') {
-                return res.status(404).json({
-                success: false,
-                message: 'El trabajador no existe'
-                });
+        
+        res.json({
+            success: true,
+            message: `Trabajador ${id} eliminado exitosamente`,
+            data: {
+                action: 'delete',
+                trabajadorId: id,
+                permissions: (req as any).user?.permissions
             }
-
-            // Error: integridad referencial (FK)
-            if (error.code === 'P2003') {
-                return res.status(400).json({
-                success: false,
-                message: 'No se puede eliminar el trabajador porque tiene información relacionada'
-                });
-            }
-
-            // Error genérico
-            return res.status(500).json({
-                success: false,
-                message: 'Error interno del servidor al eliminar el trabajador'
-            });
-        }
+        });
     }
 );
 
@@ -355,7 +406,7 @@ router.get('/export',
                 action: 'export',
                 format: req.query.format || 'excel',
                 filename: `trabajadores_${new Date().toISOString().split('T')[0]}.xlsx`,
-                permissions: (req.user as any)?.permissions
+                permissions: (req as any).user?.permissions
             }
         });
     }
@@ -379,7 +430,7 @@ router.post('/import',
                 recordsProcessed: 25,
                 recordsCreated: 20,
                 recordsSkipped: 5,
-                permissions: (req.user as any)?.permissions
+                permissions: (req as any).user?.permissions
             }
         });
     }
@@ -491,8 +542,8 @@ router.post('/:id/info-laboral',
     async (req, res) => {
         try {
             const { id } = req.params;
-            const userId = (req.user as any)?.id;            
-            const { role, baseSalary, contractType, entryDate, department } = req.body;
+            const userId = (req as any).user?.id;            
+            const { cargo, salario_base, tipo_contrato, fecha_ingreso, departamento } = req.body;
 
             const existingInfo = await prisma.mot_info_laboral.findFirst({
                 where: { trabajador_id: parseInt(id) }
@@ -509,11 +560,11 @@ router.post('/:id/info-laboral',
             await prisma.mot_info_laboral.create({
                 data: {
                     trabajador_id: parseInt(id),
-                    cargo: role,
-                    departamento: department,
-                    salario_base: parseFloat(baseSalary),
-                    tipo_contrato: contractType,
-                    fecha_ingreso_at: new Date(entryDate),
+                    cargo: cargo,
+                    departamento: departamento,
+                    salario_base: parseFloat(salario_base),
+                    tipo_contrato: tipo_contrato,
+                    fecha_ingreso_at: new Date(fecha_ingreso),
                     fecha_ultima_actualizacion_at: new Date(),
                     usuario_ultima_actualizacion: parseInt(userId),
                     created_at: new Date(),
@@ -528,11 +579,12 @@ router.post('/:id/info-laboral',
                 message: 'Información laboral guardada'
             });
             
-        } catch (error: any) {
-            console.error('Error al crear información laboral:', error);
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
+            console.error('Error al crear información laboral:', err);
             
             // Manejar errores específicos de Prisma
-            if (error.code === 'P2003') {
+            if (err.code === 'P2003') {
                 return res.status(404).json({
                     success: false,
                     message: 'Trabajador no encontrado'

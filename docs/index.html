@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Documentación - AgroMano</title>
+    <!-- Docsify CDN -->
+    <script src="https://unpkg.com/docsify/lib/docsify.min.js"></script>
+  </head>
+  <body>
+    <div id="app">Loading...</div>
+    <!-- Fallback navigation: visible si Docsify no carga o si abres el archivo directamente -->
+    <div id="fallback" style="margin:24px;font-family:Segoe UI,Roboto,Arial, sans-serif;">
+      <h2>Documentación (vista estática)</h2>
+      <p>Si no ves la documentación interactiva, arranca el servidor local con <code>npm run serve-docs</code> o usa los enlaces estáticos abajo.</p>
+      <ul>
+        <li><a href="README.md">Índice principal (docs/README.md)</a></li>
+        <li><a href="frontend/INDEX.md">Frontend - Índice (docs/frontend/INDEX.md)</a></li>
+        <li><a href="backend/INDEX.md">Backend - Índice (docs/backend/INDEX.md)</a></li>
+        <li><a href="database/README.md">Base de datos - README (docs/database/README.md)</a></li>
+        <li><a href="contributing/CONTRIBUTING.md">CONTRIBUTING (docs/contributing/CONTRIBUTING.md)</a></li>
+      </ul>
+      <p>Para la experiencia completa con navegación a la izquierda y renderizado Markdown, ejecuta el servidor de Docsify (instrucciones abajo).</p>
+    </div>
+    <script>
+      window.$docsify = {
+        name: 'AgroMano Docs',
+        repo: '',
+        loadSidebar: true,
+      };
+    </script>
+  </body>
+</html>

@@ -3,7 +3,7 @@ import { apiConfig } from '../config/auth0.config';
 import toast from 'react-hot-toast';
 
 // Tipos para las respuestas de la API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
   message?: string;
@@ -94,7 +94,7 @@ class ApiService {
         toast.error('Recurso no encontrado.');
         break;
       case 422:
-        const validationErrors = (response.data as any)?.errors;
+        const validationErrors = response.data && typeof response.data === 'object' && 'errors' in response.data ? response.data.errors : null;
         if (validationErrors && Array.isArray(validationErrors)) {
           validationErrors.forEach((err: string) => toast.error(err));
         } else {
@@ -105,33 +105,33 @@ class ApiService {
         toast.error('Error interno del servidor. Intente nuevamente más tarde.');
         break;
       default:
-        const message = (response.data as any)?.message || 'Error desconocido.';
+        const message = response.data && typeof response.data === 'object' && 'message' in response.data && typeof response.data.message === 'string' ? response.data.message : 'Error desconocido.';
         toast.error(message);
     }
   }
 
   // Métodos HTTP básicos
-  async get<T = any>(url: string, params?: any): Promise<ApiResponse<T>> {
+  async get<T = unknown>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.get(url, { params });
     return response.data;
   }
 
-  async post<T = any>(url: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.post(url, data);
     return response.data;
   }
 
-  async put<T = any>(url: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.put(url, data);
     return response.data;
   }
 
-  async patch<T = any>(url: string, data?: any): Promise<ApiResponse<T>> {
+  async patch<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.patch(url, data);
     return response.data;
   }
 
-  async delete<T = any>(url: string): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(url: string): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.delete(url);
     return response.data;
   }
@@ -143,16 +143,16 @@ class ApiService {
     return this.get('/auth/profile');
   }
 
-  async updateProfile(data: any) {
+  async updateProfile(data: Record<string, unknown>) {
     return this.put('/auth/profile', data);
   }
 
-  async updateLaborInfoEmployee(id: number, data: any) {
+  async updateLaborInfoEmployee(id: number, data: Record<string, unknown>) {
     return this.put(`/trabajadores/${id}`, data);
   }
 
   // Empleados
-  async getEmpleados(params?: any): Promise<PaginatedResponse<any>> {
+  async getEmpleados(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/trabajadores', { params });
     return response.data;
   }
@@ -161,11 +161,11 @@ class ApiService {
     return this.get(`/trabajadores/${id}`);
   }
 
-  async createEmpleado(data: any) {
+  async createEmpleado(data: Record<string, unknown>) {
     return this.post('/trabajadores', data);
   }
 
-  async updateEmpleado(id: number, data: any) {
+  async updateEmpleado(id: number, data: Record<string, unknown>) {
     return this.put(`/trabajadores/${id}`, data);
   }
 
@@ -173,26 +173,26 @@ class ApiService {
     return this.delete(`/trabajadores/${id}`);
   }
 
-  async createLaborInfo(trabajadorId: number, data: any): Promise<ApiResponse<any>> {
+  async createLaborInfo(trabajadorId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
     return this.post(`/trabajadores/${trabajadorId}/info-laboral`, data);
   }
 
   // Asistencias
-  async getAsistencias(params?: any): Promise<PaginatedResponse<any>> {
+  async getAsistencias(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/asistencias', { params });
     return response.data;
   }
 
-  async createAsistencia(data: any) {
+  async createAsistencia(data: Record<string, unknown>) {
     return this.post('/asistencias', data);
   }
 
-  async updateAsistencia(id: number, data: any) {
+  async updateAsistencia(id: number, data: Record<string, unknown>) {
     return this.put(`/asistencias/${id}`, data);
   }
 
   // Nóminas
-  async getNominas(params?: any): Promise<PaginatedResponse<any>> {
+  async getNominas(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/nominas', { params });
     return response.data;
   }
@@ -201,7 +201,7 @@ class ApiService {
     return this.get(`/nominas/${id}`);
   }
 
-  async procesarNomina(data: any) {
+  async procesarNomina(data: Record<string, unknown>) {
     return this.post('/nominas/procesar', data);
   }
 
@@ -210,25 +210,25 @@ class ApiService {
   }
 
   // Productividad
-  async getTareasProductividad(params?: any): Promise<PaginatedResponse<any>> {
+  async getTareasProductividad(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/productividad/tareas', { params });
     return response.data;
   }
 
-  async createTareaProductividad(data: any) {
+  async createTareaProductividad(data: Record<string, unknown>) {
     return this.post('/productividad/tareas', data);
   }
 
-  async updateTareaProductividad(id: number, data: any) {
+  async updateTareaProductividad(id: number, data: Record<string, unknown>) {
     return this.put(`/productividad/tareas/${id}`, data);
   }
 
   // Reportes
-  async getReportes(tipo: string, params?: any) {
+  async getReportes(tipo: string, params?: Record<string, unknown>) {
     return this.get(`/reportes/${tipo}`, params);
   }
 
-  async generateReporte(tipo: string, filtros: any) {
+  async generateReporte(tipo: string, filtros: Record<string, unknown>) {
     return this.post(`/reportes/${tipo}/generar`, filtros);
   }
 
@@ -237,7 +237,7 @@ class ApiService {
     return this.get('/configuracion');
   }
 
-  async updateConfiguracion(data: any) {
+  async updateConfiguracion(data: Record<string, unknown>) {
     return this.put('/configuracion', data);
   }
 

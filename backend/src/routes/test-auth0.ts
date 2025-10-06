@@ -59,11 +59,12 @@ router.get('/database', async (req, res) => {
       test_result: result,
       timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as Error;
     res.status(500).json({
       success: false,
       message: '❌ Error de conexión a base de datos',
-      error: error.message,
+      error: err.message,
       timestamp: new Date().toISOString()
     });
   }
@@ -84,7 +85,7 @@ router.get('/env', (req, res) => {
     'PORT'
   ];
 
-  const envStatus = requiredEnvVars.reduce((acc: any, envVar) => {
+  const envStatus = requiredEnvVars.reduce((acc: Record<string, string>, envVar) => {
     acc[envVar] = process.env[envVar] ? '✅ Configurado' : '❌ Falta';
     return acc;
   }, {});

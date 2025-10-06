@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -7,11 +7,6 @@ import {
   TextField,
   Paper,
   InputAdornment,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -20,42 +15,23 @@ import {
 } from '@mui/icons-material';
 import { EmployeeTable } from '../EmployeeTable/EmployeeTable';
 import { NewEmployeeForm, NewEmployeeFormData } from '../EmployeeForm/NewEmployeeForm';
-import { LaborInfoView } from '../EmployeeLaborInfoForm/LaborInfoView';
-import { EditInfoLabor } from '../EmployeeEditInfoLabor/EditInfoLabor';
+import { LaborInfoView } from '../EmployeeLaborInfoForm/LaborInfoView'; // Nueva importación
 import { useEmployeeManagement } from '../../../application/hooks/useEmployeeManagement';
-import { Employee } from '../../../domain/entities/Employee';
+import { CreateEmployeeData, Employee } from '../../../domain/entities/Employee';
 
-type EmployeeView = 'list' | 'new-employee' | 'labor-info' | 'edit-info';
+type EmployeeView = 'list' | 'new-employee' | 'labor-info';
+
+interface SelectedEmployee {
+  id: string;
+  name: string;
+}
 
 export const EmployeeManagementView: React.FC = () => {
-  const { employees, loading, error, successMessage, deleteEmployee, searchEmployees, refreshEmployees, createEmployee, createLaborInfo, clearMessages, updateEmployee } = useEmployeeManagement();
+  const { employees, loading, error, deleteEmployee, searchEmployees, refreshEmployees, createEmployee } = useEmployeeManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [currentView, setCurrentView] = useState<EmployeeView>('list');
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
-
-  const handleBackToList = useCallback(() => {
-    if (currentView !== 'list' && error === null) setCurrentView('list');
-  }, [currentView, error]);
-
-  const previousViewRef = useRef<EmployeeView>('list');
-
-   // Limpiar mensajes solo cuando la vista cambia realmente
-  useEffect(() => {
-    if (previousViewRef.current !== currentView) {
-      clearMessages();
-      previousViewRef.current = currentView;
-    }
-  }, [currentView, clearMessages]);
-
-  useEffect(() => {
-    if (error || successMessage) {
-      const timer = setTimeout(() => clearMessages(), 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [error, successMessage, clearMessages]);
+  const [selectedEmployee, setSelectedEmployee] = useState<SelectedEmployee | null>(null);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -81,73 +57,70 @@ export const EmployeeManagementView: React.FC = () => {
     }
   };
 
-  const handleAddLaborInfo = () => {
+  const handleAddLaborInfo = useCallback(() => {
     if (selectedEmployee) {
       setCurrentView('labor-info');
     }
-  };
+  }, [selectedEmployee]);
 
-  const handleAddEmployeeClick = () => {
+  const handleAddEmployeeClick = useCallback(() => {
     setCurrentView('new-employee');
     setSelectedEmployee(null); // Limpiar selección al agregar nuevo empleado
+  }, []);
+
+  const handleBackToList = () => {
+    setCurrentView('list');
+    setSelectedEmployee(null); // Limpiar selección al volver a la lista
+    refreshEmployees();
   };
 
-  const handleCreateEmployee = async (data: NewEmployeeFormData) => {
+  const handleCreateEmployee = async (data: CreateEmployeeData) => {
     try {
       await createEmployee(data);
-      return true;
+      await refreshEmployees();
     } catch (err) {
       console.error('Error al crear empleado:', err);
-      return false;
+      throw err;
     }
   };
 
-  const handleEdit = (employee: Employee) => {
+  const handleEdit = useCallback((employee: Employee) => {
     console.log('Editar empleado:', employee);
-    setSelectedEmployee(employee);
-    setCurrentView('edit-info'); // Ir a la vista de edición
-  };
+    setSelectedEmployee({ id: employee.id, name: employee.name });
+  }, []);
 
-  const handleDeleteRequest = (employee: Employee) => {
-    setEmployeeToDelete(employee);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (employeeToDelete) {
-      await deleteEmployee(employeeToDelete.id);
-      if (selectedEmployee && selectedEmployee.id === employeeToDelete.id) {
-        setSelectedEmployee(null);
+  const handleDelete = useCallback(async (id: string) => {
+    if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
+      try {
+        await deleteEmployee(id);
+        // Si el empleado eliminado era el seleccionado, limpiar selección
+        if (selectedEmployee && selectedEmployee.id === id) {
+          setSelectedEmployee(null);
+        }
+        await refreshEmployees();
+      } catch (err) {
+        console.error('Error al eliminar empleado:', err);
       }
     }
-    setDeleteDialogOpen(false);
-    setEmployeeToDelete(null);
-  };
+  }, [deleteEmployee, selectedEmployee, refreshEmployees]);
 
-  const cancelDelete = () => {
-    setDeleteDialogOpen(false);
-    setEmployeeToDelete(null);
-  };
+  const handleEmployeeSelect = useCallback((employee: Employee) => {
+    setSelectedEmployee({ id: employee.id, name: employee.name });
+  }, []);
 
-  const handleEmployeeSelect = (employee: Employee) => {
-    setSelectedEmployee(employee);
-  };
+  const { updateEmployeeLaborInfo } = useEmployeeManagement();
 
   const handleSaveLaborInfo = async (laborData: any) => {
-    return await createLaborInfo(laborData);
+    if (!selectedEmployee) throw new Error('No hay empleado seleccionado');
+    try {
+      await updateEmployeeLaborInfo(selectedEmployee.id, laborData);
+      await refreshEmployees();
+      await handleBackToList();
+    } catch (err) {
+      console.error('Error al guardar info laboral:', err);
+      throw err;
+    }
   };
-
-  const updatedData = async (data: Partial<Employee>): Promise<void> => {
-    await updateEmployee(selectedEmployee!.id , data);
-  };
-
-  if (loading && currentView === 'list') {
-    return <Typography>Cargando empleados...</Typography>;
-  }
-
-  if (error && currentView === 'list') {
-    return <Typography color="error">{error}</Typography>;
-  }
 
   // Renderizar contenido basado en la vista actual
   const renderContent = () => {
@@ -166,21 +139,11 @@ export const EmployeeManagementView: React.FC = () => {
             employee={selectedEmployee}
             onCancel={handleBackToList}
             onSave={handleSaveLaborInfo}
-            loading={loading}
-          />
-        );
-
-      case 'edit-info':
-        return (
-          <EditInfoLabor
-            employee={selectedEmployee}
-            onCancel={handleBackToList}
-            onSave={updatedData}
-            loading={loading}
           />
         );
 
       case 'list':
+      default:
         return (
           <>
             {/* Search Bar */}
@@ -257,7 +220,7 @@ export const EmployeeManagementView: React.FC = () => {
               employees={employees}
               selectedEmployeeId={selectedEmployee?.id}
               onEdit={handleEdit}
-              onDelete={handleDeleteRequest}
+              onDelete={handleDelete}
               onSelect={handleEmployeeSelect}
             />
           </>
@@ -265,8 +228,16 @@ export const EmployeeManagementView: React.FC = () => {
     }
   };
 
+  if (loading && currentView === 'list') {
+    return <Typography>Cargando empleados...</Typography>;
+  }
+
+  if (error && currentView === 'list') {
+    return <Typography color="error">{error}</Typography>;
+  }
+
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       {/* Header - Siempre visible */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
@@ -303,56 +274,6 @@ export const EmployeeManagementView: React.FC = () => {
           </Box>
         )}
       </Box>
-
-      {/* Mensajes de éxito/error */}
-      {error && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <Alert severity="error" sx={{ width: "auto", maxWidth: "90%", textAlign: 'center', fontWeight: 'bold', borderRadius: 3, color: '#d13d3dff', }}>
-            {error}
-          </Alert>
-        </Box>
-      )}
-      
-      {successMessage && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-          <Alert severity="success" sx={{ width: "auto", maxWidth: "90%", textAlign: 'center', fontWeight: 'bold', borderRadius: 3, color: '#36b441ff', }}>
-            {successMessage}
-          </Alert>
-        </Box>
-      )}
-
-      {/* Diálogo de confirmación */}
-      <Dialog open={deleteDialogOpen} onClose={cancelDelete}
-      PaperProps={{
-        sx: {
-          backgroundColor: '#1e293b', // Fondo oscuro
-          color: '#e2e8f0',          // Texto claro
-          borderRadius: 3,           // Bordes redondeados
-          border: '1px solid #334155',
-          minWidth: '400px',
-          p: 2
-        }
-      }}>
-        <DialogTitle>⚠ Confirmar eliminación</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Está seguro de que desea eliminar al trabajador{" "}
-            <strong>{employeeToDelete?.name}</strong>?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDelete} color="inherit">
-            Cancelar
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="contained"
-          >
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Contenido dinámico */}
       {renderContent()}

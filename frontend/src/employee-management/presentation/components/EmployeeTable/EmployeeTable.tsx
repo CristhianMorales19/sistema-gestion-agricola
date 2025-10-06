@@ -22,9 +22,95 @@ interface EmployeeTableProps {
   employees: Employee[];
   selectedEmployeeId?: string;
   onEdit: (employee: Employee) => void;
-  onDelete: (employee: Employee) => void;
+  onDelete: (id: string) => void;
   onSelect: (employee: Employee) => void;
 }
+
+// Funciones auxiliares fuera del componente
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'activo': return 'success';
+    case 'inactivo': return 'error';
+    case 'on_leave': return 'warning';
+    default: return 'default';
+  }
+};
+
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString('es-ES');
+};
+
+// Componente optimizado para cada fila
+const EmployeeRow = React.memo<{
+  employee: Employee;
+  isSelected: boolean;
+  onEdit: (employee: Employee) => void;
+  onDelete: (id: string) => void;
+  onSelect: (employee: Employee) => void;
+}>(({ employee, isSelected, onEdit, onDelete, onSelect }) => {
+  const handleRowClick = React.useCallback(() => {
+    onSelect(employee);
+  }, [employee, onSelect]);
+
+  const handleEditClick = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(employee);
+  }, [employee, onEdit]);
+
+  const handleDeleteClick = React.useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(employee.id);
+  }, [employee.id, onDelete]);
+
+  return (
+    <TableRow 
+      onClick={handleRowClick}
+      sx={{ 
+        '&:last-child td, &:last-child th': { border: 0 },
+        backgroundColor: isSelected ? '#334155' : 'transparent',
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: isSelected ? '#334155' : '#2d3748'
+        }
+      }}
+    >
+      <TableCell component="th" scope="row" sx={{ color: '#e2e8f0' }}>
+        {employee.name}
+      </TableCell>
+      <TableCell sx={{ color: '#e2e8f0' }}>{employee.identification}</TableCell>
+      <TableCell sx={{ color: '#e2e8f0' }}>{employee.cargo}</TableCell>
+      <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.hireDate)}</TableCell>
+      <TableCell>
+        <Chip 
+          label={employee.status === 'activo' ? 'Activo' : 
+                  employee.status === 'inactivo' ? 'Inactivo' : 'Permiso'} 
+          color={getStatusColor(employee.status)}
+          size="small"
+        />
+      </TableCell>
+      <TableCell>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton 
+            size="small" 
+            onClick={handleEditClick}
+            sx={{ color: '#3b82f6' }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton 
+            size="small" 
+            onClick={handleDeleteClick}
+            sx={{ color: '#ef4444' }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+EmployeeRow.displayName = 'EmployeeRow';
 
 export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   employees,
@@ -35,30 +121,6 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 }) => {
 
   console.log('Employees in table:', employees);
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'activo': return 'success';
-      case 'inactivo': return 'error';
-      case 'on_leave': return 'warning';
-      default: return 'default';
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    const utcDate = new Date(date);
-    return utcDate.toLocaleDateString('es-ES', { 
-      timeZone: 'UTC',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric'
-    });
-  };
-
-
-  const handleRowClick = (employee: Employee) => {
-    onSelect(employee);
-  };
 
   return (
     <TableContainer component={Paper} sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
@@ -75,57 +137,14 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         </TableHead>
         <TableBody>
           {employees.map((employee) => (
-            <TableRow 
-              key={employee.id} 
-              onClick={() => handleRowClick(employee)}
-              sx={{ 
-                '&:last-child td, &:last-child th': { border: 0 },
-                backgroundColor: selectedEmployeeId === employee.id ? '#334155' : 'transparent',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: selectedEmployeeId === employee.id ? '#334155' : '#2d3748'
-                }
-              }}
-            >
-              <TableCell component="th" scope="row" sx={{ color: '#e2e8f0' }}>
-                {employee.name}
-              </TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{employee.identification}</TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{employee.role}</TableCell>
-              <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.entryDate)}</TableCell>
-              <TableCell>
-                <Chip 
-                  label={employee.status === 'activo' ? 'Activo' : 
-                          employee.status === 'inactivo' ? 'Inactivo' : 'Permiso'} 
-                  color={getStatusColor(employee.status)}
-                  size="small"
-                />
-              </TableCell>
-              <TableCell>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
-                      onEdit(employee);
-                    }}
-                    sx={{ color: '#3b82f6' }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevenir que el click en el botón active la selección
-                      onDelete(employee);
-                    }}
-                    sx={{ color: '#ef4444' }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              </TableCell>
-            </TableRow>
+            <EmployeeRow
+              key={employee.id}
+              employee={employee}
+              isSelected={selectedEmployeeId === employee.id}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onSelect={onSelect}
+            />
           ))}
         </TableBody>
       </Table>

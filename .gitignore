@@ -90,3 +90,5 @@ backend/uploads/
 # TypeScript build outputs
 lib/
 types/
+!backend/src/types/
+!frontend/src/types/

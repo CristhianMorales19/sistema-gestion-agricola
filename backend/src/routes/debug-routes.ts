@@ -15,17 +15,17 @@ router.get('/user-check',
     },
     checkJwt,
     (req, res, next) => {
-        console.log('🔐 PASO 2: checkJwt pasado - Usuario Auth0:', (req.user as any)?.sub);
+        console.log('🔐 PASO 2: checkJwt pasado - Usuario Auth0:', (req as any).user?.sub);
         next();
     },
     hybridAuthMiddleware,
     (req, res, next) => {
         console.log('🎯 PASO 3: hybridAuthMiddleware pasado - Usuario BD encontrado');
         console.log('👤 Usuario completo:', {
-            auth0_sub: (req.user as any)?.sub,
-            email: (req.user as any)?.email,
-            role: (req.user as any)?.role,
-            permissions: (req.user as any)?.permissions?.length || 0
+            auth0_sub: (req as any).user?.sub,
+            email: (req as any).user?.email,
+            role: (req as any).user?.role,
+            permissions: (req as any).user?.permissions?.length || 0
         });
         next();
     },
@@ -34,10 +34,10 @@ router.get('/user-check',
             success: true,
             message: 'Middleware híbrido funciona correctamente',
             data: {
-                auth0_user: (req.user as any)?.sub,
-                bd_user: (req.user as any)?.email,
-                role: (req.user as any)?.role,
-                permissions_count: (req.user as any)?.permissions?.length || 0,
+                auth0_user: (req as any).user?.sub,
+                bd_user: (req as any).user?.email,
+                role: (req as any).user?.role,
+                permissions_count: (req as any).user?.permissions?.length || 0,
                 timestamp: new Date().toISOString()
             }
         });
@@ -51,11 +51,11 @@ router.get('/user-check',
 router.get('/simple', 
     checkJwt,
     (req, res) => {
-        console.log('✅ Debug simple - Usuario Auth0:', (req.user as any)?.sub);
+        console.log('✅ Debug simple - Usuario Auth0:', (req as any).user?.sub);
         res.json({
             success: true,
             message: 'Auth0 funciona correctamente',
-            user: (req.user as any)?.sub,
+            user: (req as any).user?.sub,
             timestamp: new Date().toISOString()
         });
     }

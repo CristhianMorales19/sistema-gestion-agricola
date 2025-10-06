@@ -79,6 +79,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       usuario_id: usuario.usuario_id,
       username: usuario.username,
       rol_id: usuario.rol_id,
+      estado: usuario.estado,
       trabajador_id: usuario.trabajador_id || undefined,
       permisos
     };
@@ -231,9 +232,17 @@ export const userHasPermission = (user: LocalUser, permission: string): boolean 
  * @param category - Categoría de permisos
  */
 export const getUserPermissionsByCategory = async (user: LocalUser, category?: string) => {
-  if (!user) return [];
+  if (!user || !user.rol_id) return [];
 
-  const whereClause: any = {
+  const whereClause: {
+    rel_mom_rol__mom_permiso: {
+      some: {
+        rol_id: number;
+      };
+    };
+    is_activo: boolean;
+    categoria?: string;
+  } = {
     rel_mom_rol__mom_permiso: {
       some: {
         rol_id: user.rol_id

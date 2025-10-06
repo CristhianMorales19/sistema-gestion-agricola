@@ -33,13 +33,14 @@ router.post('/test-token', async (req: Request, res: Response) => {
       }
     });
 
-  } catch (error: any) {
-    console.error('❌ Error obteniendo token:', error.response?.data || error.message);
+  } catch (error) {
+    const err = error as Error & { response?: { data?: unknown } };
+    console.error('❌ Error obteniendo token:', err.response?.data || err.message);
     
     res.status(500).json({
       success: false,
       message: 'Error obteniendo token de Auth0',
-      error: error.response?.data || error.message,
+      error: err.response?.data || err.message,
       debug: {
         domain: process.env.AUTH0_DOMAIN,
         audience: process.env.AUTH0_AUDIENCE,
@@ -62,7 +63,7 @@ router.get('/config', (req: Request, res: Response) => {
       domain: process.env.AUTH0_DOMAIN,
       audience: process.env.AUTH0_AUDIENCE,
       client_id: process.env.AUTH0_CLIENT_ID?.substring(0, 8) + '...',
-      has_secret: !!process.env.AUTH0_CLIENT_SECRET,
+      has_secret: Boolean(process.env.AUTH0_CLIENT_SECRET),
       issuer_base_url: process.env.AUTH0_ISSUER_BASE_URL
     }
   });

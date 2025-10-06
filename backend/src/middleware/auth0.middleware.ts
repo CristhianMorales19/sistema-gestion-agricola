@@ -41,18 +41,19 @@ const prisma = new PrismaClient();
 export const authenticateAuth0 = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Verificar JWT de Auth0
-    checkJwt(req, res, async (jwtError: any) => {
+    checkJwt(req, res, async (jwtError: unknown) => {
       if (jwtError) {
+        const error = jwtError as Error;
         return res.status(401).json({
           success: false,
           message: 'Token de Auth0 inválido',
-          error: jwtError.message
+          error: error.message
         });
       }
 
       try {
         // 2. Obtener información del usuario de Auth0
-        const auth0User = req.user as unknown as Auth0User;
+        const auth0User = req.auth;
         const auth0UserId = auth0User?.sub;
         const userEmail = auth0User?.email;
 
@@ -96,8 +97,8 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
 
         // 4. Extraer permisos del usuario
         const permisos = usuario.mom_rol.rel_mom_rol__mom_permiso
-          .map(rel => rel.mom_permiso.codigo)
-          .filter((codigo): codigo is string => codigo !== null);
+          .map((rel) => rel.mom_permiso.codigo)
+          .filter((codigo): codigo is string => codigo !== null && codigo !== undefined);
 
 
         // 5. Agregar información al request
@@ -110,7 +111,9 @@ export const authenticateAuth0 = async (req: Request, res: Response, next: NextF
         req.localUser = {
           usuario_id: usuario.usuario_id,
           username: usuario.username,
+          email: usuario.email || undefined,
           rol_id: usuario.rol_id,
+          estado: usuario.estado,
           trabajador_id: usuario.trabajador_id || undefined,
           permisos: permisos
         };
@@ -150,7 +153,6 @@ export const requirePermission = (permission: string) => {
         message: 'Permisos no cargados'
       });
     }
-
     if (!req.userPermissions.includes(permission)) {
       return res.status(403).json({
         success: false,
@@ -177,7 +179,7 @@ export const requireAnyPermission = (permissions: string[]) => {
       });
     }
 
-    const hasPermission = permissions.some(permission => 
+    const hasPermission = permissions.some((permission) =>
       req.userPermissions!.includes(permission)
     );
 
@@ -206,12 +208,12 @@ export const requireAllPermissions = (permissions: string[]) => {
       });
     }
 
-    const hasAllPermissions = permissions.every(permission => 
+    const hasAllPermissions = permissions.every((permission) =>
       req.userPermissions!.includes(permission)
     );
 
     if (!hasAllPermissions) {
-      const missingPermissions = permissions.filter(permission => 
+      const missingPermissions = permissions.filter((permission) =>
         !req.userPermissions!.includes(permission)
       );
 

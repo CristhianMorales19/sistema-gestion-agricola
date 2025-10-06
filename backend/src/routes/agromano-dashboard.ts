@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { checkJwt } from '../config/auth0-simple.config';
+import { flexibleAuth } from '../config/flexible-auth.config';
 import { hybridAuthMiddleware } from '../middleware/hybrid-auth-final.middleware';
 import { 
     requirePermission, 
@@ -27,12 +28,13 @@ const router = Router();
  *         description: Datos generales del dashboard
  */
 router.get('/general', 
-    checkJwt,
+    // flexibleAuth accepts server-signed tokens (HS256) or Auth0 (RS256)
+    flexibleAuth,
     hybridAuthMiddleware,
     requireAnyPermission(['dashboard:view:basic', 'dashboard:view:advanced']),
     async (req, res) => {
         try {
-            console.log('� ===== DASHBOARD GENERAL REQUEST =====');
+            console.log('📊 ===== DASHBOARD GENERAL REQUEST =====');
             console.log('⏰ Timestamp:', new Date().toISOString());
             console.log('🔍 Headers recibidos:', {
                 authorization: req.headers.authorization ? '✅ Presente' : '❌ Ausente',
@@ -40,13 +42,13 @@ router.get('/general',
                 origin: req.headers.origin
             });
             
-            console.log('👤 Usuario Auth0 después de checkJwt:', (req.user as any)?.sub);
-            console.log('📧 Email usuario:', (req.user as any)?.email);
-            console.log('� Estado después de hybridAuthMiddleware:');
-            console.log('   - dbUser:', (req.user as any)?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
-            console.log('   - permissions length:', ((req.user as any)?.permissions || []).length);
+            console.log('👤 Usuario Auth0 después de checkJwt:', req.user?.auth0_id);
+            console.log('📧 Email usuario:', req.user?.email);
+            console.log('📊 Estado después de hybridAuthMiddleware:');
+            console.log('   - dbUser:', req.user?.dbUser ? '✅ Encontrado' : '❌ No encontrado');
+            console.log('   - permissions length:', (req.user?.permissions || req.user?.permisos || []).length);
             
-            const userPermissions = (req.user as any)?.permissions || [];
+            const userPermissions = req.user?.permissions || req.user?.permisos || [];
             console.log('🎭 Permisos completos del usuario:', userPermissions);
             const isAdvanced = userPermissions.includes('dashboard:view:advanced');
             
@@ -64,11 +66,12 @@ router.get('/general',
                 
                 // Consultas reales a la BD con manejo de errores individual
                 console.log('📊 Consultando trabajadores...');
+                // En el modelo `mom_trabajador` el campo es `is_activo` (boolean), no `estado`.
                 const totalTrabajadores = await prisma.mom_trabajador.count({
                     where: {
-                        estado: 'activo'
+                        is_activo: true
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando trabajadores:', err.message);
                     return 0;
                 });
@@ -81,17 +84,18 @@ router.get('/general',
                             { estado: 'activo' }
                         ]
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando usuarios:', err.message);
                     return 0;
                 });
                 
                 console.log('👑 Consultando roles...');
+                // is_activo es boolean en el modelo
                 const totalRoles = await prisma.mom_rol.count({
                     where: {
-                        is_activo: 1
+                        is_activo: true
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando roles:', err.message);
                     return 0;
                 });
@@ -101,7 +105,7 @@ router.get('/general',
                     where: {
                         is_activo: 1
                     }
-                }).catch((err: any) => {
+                }).catch((err: Error) => {
                     console.log('⚠️ Error consultando permisos:', err.message);
                     return 0;
                 });
@@ -120,7 +124,11 @@ router.get('/general',
                     alertasPendientes: 0 // Por ahora 0 hasta que tengamos tabla de alertas
                 };
                 
-                await prisma.$disconnect();
+                try {
+                    await prisma.$disconnect();
+                } catch (dErr) {
+                    console.warn('⚠️ Error al desconectar Prisma:', dErr);
+                }
                 
             } catch (error) {
                 console.error('❌ Error obteniendo datos de la BD:', error);
@@ -229,9 +237,30 @@ router.get('/general',
             console.log('💥 ===== ERROR EN DASHBOARD GENERAL =====');
             console.error('❌ Error obteniendo datos del dashboard:', error);
             console.error('🔍 Stack trace:', error instanceof Error ? error.stack : 'No disponible');
-            console.error('👤 Usuario en error:', (req.user as any)?.sub);
+            console.error('👤 Usuario en error:', req.user?.auth0_id);
             console.log('=======================================');
-            
+            // Si detectamos un error de Prisma P2022 (columna inexistente), devolver datos por defecto en vez de 500
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2022') {
+                console.warn('Prisma P2022 detectado en dashboard.general, devolviendo datos por defecto');
+                return res.json({
+                    success: true,
+                    message: 'Datos del dashboard (modo degradado)',
+                    data: {
+                        estadisticas: {
+                            trabajadores: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            usuarios: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            roles: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            permisos: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' },
+                            alertas: { valor: 0, cambio: 'modo degradado', tendencia: 'n/a' }
+                        },
+                        actividadReciente: [],
+                        condicionesClimaticas: {},
+                        permisos: { nivel: 'basico', total: 0 },
+                        timestamp: new Date().toISOString()
+                    }
+                });
+            }
+
             res.status(500).json({
                 success: false,
                 message: 'Error interno del servidor',

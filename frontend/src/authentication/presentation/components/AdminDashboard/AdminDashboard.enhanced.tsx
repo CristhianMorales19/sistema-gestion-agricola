@@ -137,22 +137,30 @@ const sidebarItems = [
 export const EnhancedAdminDashboard: React.FC = () => {
   const { user, logout, loginWithDemoRole } = useAuth();
 
-  const handleViewAsRole = async (roleName: string) => {
+  const handleViewAsRole = React.useCallback(async (roleName: string) => {
     try {
       await loginWithDemoRole(roleName);
     } catch (error) {
       console.error('Error changing view:', error);
     }
-  };
+  }, [loginWithDemoRole]);
 
-  const getStatusColor = (status: string) => {
+  const handleViewAsManager = React.useCallback(() => {
+    handleViewAsRole('Gerente de Granja');
+  }, [handleViewAsRole]);
+
+  const handleViewAsWorker = React.useCallback(() => {
+    handleViewAsRole('Trabajador de Campo');
+  }, [handleViewAsRole]);
+
+  const getStatusColor = React.useCallback((status: string) => {
     switch (status) {
       case 'success': return '#10b981';
       case 'info': return '#3b82f6';
       case 'warning': return '#f59e0b';
       default: return '#6b7280';
     }
-  };
+  }, []);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
@@ -245,7 +253,7 @@ export const EnhancedAdminDashboard: React.FC = () => {
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -259,7 +267,7 @@ export const EnhancedAdminDashboard: React.FC = () => {
               variant="text"
               size="small"
               fullWidth
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{
                 color: '#cbd5e1',
                 textTransform: 'none',
@@ -338,7 +346,7 @@ export const EnhancedAdminDashboard: React.FC = () => {
             <Button
               variant="outlined"
               size="small"
-              onClick={() => handleViewAsRole('Gerente de Granja')}
+              onClick={handleViewAsManager}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',
@@ -354,7 +362,7 @@ export const EnhancedAdminDashboard: React.FC = () => {
             <Button
               variant="outlined"  
               size="small"
-              onClick={() => handleViewAsRole('Trabajador de Campo')}
+              onClick={handleViewAsWorker}
               sx={{ 
                 color: '#cbd5e1',
                 borderColor: '#475569',

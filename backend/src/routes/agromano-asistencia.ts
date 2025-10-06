@@ -48,7 +48,7 @@ router.post('/marcar',
                 timestamp: new Date().toISOString(),
                 type: req.body.type || 'entrada',
                 location: req.body.location,
-                userId: (req.user as any)?.sub
+                    userId: (req as any).user?.sub
             }
         });
     }
@@ -76,7 +76,7 @@ router.get('/',
     checkJwt,
     requireAnyPermission(['asistencia:read:all', 'asistencia:read:own']),
     (req, res) => {
-        const userPermissions = (req.user as any)?.permissions || [];
+    const userPermissions = (req as any).user?.permissions || [];
         const canReadAll = userPermissions.includes('asistencia:read:all');
         
         res.json({
@@ -110,7 +110,7 @@ router.put('/:id/aprobar',
             data: {
                 action: 'approve',
                 asistenciaId: id,
-                approvedBy: (req.user as any)?.sub,
+                    approvedBy: (req as any).user?.sub,
                 approvedAt: new Date().toISOString()
             }
         });
@@ -192,7 +192,7 @@ router.post('/permisos',
             message: 'Solicitud de permiso creada exitosamente',
             data: {
                 action: 'create_permission_request',
-                solicitante: (req.user as any)?.sub,
+                    solicitante: (req as any).user?.sub,
                 tipo: req.body.tipo,
                 fechaInicio: req.body.fechaInicio,
                 fechaFin: req.body.fechaFin,
@@ -220,7 +220,7 @@ router.put('/permisos/:id/aprobar',
             data: {
                 action: 'approve_permission',
                 permisoId: id,
-                aprobadoPor: (req.user as any)?.sub,
+                    aprobadoPor: (req as any).user?.sub,
                 fechaAprobacion: new Date().toISOString(),
                 comentarios: req.body.comentarios
             }

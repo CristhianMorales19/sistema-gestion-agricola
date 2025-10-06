@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/NewEmployeeForm/NewEmployeeForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import {
 import {
   Person as PersonIcon,
   Badge as BadgeIcon,
+  Event as EventIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
   Cake as CakeIcon,
@@ -19,16 +20,17 @@ import {
 } from '@mui/icons-material';
 
 export interface NewEmployeeFormData {
-  identification: string;
-  name: string;
-  birthDate: string;
-  phone?: string;
+  documento_identidad: string;
+  nombre_completo: string;
+  fecha_nacimiento: string;
+  fecha_registro_at: string;
+  telefono?: string;
   email?: string;
   created_by: number;
 }
 
 interface NewEmployeeFormProps {
-  onSubmit: (data: NewEmployeeFormData) => Promise<boolean>;
+  onSubmit: (data: NewEmployeeFormData) => void;
   onCancel: () => void;
 }
 
@@ -37,24 +39,25 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
   onCancel,
 }) => {
   const [formData, setFormData] = useState<NewEmployeeFormData>({
-    identification: '',
-    name: '',
-    birthDate: '',
-    phone: '',
+    documento_identidad: '',
+    nombre_completo: '',
+    fecha_nacimiento: '',
+    fecha_registro_at: new Date().toISOString().split('T')[0],
+    telefono: '',
     email: '',
     created_by: 1
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof NewEmployeeFormData, string>>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     // Limpiar espacios en blanco al escribir
     let cleanedValue = value;
-    if (name === 'identification' || name === 'phone') {
+    if (name === 'documento_identidad' || name === 'telefono') {
       cleanedValue = value.replace(/\s/g, '');
-    } else if (name === 'name') {
+    } else if (name === 'nombre_completo') {
       // Permitir solo un espacio entre palabras
       cleanedValue = value.replace(/\s+/g, ' ').trimStart();
     } else if (name === 'email') {
@@ -67,30 +70,37 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     }));
 
     // Limpiar error del campo al escribir
-    if (errors[name as keyof NewEmployeeFormData]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
-    }
-  };
+    setErrors(prev => {
+      if (prev[name as keyof NewEmployeeFormData]) {
+        return {
+          ...prev,
+          [name]: '',
+        };
+      }
+      return prev;
+    });
+  }, []);
 
-  const validateForm = (): boolean => {
+  const validateForm = useCallback((): boolean => {
     const newErrors: Partial<Record<keyof NewEmployeeFormData, string>> = {};
+
+    if (!formData.documento_identidad.trim()) {
+      newErrors.documento_identidad = 'La cédula es requerida';
+    }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'El formato del email no es válido';
     }
 
-    if (formData.phone && !/^[0-9]+$/.test(formData.phone)) {
-      newErrors.phone = 'El teléfono debe contener solo números';
+    if (formData.telefono && !/^[0-9]+$/.test(formData.telefono)) {
+      newErrors.telefono = 'El teléfono debe contener solo números';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData.documento_identidad, formData.email, formData.telefono]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -98,26 +108,36 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     // Limpiar espacios finales antes de enviar
     const cleanedData: NewEmployeeFormData = {
       ...formData,
-      identification: formData.identification.trim(),
-      name: formData.name.trim(),
-      phone: formData.phone?.trim(),
+      documento_identidad: formData.documento_identidad.trim(),
+      nombre_completo: formData.nombre_completo.trim(),
+      telefono: formData.telefono?.trim(),
       email: formData.email?.trim(),
       created_by: 1
     };
 
-    const result = await onSubmit(cleanedData);
-    if (result) {
-      setFormData({
-        identification: '',
-        name: '',
-        birthDate: '',
-        phone: '',
-        email: '',
-        created_by: 1
-      });
-      setErrors({});
+    try {
+      await onSubmit(cleanedData);
+    } catch (error: any) {
+      if (error.message.includes('cédula')) {
+        setErrors(prev => ({
+          ...prev,
+          documento_identidad: error.message,
+          submit: undefined
+        }));
+      } else if (error.message.includes('electrónico')) {
+        setErrors(prev => ({
+          ...prev,
+          email: error.message,
+          submit: undefined
+        }));
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          submit: error.message || 'Error al crear el empleado'
+        }));
+      }
     }
-  };
+  }, [validateForm, formData, onSubmit]);
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
@@ -137,11 +157,11 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
               <TextField
                 fullWidth
                 label="Cédula"
-                name="identification"
-                value={formData.identification}
+                name="documento_identidad"
+                value={formData.documento_identidad}
                 onChange={handleChange}
-                error={!!errors.identification}
-                helperText={errors.identification}
+                error={Boolean(errors.documento_identidad)}
+                helperText={errors.documento_identidad}
                 required
                 InputProps={{
                   startAdornment: (
@@ -167,11 +187,11 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
               <TextField
                 fullWidth
                 label="Nombre completo"
-                name="name"
-                value={formData.name}
+                name="nombre_completo"
+                value={formData.nombre_completo}
                 onChange={handleChange}
-                error={!!errors.name}
-                helperText={errors.name}
+                error={Boolean(errors.nombre_completo)}
+                helperText={errors.nombre_completo}
                 required
                 InputProps={{
                   startAdornment: (
@@ -197,12 +217,12 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
               <TextField
                 fullWidth
                 label="Fecha de nacimiento"
-                name="birthDate"
+                name="fecha_nacimiento"
                 type="date"
-                value={formData.birthDate}
+                value={formData.fecha_nacimiento}
                 onChange={handleChange}
-                error={!!errors.birthDate}
-                helperText={errors.birthDate}
+                error={Boolean(errors.fecha_nacimiento)}
+                helperText={errors.fecha_nacimiento}
                 required
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
@@ -224,17 +244,49 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
               />
             </Grid>
 
+            {/* Fecha de ingreso */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Fecha de ingreso"
+                name="fecha_registro_at"
+                type="date"
+                value={formData.fecha_registro_at}
+                onChange={handleChange}
+                error={Boolean(errors.fecha_registro_at)}
+                helperText={errors.fecha_registro_at}
+                required
+                InputLabelProps={{ shrink: true }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EventIcon sx={{ color: '#94a3b8' }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiInputLabel-root': { color: '#94a3b8' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { borderColor: '#475569' },
+                    '&:hover fieldset': { borderColor: '#64748b' },
+                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+                    color: '#ffffff',
+                  },
+                }}
+              />
+            </Grid>
+
             {/* Teléfono */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Teléfono"
-                name="phone"
-                value={formData.phone}
+                name="telefono"
+                value={formData.telefono}
                 required
                 onChange={handleChange}
-                error={!!errors.phone}
-                helperText={errors.phone}
+                error={Boolean(errors.telefono)}
+                helperText={errors.telefono}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -264,7 +316,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 required
                 value={formData.email}
                 onChange={handleChange}
-                error={!!errors.email}
+                error={Boolean(errors.email)}
                 helperText={errors.email}
                 InputProps={{
                   startAdornment: (
@@ -302,7 +354,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 }
               }}
             >
-              Volver
+              Cancelar
             </Button>
             <Button
               type="submit"
