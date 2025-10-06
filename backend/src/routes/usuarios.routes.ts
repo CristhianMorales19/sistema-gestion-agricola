@@ -4,7 +4,7 @@ import {
   agroManoAuthMiddleware,
   requirePermiso,
   requireAdmin
-} from '../middleware/agromano-auth.middleware';
+} from '../features/authentication/infrastructure/middleware/agromano-auth.middleware';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
