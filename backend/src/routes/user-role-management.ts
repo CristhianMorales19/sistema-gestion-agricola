@@ -1,5 +1,6 @@
 import express from 'express';
 import { UserRoleController } from '../controllers/user-role.controller';
+<<<<<<< HEAD
 import { UserSyncController } from '../controllers/user-sync.controller';
 import { checkJwt } from '../config/auth0.config';
 import { authenticateToken } from '../middleware/rbac.middleware';
@@ -16,12 +17,18 @@ import {
   validateUserId,
   validateResourceAccess
 } from '../middleware/role-validation.middleware';
+=======
+// import { UserSyncController } from '../controllers/user-sync.controller';
+import { checkJwt } from '../shared/infrastructure/config/auth0.config';
+import { loadLocalUserData } from '../features/authentication/infrastructure/middleware/auth0-hybrid.middleware';
+>>>>>>> origin/main
 
 const router = express.Router();
 
 /**
  * @route GET /api/admin/users
  * @desc Obtener lista de usuarios con sus roles
+<<<<<<< HEAD
  * @access Admin (Auth0 + Local)
  */
 router.get('/users',
@@ -29,6 +36,13 @@ router.get('/users',
   authenticateToken,
   requireRolePermission('read'),
   validateUserSearch,
+=======
+ * @access Admin (Auth0 + BD Local)
+ */
+router.get('/users',
+  checkJwt,              // 1. Valida token Auth0
+  loadLocalUserData,     // 2. Carga datos de BD local
+>>>>>>> origin/main
   UserRoleController.getUsers
 );
 
@@ -39,9 +53,13 @@ router.get('/users',
  */
 router.get('/users/without-roles',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   requireRolePermission('read'),
   validateUserSearch,
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.getUsersWithoutRoles
 );
 
@@ -52,10 +70,14 @@ router.get('/users/without-roles',
  */
 router.get('/users/:userId',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   requireRolePermission('read'),
   validateUserId,
   validateResourceAccess,
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.getUserById
 );
 
@@ -66,8 +88,12 @@ router.get('/users/:userId',
  */
 router.get('/roles',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   requireRolePermission('read'),
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.getRoles
 );
 
@@ -78,11 +104,15 @@ router.get('/roles',
  */
 router.put('/users/:userId/roles',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   validateUserId,
   validateRoleAssignment,
   requireUserRoleManagementPermission,
   auditRoleManagement('assign_roles'),
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.assignRoles
 );
 
@@ -93,11 +123,15 @@ router.put('/users/:userId/roles',
  */
 router.delete('/users/:userId/roles',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   validateUserId,
   validateRoleRemoval,
   requireUserRoleManagementPermission,
   auditRoleManagement('remove_roles'),
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.removeRoles
 );
 
@@ -108,9 +142,13 @@ router.delete('/users/:userId/roles',
  */
 router.get('/users/:userId/role-history',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   requireRolePermission('read'),
   validateUserId,
+=======
+  loadLocalUserData,
+>>>>>>> origin/main
   UserRoleController.getRoleAssignmentHistory
 );
 
@@ -121,6 +159,7 @@ router.get('/users/:userId/role-history',
  */
 router.get('/role-history',
   checkJwt,
+<<<<<<< HEAD
   authenticateToken,
   requireRolePermission('read'),
   UserRoleController.getRoleAssignmentHistory
@@ -190,5 +229,45 @@ router.get('/sync/stats',
   requireRolePermission('read'),
   UserSyncController.getSyncStats
 );
+=======
+  loadLocalUserData,
+  UserRoleController.getRoleAssignmentHistory
+);
+
+// ========== RUTAS DE SINCRONIZACIÓN (TEMPORALMENTE DESHABILITADAS) ==========
+// TODO: Implementar UserSyncService y UserSyncController
+
+/*
+router.post('/sync/users/:userId',
+  checkJwt,
+  authenticateToken,
+  UserSyncController.syncUser
+);
+
+router.post('/sync/users',
+  checkJwt,
+  authenticateToken,
+  UserSyncController.syncAllUsers
+);
+
+router.get('/sync/integrity',
+  checkJwt,
+  authenticateToken,
+  UserSyncController.verifyIntegrity
+);
+
+router.delete('/sync/orphaned-users',
+  checkJwt,
+  authenticateToken,
+  UserSyncController.cleanupOrphanedUsers
+);
+
+router.get('/sync/stats',
+  checkJwt,
+  authenticateToken,
+  UserSyncController.getSyncStats
+);
+*/
+>>>>>>> origin/main
 
 export default router;

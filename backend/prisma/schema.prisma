@@ -589,13 +589,28 @@ model mot_usuario {
   trabajador_id              Int?
   username                   String          @unique(map: "username") @db.VarChar(100)
   email                      String?         @db.VarChar(255)
+<<<<<<< HEAD
   password_hash              String          @db.VarChar(255)
+=======
+  password_hash              String?         @db.VarChar(255)
+>>>>>>> origin/main
   rol_id                     Int
   estado                     String          @default("activo") @db.VarChar(50)
   auth_provider              String?         @default("local") @db.VarChar(50)
   email_verified             Boolean?        @default(false)
   last_login_at              DateTime?       @db.DateTime(0)
   fecha_ultimo_cambio_rol_at DateTime?       @db.DateTime(0)
+  
+  // 🔐 Sistema de Fallback de Autenticación Local
+  auth0_enabled              Boolean?        @default(true)
+  local_auth_enabled         Boolean?        @default(true)
+  last_auth_method           String?         @db.VarChar(20)
+  failed_login_attempts      Int?            @default(0)
+  account_locked_until       DateTime?       @db.DateTime(0)
+  password_changed_at        DateTime?       @db.DateTime(0)
+  password_expires_at        DateTime?       @db.DateTime(0)
+  require_password_change    Boolean?        @default(false)
+  
   created_at                 DateTime        @db.DateTime(0)
   updated_at                 DateTime?       @db.DateTime(0)
   created_by                 Int
@@ -606,6 +621,8 @@ model mot_usuario {
 
   @@index([rol_id], map: "FK_MOT_USUARIO_RELATION_MOM_ROL")
   @@index([trabajador_id], map: "FK_MOT_USUARIO_RELATION_MOM_TRABAJADOR")
+  @@index([email], map: "idx_mot_usuario_email")
+  @@index([last_auth_method], map: "idx_mot_usuario_auth_method")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

@@ -6,6 +6,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
+<<<<<<< HEAD
 // Importar rutas DESPUÉS de cargar .env
 import authRoutes from './routes/auth';
 import authTestingRoutes from './routes/auth-testing';
@@ -19,6 +20,32 @@ import debugPrismaRoutes from './routes/debug-prisma';
 import userRoleManagementRoutes from './routes/user-role-management';
 import testUserManagementRoutes from './routes/test-user-management';
 import usuariosSistemaRoutes from './routes/usuarios-sistema.routes';
+=======
+// ==========================================
+// ✅ IMPORTAR RUTAS - SCREAMING ARCHITECTURE
+// ==========================================
+// Las rutas están organizadas por features (dominios de negocio)
+
+// 🔐 FEATURE: Authentication
+import authRoutes from './features/authentication/presentation/routes/auth.routes';
+import usuariosSistemaRoutes from './features/authentication/presentation/routes/user-system.routes';
+import fallbackAuthRoutes from './features/authentication/presentation/routes/fallback-auth.routes';
+
+// 👥 FEATURE: Personnel Management
+import agroManoTrabajadoresRoutes from './features/personnel-management/presentation/routes/employee.routes';
+
+// ⏰ FEATURE: Attendance Tracking
+import agroManoAsistenciaRoutes from './features/attendance-tracking/presentation/routes/attendance.routes';
+
+// 📊 SHARED: Dashboard & Config
+import agroManoDashboardRoutes from './shared/presentation/routes/dashboard.routes';
+
+// 👑 ADMIN: User & Role Management
+import userRoleManagementRoutes from './routes/user-role-management';
+
+// 🏖️ ABSENCES: Ausencias/Permisos
+import ausenciasRoutes from './routes/ausencias.routes';
+>>>>>>> origin/main
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
@@ -105,18 +132,29 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Rutas principales
-app.use('/api/auth', authRoutes);
-app.use('/api/auth', authTestRoutes);
-app.use('/api/testing', authTestingRoutes);
+// ==========================================
+// CONFIGURACIÓN DE RUTAS
+// ==========================================
+
+// 🔐 Rutas de autenticación con fallback (Auth0 + Local)
+app.use('/api/auth', fallbackAuthRoutes);
+
+// Rutas principales de autenticación (legacy - mantener por compatibilidad)
+app.use('/api/auth/legacy', authRoutes);
 
 // Rutas AgroMano con RBAC granular
 app.use('/api/trabajadores', agroManoTrabajadoresRoutes);
 app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
 app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
-app.use('/api/dashboard-simple', dashboardSimpleRoutes);
-app.use('/api/debug', debugRoutes);
-app.use('/api/debug-prisma', debugPrismaRoutes);
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de ausencias/permisos
+app.use('/api/ausencias', ausenciasRoutes);
 
 // Rutas de administración de usuarios y roles
 app.use('/api/admin', userRoleManagementRoutes);
