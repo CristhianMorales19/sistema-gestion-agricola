@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { apiConfig } from '../config/auth0.config';
-import toast from 'react-hot-toast';
 
 // Tipos para las respuestas de la API
 export interface ApiResponse<T = unknown> {
@@ -78,35 +77,35 @@ class ApiService {
     const response = error.response;
     
     if (!response) {
-      toast.error('Error de conexión. Verifique su conexión a internet.');
+      console.error('Error de conexión. Verifique su conexión a internet.');
       return;
     }
 
     switch (response.status) {
       case 401:
-        toast.error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        console.error('Sesión expirada. Por favor, inicie sesión nuevamente.');
         // Aquí podrías disparar un evento para hacer logout
         break;
       case 403:
-        toast.error('No tiene permisos para realizar esta acción.');
+        console.error('No tiene permisos para realizar esta acción.');
         break;
       case 404:
-        toast.error('Recurso no encontrado.');
+        console.error('Recurso no encontrado.');
         break;
       case 422:
         const validationErrors = response.data && typeof response.data === 'object' && 'errors' in response.data ? response.data.errors : null;
         if (validationErrors && Array.isArray(validationErrors)) {
-          validationErrors.forEach((err: string) => toast.error(err));
+          validationErrors.forEach((err: string) => console.error(err));
         } else {
-          toast.error('Datos inválidos. Verifique la información ingresada.');
+          console.error('Datos inválidos. Verifique la información ingresada.');
         }
         break;
       case 500:
-        toast.error('Error interno del servidor. Intente nuevamente más tarde.');
+        console.error('Error interno del servidor. Intente nuevamente más tarde.');
         break;
       default:
         const message = response.data && typeof response.data === 'object' && 'message' in response.data && typeof response.data.message === 'string' ? response.data.message : 'Error desconocido.';
-        toast.error(message);
+        console.error(message);
     }
   }
 

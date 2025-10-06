@@ -3,28 +3,13 @@ import { Request } from 'express';
 /**
  * Tipo extendido para Request con usuario autenticado
  * Usado en toda la aplicación cuando el middleware de autenticación agrega datos del usuario
+ * 
+ * NOTA: Los tipos de usuario ya están definidos globalmente en express.ts
+ * Esta interfaz se mantiene para compatibilidad pero ahora usa los tipos globales
  */
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    usuario_id?: number;
-    sub?: string;
-    email?: string;
-    permissions?: string[];
-    dbUser?: {
-      usuario_id: number;
-      username: string;
-      email: string;
-      rol_id: number;
-      estado: string;
-    };
-  };
-  localUser?: {
-    usuario_id: number;
-    username: string;
-    email: string;
-    rol_id: number;
-    estado: string;
-  };
+  // Los tipos user, localUser, auth0User están definidos en la extensión global de Express
+  // en src/types/express.ts, por lo que no necesitamos redefinirlos aquí
 }
 
 /**

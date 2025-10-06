@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { authenticateToken, requirePermissions } from '../middleware/rbac.middleware';
+import { authenticateToken, requirePermissions } from '../features/authentication/infrastructure/middleware/rbac.middleware';
 
 const router = Router();
 const prisma = new PrismaClient();
