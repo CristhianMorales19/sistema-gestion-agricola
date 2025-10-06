@@ -1,3 +1,4 @@
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiConfig = exports.auth0Config = void 0;
 // Configuración de Auth0 para el frontend
