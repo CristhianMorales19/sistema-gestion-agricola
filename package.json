@@ -20,4 +20,8 @@
   "scripts": {
     "serve-docs": "npx docsify-cli serve docs"
   }
+  ,
+  "scripts": {
+    "serve-docs": "npx docsify-cli serve docs"
+  }
 }

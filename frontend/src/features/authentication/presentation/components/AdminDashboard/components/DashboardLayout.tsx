@@ -222,11 +222,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
           </Box>
         </Box>
       </Box>
-
-      {/* Top Header */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
+      
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column'}}>
+        {/* #f8fbffff */}
+        {/* <Box
+          sx={{ 
             backgroundColor: '#1e293b',
             borderBottom: '1px solid #334155',
             p: 4,
@@ -300,7 +300,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               Cerrar Sesión
             </Button>
           </Box>
-        </Box>
+        </Box> */}
 
         {/* Main Content */}
         {children}

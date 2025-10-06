@@ -10,9 +10,14 @@ import { StatsCards } from '../../../../../app/layout/presentation/components/St
 import { ActivityFeed } from '../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
+<<<<<<< HEAD:frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
+import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView';
+import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
+=======
 import { EmployeeManagementView } from '../../../../personnel-management/presentation/components/EmployeeManagementView';
 import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 import { AbsenceManagementView } from '../../../../attendance-tracking';
+>>>>>>> origin/main:frontend/src/features/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -122,11 +127,14 @@ export const AdminDashboard: React.FC = () => {
           <UserManagementView/>
         );
 
+<<<<<<< HEAD:frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
+=======
       case 'absences':
         return (
           <AbsenceManagementView />
         );
 
+>>>>>>> origin/main:frontend/src/features/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
       case 'farms':
         return (
           <Box sx={{ p: 3, color: '#ffffff' }}>
@@ -171,7 +179,7 @@ export const AdminDashboard: React.FC = () => {
       onNavigationChange={handleNavigationChange}
       currentView={currentView}
     >
-      <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
+      <Box sx={{ flex: 1, p: 5, backgroundColor: '#0f172a' }}>
         {renderContent()}
       </Box>
     </DashboardLayout>

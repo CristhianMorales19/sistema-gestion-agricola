@@ -1,10 +1,17 @@
 import React, {useState, useCallback} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
+<<<<<<< HEAD:frontend/src/authentication/presentation/components/SupervisorRRHHDashboard/SupervisorRRHHDashboard.tsx
+import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
+import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
+import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
+import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../dashboard/domain/entities/Dashboard';
+=======
 import { StatsCards } from '../../../../../app/layout/presentation/components/StatsCards/StatsCards';
 import { ActivityFeed } from '../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../../app/layout/domain/entities/Dashboard';
+>>>>>>> origin/main:frontend/src/features/authentication/presentation/components/SupervisorRRHHDashboard/SupervisorRRHHDashboard.tsx
 
 interface SupervisorRRHHDashboardProps {
   user: {

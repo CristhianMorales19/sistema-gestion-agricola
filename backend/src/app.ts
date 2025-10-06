@@ -6,6 +6,21 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
+<<<<<<< HEAD
+// Importar rutas DESPUÉS de cargar .env
+import authRoutes from './routes/auth';
+import authTestingRoutes from './routes/auth-testing';
+import authTestRoutes from './routes/auth-test';
+import agroManoTrabajadoresRoutes from './routes/agromano-trabajadores';
+import agroManoAsistenciaRoutes from './routes/agromano-asistencia';
+import agroManoDashboardRoutes from './routes/agromano-dashboard';
+import dashboardSimpleRoutes from './routes/dashboard-simple';
+import debugRoutes from './routes/debug-routes';
+import debugPrismaRoutes from './routes/debug-prisma';
+import userRoleManagementRoutes from './routes/user-role-management';
+import testUserManagementRoutes from './routes/test-user-management';
+import usuariosSistemaRoutes from './routes/usuarios-sistema.routes';
+=======
 // ==========================================
 // ✅ IMPORTAR RUTAS - SCREAMING ARCHITECTURE
 // ==========================================
@@ -30,6 +45,7 @@ import userRoleManagementRoutes from './routes/user-role-management';
 
 // 🏖️ ABSENCES: Ausencias/Permisos
 import ausenciasRoutes from './routes/ausencias.routes';
+>>>>>>> origin/main
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
@@ -139,6 +155,15 @@ app.use('/api/admin', userRoleManagementRoutes);
 
 // Rutas de ausencias/permisos
 app.use('/api/ausencias', ausenciasRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
+
+// Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
+app.use('/api/test', testUserManagementRoutes);
 
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {

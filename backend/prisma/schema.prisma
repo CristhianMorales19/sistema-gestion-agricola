@@ -459,6 +459,7 @@ model mot_info_laboral {
   info_laboral_id               Int            @id @default(autoincrement())
   trabajador_id                 Int
   cargo                         String         @db.VarChar(100)
+  departamento                  String         @db.VarChar(100)
   fecha_ingreso_at              DateTime       @db.DateTime(0)
   tipo_contrato                 String         @db.VarChar(50)
   // Campos añadidos para soportar reportes y comprobantes
@@ -588,7 +589,11 @@ model mot_usuario {
   trabajador_id              Int?
   username                   String          @unique(map: "username") @db.VarChar(100)
   email                      String?         @db.VarChar(255)
+<<<<<<< HEAD
+  password_hash              String          @db.VarChar(255)
+=======
   password_hash              String?         @db.VarChar(255)
+>>>>>>> origin/main
   rol_id                     Int
   estado                     String          @default("activo") @db.VarChar(50)
   auth_provider              String?         @default("local") @db.VarChar(50)

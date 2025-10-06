@@ -7,7 +7,12 @@ import {
     requireAnyPermission, 
     requirePermissions,
     AgroManoPermission 
+<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
+} from '../middleware/agromano-rbac.middleware';
+import { validateEmployeeInputSingleError } from '../utils/employee-validation';
+=======
 } from '../../../authentication/infrastructure/middleware/agromano-rbac.middleware';
+>>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -30,7 +35,6 @@ const prisma = new PrismaClient();
  *       200:
  *         description: Lista de trabajadores
  */
-// Backend - Modifica tu ruta para devolver datos reales
 router.get('/', 
     checkJwt,
     hybridAuthMiddleware,
@@ -40,7 +44,6 @@ router.get('/',
             const userPermissions = req.auth?.permissions || [];
             const canReadAll = userPermissions.includes('trabajadores:read:all');
             
-            // Aquí debes hacer la consulta real a tu base de datos
             const trabajadores = await prisma.mom_trabajador.findMany({
                 where: { is_activo: true },
 
@@ -48,21 +51,13 @@ router.get('/',
                     mot_info_laboral: {
                         select: {
                             cargo: true,
+                            tipo_contrato: true,
+                            salario_base: true,
+                            fecha_ingreso_at: true,
+                            departamento: true
                         }
                     }
                 }
-                // select: {
-                //     trabajador_id: true,
-                //     documento_identidad: true,
-                //     nombre_completo: true,
-                //     fecha_nacimiento: true,
-                //     telefono: true,
-                //     email: true,
-                //     is_activo: true,
-                //     fecha_registro_at: true,
-                //     created_at: true,
-                //     updated_at: true
-                // }
             });
 
             res.json({
@@ -72,13 +67,15 @@ router.get('/',
                         id: t.trabajador_id.toString(),
                         name: t.nombre_completo,
                         identification: t.documento_identidad,
-                        cargo:  t.mot_info_laboral[0]?.cargo || 'Sin asignar', // Necesitas join con otra tabla
-                        hireDate: t.fecha_registro_at,
-                        status: t.is_activo ? 'activo' : 'inactivo',
+                        role: t.mot_info_laboral[0]?.cargo,
+                        department: t.mot_info_laboral[0]?.departamento,
+                        entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
+                        status: t.is_activo,
                         email: t.email,
                         phone: t.telefono,
-                        createdAt: t.created_at,
-                        updatedAt: t.updated_at
+                        contractType: t.mot_info_laboral[0]?.tipo_contrato,
+                        baseSalary: t.mot_info_laboral[0]?.salario_base,
+                        birthDate: t.fecha_nacimiento,
                     })),
                     permissions: userPermissions,
                     scope: canReadAll ? 'all' : 'own'
@@ -157,27 +154,7 @@ router.get('/',
  *       500:
  *         description: Error del servidor
  */
-router.post('/', 
-        (req, res, next) => {
-        console.log('1. Request recibida - Headers:', req.headers);
-        console.log('1. Request recibida - Body:', req.body);
-        next();
-    },
-    checkJwt,
-    (req, res, next) => {
-        console.log('2. Después de checkJwt - User:', (req as any).user);
-        next();
-    },
-    hybridAuthMiddleware,
-    (req, res, next) => {
-        console.log('3. Después de hybridAuthMiddleware - User:', (req as any).user);
-        next();
-    },
-    requirePermission('trabajadores:create'),
-    (req, res, next) => {
-        console.log('4. Después de requirePermission');
-        next();
-    },
+router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores:create'),
     async (req, res) => {
         try {
             console.log('5. Datos recibidos en controller:', req.body);
@@ -191,6 +168,10 @@ router.post('/',
                 email,
                 cargo,
                 // Campos laborales opcionales
+<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
+                departamento,
+=======
+>>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
                 codigo_nomina,
                 salario_bruto,
                 rebajas_ccss,
@@ -205,67 +186,18 @@ router.post('/',
                 created_by
             } = req.body;
 
-            // Validar campos requeridos
-            if (!documento_identidad || !nombre_completo || !fecha_nacimiento || !fecha_registro_at || !created_by) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Faltan campos requeridos'
-                });
+            const error = await validateEmployeeInputSingleError(req.body);
+            if (error) {
+                return res.status(409).json({ success: false, message: error });
             }
-
-            // Verificar si la cédula ya existe
-            const existingEmployee = await prisma.mom_trabajador.findUnique({
-                where: {
-                    documento_identidad: documento_identidad.trim()
-                }
-            });
-
-            if (existingEmployee) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Ya existe un trabajador con esta cédula'
-                });
-            }
-            
-            // Verificar si el correo ya existe
-            const existingEmployeeByEmail = await prisma.mom_trabajador.findFirst({
-                where: {
-                    email: email.trim()
-                }
-            });
-
-            if (existingEmployeeByEmail) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Ya existe un trabajador con este correo electrónico'
-                });
-            }
-
-            // Verificar si el correo ya existe en la tabla de usuarios
-            const existingUserByEmail = await prisma.mot_usuario.findFirst({
-                where: {
-                    username: email.trim()
-                }
-            });
-
-            if (existingUserByEmail) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Ya existe un usuario con este correo electrónico'
-                });
-            }
-
-            // Crear el trabajador en la base de datos
             const newEmployee = await prisma.mom_trabajador.create({
                 data: {
                     documento_identidad: documento_identidad.trim(),
                     nombre_completo: nombre_completo.trim(),
                     fecha_nacimiento: new Date(fecha_nacimiento),
-                    fecha_registro_at: new Date(fecha_registro_at),
+                    fecha_registro_at: new Date(),
                     telefono: telefono ? telefono.trim() : null,
                     email: email ? email.trim() : null,
-                    // El campo cargo se guardaría en otra tabla relacionada (mot_info_laboral)
-                    // Por ahora lo dejamos como campo adicional si es necesario
                     created_at: new Date(),
                     created_by: created_by,
                     is_activo: true
@@ -278,6 +210,10 @@ router.post('/',
                     data: {
                         trabajador_id: newEmployee.trabajador_id,
                         cargo: cargo ? cargo.trim() : 'Sin definir',
+<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
+                        departamento: departamento ? departamento.trim() : 'Sin definir',
+=======
+>>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
                         fecha_ingreso_at: new Date(fecha_registro_at),
                         tipo_contrato: req.body.tipo_contrato || 'no_definido',
                         salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0,
@@ -448,7 +384,7 @@ router.delete('/:id',
     checkJwt,
     hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
     requirePermission('trabajadores:delete'),
-    (req, res) => {
+    async (req, res) => {
         const { id } = req.params;
         
         res.json({
@@ -580,13 +516,15 @@ router.get('/search/:query',
                         id: t.trabajador_id.toString(),
                         name: t.nombre_completo,
                         identification: t.documento_identidad,
-                        position: t.mot_info_laboral[0]?.cargo || 'Sin definir',
-                        hireDate: t.fecha_registro_at,
+                        role: t.mot_info_laboral[0]?.cargo || 'Sin definir',
+                        birthDate: t.fecha_nacimiento,
+                        entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
+                        baseSalary: t.mot_info_laboral[0]?.salario_base,
+                        department: t.mot_info_laboral[0]?.departamento,
                         status: t.is_activo ? 'activo' : 'inactivo',
                         email: t.email,
-                        phone: t.telefono,
-                        createdAt: t.created_at,
-                        updatedAt: t.updated_at
+                        contractType: t.mot_info_laboral[0]?.tipo_contrato,
+                        phone: t.telefono
                     })),
                     permissions: userPermissions,
                     scope: canReadAll ? 'all' : 'own'
@@ -602,7 +540,6 @@ router.get('/search/:query',
     }
 );
 
-// En tu archivo agromano-trabajadores.ts - Agregar endpoint POST
 /**
  * @route POST /api/trabajadores/:id/info-laboral
  * @desc Crear información laboral del trabajador
@@ -630,12 +567,13 @@ router.post('/:id/info-laboral',
             }
             
             // Crear información laboral en la base de datos
-            const nuevaInfoLaboral = await prisma.mot_info_laboral.create({
+            await prisma.mot_info_laboral.create({
                 data: {
                     trabajador_id: parseInt(id),
-                    cargo,
+                    cargo: cargo,
+                    departamento: departamento,
                     salario_base: parseFloat(salario_base),
-                    tipo_contrato,
+                    tipo_contrato: tipo_contrato,
                     fecha_ingreso_at: new Date(fecha_ingreso),
                     fecha_ultima_actualizacion_at: new Date(),
                     usuario_ultima_actualizacion: parseInt(userId),
@@ -648,16 +586,7 @@ router.post('/:id/info-laboral',
             
             res.status(201).json({
                 success: true,
-                message: 'Información laboral guardada',
-                data: {
-                    info_laboral_id: nuevaInfoLaboral.info_laboral_id,
-                    trabajador_id: nuevaInfoLaboral.trabajador_id,
-                    cargo: nuevaInfoLaboral.cargo,
-                    departamento: '',
-                    salario_base: nuevaInfoLaboral.salario_base,
-                    tipo_contrato: nuevaInfoLaboral.tipo_contrato,
-                    fecha_ingreso: nuevaInfoLaboral.fecha_ingreso_at
-                }
+                message: 'Información laboral guardada'
             });
             
         } catch (error: unknown) {

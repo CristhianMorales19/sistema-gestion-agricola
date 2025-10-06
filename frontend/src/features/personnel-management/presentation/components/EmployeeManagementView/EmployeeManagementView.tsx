@@ -17,7 +17,7 @@ import { EmployeeTable } from '../EmployeeTable/EmployeeTable';
 import { NewEmployeeForm, NewEmployeeFormData } from '../EmployeeForm/NewEmployeeForm';
 import { LaborInfoView } from '../EmployeeLaborInfoForm/LaborInfoView'; // Nueva importación
 import { useEmployeeManagement } from '../../../application/hooks/useEmployeeManagement';
-import { Employee } from '../../../domain/entities/Employee';
+import { CreateEmployeeData, Employee } from '../../../domain/entities/Employee';
 
 type EmployeeView = 'list' | 'new-employee' | 'labor-info';
 
@@ -74,7 +74,7 @@ export const EmployeeManagementView: React.FC = () => {
     refreshEmployees();
   };
 
-  const handleCreateEmployee = async (data: NewEmployeeFormData) => {
+  const handleCreateEmployee = async (data: CreateEmployeeData) => {
     try {
       await createEmployee(data);
       await refreshEmployees();
