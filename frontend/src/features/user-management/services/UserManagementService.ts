@@ -1,4 +1,4 @@
-import { UserWithRoles, UserListResponse, AssignRolesRequest, UserFilters, Role } from '../types';
+import { UserWithRoles, UserListResponse, UserFilters, Role } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
