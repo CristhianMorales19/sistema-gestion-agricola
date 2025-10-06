@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { auth0ManagementService } from '../services/auth0-management.service';
+import { auth0ManagementService } from '../features/authentication/application/services/auth0-management.service';
 import {
   UserWithRoles,
   UsersListResponse,
@@ -42,7 +42,7 @@ export class UserRoleController {
 
       // Enriquecer con datos locales y roles
       const usersWithRoles: UserWithRoles[] = await Promise.all(
-        auth0Result.users.map(async (user) => {
+        auth0Result.users.map(async (user: any) => {
           // Obtener roles del usuario en Auth0
           const roles = await auth0ManagementService.getUserRoles(user.user_id!);
 
@@ -270,7 +270,7 @@ export class UserRoleController {
 
       // Obtener roles actuales para auditoría
       const currentRoles = await auth0ManagementService.getUserRoles(userId);
-      const currentRoleIds = currentRoles.map(role => role.id!);
+      const currentRoleIds = currentRoles.map((role: any) => role.id!);
 
       // Actualizar roles en Auth0
       await auth0ManagementService.updateUserRoles(userId, roleIds);
@@ -346,7 +346,7 @@ export class UserRoleController {
 
       // Obtener roles actuales para auditoría
       const currentRoles = await auth0ManagementService.getUserRoles(userId);
-      const currentRoleIds = currentRoles.map(role => role.id!);
+      const currentRoleIds = currentRoles.map((role: any) => role.id!);
 
       // Remover roles en Auth0
       await auth0ManagementService.removeRolesFromUser(userId, roleIds);
@@ -363,7 +363,7 @@ export class UserRoleController {
             timestamp: new Date()
           }),
           datos_despues: JSON.stringify({
-            roles: currentRoleIds.filter(id => !roleIds.includes(id)),
+            roles: currentRoleIds.filter((id: any) => !roleIds.includes(id)),
             removedRoles: roleIds,
             reason: reason || 'Sin razón especificada',
             timestamp: new Date()
