@@ -6,7 +6,7 @@ export interface Employee {
   position: string;
   cargo?: string;
   hireDate: Date;
-  status: 'activo' | 'inactivo';
+  status: boolean;
   email?: string;
   phone?: string;
   salary?: number;
@@ -57,7 +57,7 @@ export interface UpdateEmployeeData {
   name?: string;
   position?: string;
   department?: string;
-  status?: 'activo' | 'inactivo';
+  status?: boolean;
   email?: string;
   phone?: string;
   salary?: number;

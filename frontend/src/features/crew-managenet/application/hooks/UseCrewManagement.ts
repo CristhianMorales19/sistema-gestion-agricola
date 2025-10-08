@@ -15,27 +15,27 @@ export const UseCrewManagement = () => {
         setLoading(true);
         setError(null);
         try {
-        const crewsData = await crewUseCases.getAllCrews();
-        setCrews(crewsData);
+            const crewsData = await crewUseCases.getAllCrews();
+            setCrews(crewsData);
         } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch crews');
+            setError(err instanceof Error ? err.message : 'Failed to fetch crews');
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     }, []);
 
-    // const searchCrews = useCallback(async (query: string) => {
-    //     setLoading(true);
-    //     setError(null);
-    //     try {
-    //     const searchResults = await crewUseCases.searchCrews(query);
-    //     setCrews(searchResults);
-    //     } catch (err) {
-    //     setError(err instanceof Error ? err.message : 'Failed to search crews');
-    //     } finally {
-    //     setLoading(false);
-    //     }
-    // }, []);
+    const searchCrews = useCallback(async (query: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const searchResults = await crewUseCases.getCrewByCodeOrArea(query);
+            setCrews(searchResults);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to search crews');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     // const createCrew = useCallback(async (crewData: CreateCrewData): Promise<Crew> => {
     //     setError(null);
@@ -80,7 +80,7 @@ export const UseCrewManagement = () => {
         loading,
         error,
         fetchCrews,
-        // searchCrews,
+        searchCrews,
         // createCrew,
         // updateCrew,
         // deleteCrew,

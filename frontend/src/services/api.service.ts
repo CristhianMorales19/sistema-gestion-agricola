@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { apiConfig } from '../config/auth0.config';
+import id from 'date-fns/esm/locale/id/index.js';
 
 // Tipos para las respuestas de la API
 export interface ApiResponse<T = unknown> {
@@ -194,6 +195,10 @@ class ApiService {
   async getCuadrillas(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/cuadrillas', { params });
     return response.data;
+  }
+
+  async searchCrew(codeOrArea: string) {
+    return this.get(`/cuadrillas/${codeOrArea}`);
   }
 
   // Nóminas

@@ -72,4 +72,94 @@ router.get('/',
     }
 );
 
+/**
+ * @route GET /api/cuadrillas/:query
+ * @desc Buscar cuadrillas por código o área de trabajo
+ */
+/**
+ * @swagger
+ * /api/cuadrillas/{query}:
+ *   get:
+ *     summary: Buscar cuadrillas por código o área de trabajo
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Cuadrillas
+ *     parameters:
+ *       - in: path
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Término de búsqueda (código o área de trabajo)
+ *     responses:
+ *       200:
+ *         description: Lista de cuadrillas encontradas
+ */
+router.get('/:query', 
+    checkJwt,
+    hybridAuthMiddleware,
+    // requireAnyPermission(['trabajadores:read:all', 'trabajadores:read:own']),
+    async (req, res) => {
+        try {
+            const { query } = req.params;
+            // const userPermissions = req.auth?.permissions || [];
+            // const canReadAll = userPermissions.includes('trabajadores:read:all');
+
+            if (!query || query.trim().length < 2) {
+                return res.json({ success: true, data: [] });
+            }
+
+            // Buscar por código o área de trabajo
+            const cuadrillas = await prisma.mom_cuadrilla.findMany({
+                where: {
+                    OR: [
+                        { codigo_identificador: { contains: query.toLowerCase() } },
+                        { area_trabajo: { contains: query.toLowerCase() } }
+                    ]
+                },
+                include: {
+                    rel_mom_cuadrilla__mom_trabajador: {
+                        select: {
+                            mom_trabajador: {
+                                select: {
+                                    trabajador_id: true,
+                                    nombre_completo: true,
+                                    documento_identidad: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                take: 50 // Limitar resultados
+            });
+
+            const response = cuadrillas.map(c => ({
+                id: c.cuadrilla_id,
+                code: c.codigo_identificador,
+                description: c.descripcion,
+                workArea: c.area_trabajo,
+                active: c.is_activa,
+                workers: c.rel_mom_cuadrilla__mom_trabajador.map(r => ({
+                    id: r.mom_trabajador.trabajador_id,
+                    name: r.mom_trabajador.nombre_completo,
+                    identification: r.mom_trabajador.documento_identidad,
+                })),
+            }));
+
+            res.json({
+                success: true,
+                data: response,
+            });
+
+        } catch (error) {
+            console.error('Error en búsqueda:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al buscar trabajadores'
+            });
+        }
+    }
+);
+
 export default router;

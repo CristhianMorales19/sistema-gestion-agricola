@@ -32,11 +32,32 @@ export class ApiCrewRepository implements CrewRepository {
         return crews;
     }
 
-    // async getCrewById(id: string): Promise<Crew | null> {
-    //     const response = await fetch(`${this.baseUrl}/${id}`);
-    //     if (!response.ok) throw new Error('Failed to fetch crew');
-    //     return response.json();
-    // }
+    async getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]> {
+
+        const response = await apiService.get<CrewApiResponse[]>(`${this.baseUrl}/${encodeURIComponent(codeOrArea)}`);
+
+        console.log('Cuadrillas:', response.data);
+        // Verificar si la respuesta fue exitosa
+        if (!response.success) {
+            throw new Error('Failed to fetch crews');
+        }
+
+        // Mapear la respuesta del backend a la interfaz Crew
+        const crews: Crew[] = response.data.map((crewData: CrewApiResponse) => ({
+            id: crewData.id,
+            code: crewData.code,
+            description: crewData.description,
+            workArea: crewData.workArea,
+            active: crewData.active,
+            workers: crewData.workers.map((worker: any) => ({
+                id: worker.id,
+                name: worker.name,
+                identification: worker.identification,
+            })),
+        }));
+
+        return crews;
+    }
 
     // async createCrew(crewData: CreateCrewData): Promise<Crew> {
     //     const response = await fetch(this.baseUrl, {

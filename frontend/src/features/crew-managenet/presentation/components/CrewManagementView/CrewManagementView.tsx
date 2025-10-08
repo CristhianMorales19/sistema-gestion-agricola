@@ -15,11 +15,13 @@ import {
     import { NewCrewForm, NewCrewFormData } from '../CrewForm/NewCrewForm';
     import { UseCrewManagement } from '../../../application/hooks/UseCrewManagement';
     import { CreateCrewData, Crew } from '../../../domain/entities/Crew';
+    import { useEmployeeManagement } from '../../../../personnel-management/application/hooks/useEmployeeManagement';
 
     type CrewView = 'list' | 'new-crew' | 'edit-crew';
 
     export const CrewManagementView: React.FC = () => {
-    const { crews, loading, error, fetchCrews, } = UseCrewManagement();
+    const { crews, loading, error, fetchCrews, searchCrews} = UseCrewManagement();
+    const { employees, refreshEmployees } = useEmployeeManagement();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [currentView, setCurrentView] = useState<CrewView>('list');
@@ -28,17 +30,18 @@ import {
     // Fetch crews on component mount
     useEffect(() => {
         fetchCrews();
-    }, [fetchCrews]);
+        refreshEmployees();
+    }, [fetchCrews, refreshEmployees]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
     const handleSearch = async () => {
-        // if (searchQuery.trim().length > 0) {
-        // setIsSearching(true);
-        // await searchCrews(searchQuery.trim());
-        // }
+        if (searchQuery.trim().length > 0) {
+            setIsSearching(true);
+            await searchCrews(searchQuery.trim());
+        }
     };
 
     const handleClearSearch = async () => {
@@ -113,6 +116,7 @@ import {
             <NewCrewForm
                 onSubmit={handleCreateCrew}
                 onCancel={handleBackToList}
+                employees={employees}
             />
             );
 
@@ -121,6 +125,7 @@ import {
             <NewCrewForm
                 onSubmit={handleUpdateCrew}
                 onCancel={handleBackToList}
+                employees={employees}
                 initialData={selectedCrew ? {
                     code: selectedCrew.code,
                     description: selectedCrew.description,
@@ -136,86 +141,99 @@ import {
             <>
                 {/* Search Bar */}
                 <Paper sx={{ p: 2, mb: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextField
-                    fullWidth
-                    placeholder="Buscar por codigo o area de trabajo"
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    onKeyDown={handleKeyDown}
-                    InputProps={{
-                        startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon sx={{ color: '#94a3b8' }} />
-                        </InputAdornment>
-                        ),
-                        sx: { color: '#ffffff' }
-                    }}
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                        '& fieldset': { borderColor: '#475569' },
-                        '&:hover fieldset': { borderColor: '#64748b' },
-                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        }
-                    }}
-                    />
-                    <Button
-                    variant="contained"
-                    onClick={handleSearch}
-                    disabled={searchQuery.trim().length === 0}
-                    sx={{
-                        minWidth: '100px',
-                        backgroundColor: '#6366f1',
-                        '&:hover': { backgroundColor: '#4f46e5' },
-                        '&:disabled': { backgroundColor: '#475569' }
-                    }}
-                    >
-                    Buscar
-                    </Button>
-                    {isSearching && (
-                    <Button
-                        variant="outlined"
-                        onClick={handleClearSearch}
-                        sx={{
-                        minWidth: '100px',
-                        color: '#94a3b8',
-                        borderColor: '#475569',
-                        '&:hover': {
-                            color: '#ffffff',
-                            borderColor: '#64748b',
-                            backgroundColor: '#334155'
-                        }
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <TextField
+                        fullWidth
+                        placeholder="Buscar por codigo o area de trabajo"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onKeyDown={handleKeyDown}
+                        InputProps={{
+                            startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: '#94a3b8' }} />
+                            </InputAdornment>
+                            ),
+                            sx: { color: '#ffffff' }
                         }}
-                    >
-                        Limpiar
-                    </Button>
-                    )}
-                </Box>
-                {isSearching && (
-                    <Typography variant="body2" sx={{ color: '#94a3b8', mt: 1 }}>
-                    Showing results for: "{searchQuery}"
-                    </Typography>
-                )}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: '#475569' },
+                            '&:hover fieldset': { borderColor: '#64748b' },
+                            '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+                            }
+                        }}
+                        />
+                        <Button
+                        variant="contained"
+                        onClick={handleSearch}
+                        disabled={searchQuery.trim().length === 0}
+                        sx={{
+                            minWidth: '100px',
+                            backgroundColor: '#6366f1',
+                            '&:hover': { backgroundColor: '#4f46e5' },
+                            '&:disabled': { backgroundColor: '#475569' }
+                        }}
+                        >
+                        Buscar
+                        </Button>
+                        {isSearching && (
+                        <Button
+                            variant="outlined"
+                            onClick={handleClearSearch}
+                            sx={{
+                            minWidth: '100px',
+                            color: '#94a3b8',
+                            borderColor: '#475569',
+                            '&:hover': {
+                                color: '#ffffff',
+                                borderColor: '#64748b',
+                                backgroundColor: '#334155'
+                            }
+                            }}
+                        >
+                            Limpiar
+                        </Button>
+                        )}
+                    </Box>
                 </Paper>
 
-                {/* Crew Table */}
-                <CrewTable
-                crews={crews}
-                onEdit={handleEditCrew}
-                // onDelete={handleDelete}
-                />
+                {/* Contenido dinámico: loading / sin resultados / tabla */}
+                {loading ? (
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: '#94a3b8',
+                            textAlign: 'center',
+                            mt: 5
+                        }}
+                    >
+                        Buscando cuadrillas...
+                    </Typography>
+                ) : crews.length === 0 ? (
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: '#94a3b8',
+                            textAlign: 'center',
+                            mt: 5
+                        }}
+                    >
+                        {isSearching
+                            ? `No se encontraron resultados para "${searchQuery}"`
+                            : 'No hay cuadrillas registradas aún.'}
+                    </Typography>
+                ) : (
+                    <CrewTable
+                        crews={crews}
+                        onEdit={handleEditCrew}
+                        // onDelete={handleDelete}
+                    />
+                )}
             </>
             );
         }
     };
-
-    if (loading && currentView === 'list') {
-        return <Typography sx={{ color: '#ffffff' }}>Loading crews...</Typography>;
-    }
-
-    if (error && currentView === 'list') {
-        return <Typography color="error">{error}</Typography>;
-    }
 
     return (
         <Box sx={{ p: 3 }}>

@@ -501,7 +501,7 @@ router.get('/search/:query',
                         birthDate: t.fecha_nacimiento,
                         entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
                         baseSalary: t.mot_info_laboral[0]?.salario_base,
-                        status: t.is_activo ? 'activo' : 'inactivo',
+                        status: t.is_activo,
                         email: t.email,
                         contractType: t.mot_info_laboral[0]?.tipo_contrato,
                         phone: t.telefono

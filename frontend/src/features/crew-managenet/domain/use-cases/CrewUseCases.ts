@@ -8,10 +8,10 @@ export class CrewUseCases {
         return this.crewRepository.getAllCrews();
     }
 
-    // async getCrewById(id: string): Promise<Crew | null> {
-    //     return this.crewRepository.getCrewById(id);
-    // }
-
+    async getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]> {
+        return this.crewRepository.getCrewByCodeOrArea(codeOrArea);
+    }
+    
     // async createCrew(crewData: CreateCrewData): Promise<Crew> {
     //     return this.crewRepository.createCrew(crewData);
     // }
