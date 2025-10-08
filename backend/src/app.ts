@@ -6,21 +6,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-<<<<<<< HEAD
-// Importar rutas DESPUÉS de cargar .env
-import authRoutes from './routes/auth';
-import authTestingRoutes from './routes/auth-testing';
-import authTestRoutes from './routes/auth-test';
-import agroManoTrabajadoresRoutes from './routes/agromano-trabajadores';
-import agroManoAsistenciaRoutes from './routes/agromano-asistencia';
-import agroManoDashboardRoutes from './routes/agromano-dashboard';
-import dashboardSimpleRoutes from './routes/dashboard-simple';
-import debugRoutes from './routes/debug-routes';
-import debugPrismaRoutes from './routes/debug-prisma';
-import userRoleManagementRoutes from './routes/user-role-management';
-import testUserManagementRoutes from './routes/test-user-management';
-import usuariosSistemaRoutes from './routes/usuarios-sistema.routes';
-=======
 // ==========================================
 // ✅ IMPORTAR RUTAS - SCREAMING ARCHITECTURE
 // ==========================================
@@ -41,11 +26,13 @@ import agroManoAsistenciaRoutes from './features/attendance-tracking/presentatio
 import agroManoDashboardRoutes from './shared/presentation/routes/dashboard.routes';
 
 // 👑 ADMIN: User & Role Management
-import userRoleManagementRoutes from './routes/user-role-management';
+import userRoleManagementRoutes from '../src/routes/user-role-management';
 
 // 🏖️ ABSENCES: Ausencias/Permisos
-import ausenciasRoutes from './routes/ausencias.routes';
->>>>>>> origin/main
+import ausenciasRoutes from '../src/routes/ausencias.routes';
+
+// 👥 FEATURE: Crew Management
+import crewRoutes from './features/crew-management/presentation/routes/crew.routes';
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
@@ -99,7 +86,7 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 // Configurar CORS permitiendo múltiples orígenes desde la variable de entorno
 // FRONTEND_URLS (coma-separados) o FRONTEND_URL.
-const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000';
+const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3001';
 const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
 
 app.use(cors({
@@ -162,8 +149,11 @@ app.use('/api/admin', userRoleManagementRoutes);
 // Rutas de usuarios del sistema (híbrido Auth0/BD)
 app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
 
+// Rutas de administración de usuarios y roles
+app.use('/api/cuadrillas', crewRoutes);
+
 // Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
-app.use('/api/test', testUserManagementRoutes);
+app.use('/api/test', userRoleManagementRoutes);
 
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {

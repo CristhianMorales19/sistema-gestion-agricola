@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Card, CardContent, Box, Typography } from '@mui/material';
 import { TrendingUp, TrendingDown, Agriculture, People, Assessment, NotificationsNone } from '@mui/icons-material';
-import { DashboardStatistic } from '../../../domain/entities/Dashboard';
+import { DashboardStatistic } from '../../../../app/layout/domain/entities/Dashboard';
 
 interface StatsCardsProps {
   stats: DashboardStatistic[];

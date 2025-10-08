@@ -1,13 +1,7 @@
 import { Router } from 'express';
-<<<<<<< HEAD:backend/src/routes/agromano-dashboard.ts
-import { checkJwt } from '../config/auth0-simple.config';
-import { flexibleAuth } from '../config/flexible-auth.config';
-import { hybridAuthMiddleware } from '../middleware/hybrid-auth-final.middleware';
-=======
 import { checkJwt } from '../../infrastructure/config/auth0-simple.config';
 import { flexibleAuth } from '../../infrastructure/config/flexible-auth.config';
 import { agroManoAuthMiddleware as hybridAuthMiddleware } from '../../../features/authentication/infrastructure/middleware/agromano-auth.middleware';
->>>>>>> origin/main:backend/src/shared/presentation/routes/dashboard.routes.ts
 import { 
     requirePermission, 
     requireAnyPermission 
@@ -109,7 +103,7 @@ router.get('/general',
                 console.log('🔐 Consultando permisos...');
                 const totalPermisos = await prisma.mom_permiso.count({
                     where: {
-                        is_activo: 1
+                        is_activo: true
                     }
                 }).catch((err: Error) => {
                     console.log('⚠️ Error consultando permisos:', err.message);

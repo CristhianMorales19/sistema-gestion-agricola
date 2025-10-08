@@ -1,11 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
-<<<<<<< HEAD:backend/src/middleware/agromano-auth.middleware.ts
-import { AgroManoUserSyncService } from '../services/agromano-user-sync.service';
-=======
 import { AgroManoUserSyncService } from '../../application/services/agromano-user-sync.service';
->>>>>>> origin/main:backend/src/features/authentication/infrastructure/middleware/agromano-auth.middleware.ts
 
 /**
  * Middleware de validación de JWT de Auth0

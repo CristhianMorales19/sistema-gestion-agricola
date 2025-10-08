@@ -9,7 +9,7 @@ import {
   IconButton
 } from '@mui/material';
 import { Edit } from '@mui/icons-material';
-import { UserWithRoles, Role } from '../../types';
+import { UserWithRoles, Role } from '../../../features/user-management/types';
 
 interface UserRowProps {
   userWithRoles: UserWithRoles;

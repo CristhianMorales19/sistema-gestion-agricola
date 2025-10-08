@@ -7,12 +7,7 @@ import {
     requireAnyPermission, 
     requirePermissions,
     AgroManoPermission 
-<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
-} from '../middleware/agromano-rbac.middleware';
-import { validateEmployeeInputSingleError } from '../utils/employee-validation';
-=======
 } from '../../../authentication/infrastructure/middleware/agromano-rbac.middleware';
->>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -53,8 +48,7 @@ router.get('/',
                             cargo: true,
                             tipo_contrato: true,
                             salario_base: true,
-                            fecha_ingreso_at: true,
-                            departamento: true
+                            fecha_ingreso_at: true
                         }
                     }
                 }
@@ -68,7 +62,6 @@ router.get('/',
                         name: t.nombre_completo,
                         identification: t.documento_identidad,
                         role: t.mot_info_laboral[0]?.cargo,
-                        department: t.mot_info_laboral[0]?.departamento,
                         entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
                         status: t.is_activo,
                         email: t.email,
@@ -168,10 +161,6 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
                 email,
                 cargo,
                 // Campos laborales opcionales
-<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
-                departamento,
-=======
->>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
                 codigo_nomina,
                 salario_bruto,
                 rebajas_ccss,
@@ -186,10 +175,6 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
                 created_by
             } = req.body;
 
-            const error = await validateEmployeeInputSingleError(req.body);
-            if (error) {
-                return res.status(409).json({ success: false, message: error });
-            }
             const newEmployee = await prisma.mom_trabajador.create({
                 data: {
                     documento_identidad: documento_identidad.trim(),
@@ -210,10 +195,6 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
                     data: {
                         trabajador_id: newEmployee.trabajador_id,
                         cargo: cargo ? cargo.trim() : 'Sin definir',
-<<<<<<< HEAD:backend/src/routes/agromano-trabajadores.ts
-                        departamento: departamento ? departamento.trim() : 'Sin definir',
-=======
->>>>>>> origin/main:backend/src/features/personnel-management/presentation/routes/employee.routes.ts
                         fecha_ingreso_at: new Date(fecha_registro_at),
                         tipo_contrato: req.body.tipo_contrato || 'no_definido',
                         salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0,
@@ -520,7 +501,6 @@ router.get('/search/:query',
                         birthDate: t.fecha_nacimiento,
                         entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
                         baseSalary: t.mot_info_laboral[0]?.salario_base,
-                        department: t.mot_info_laboral[0]?.departamento,
                         status: t.is_activo ? 'activo' : 'inactivo',
                         email: t.email,
                         contractType: t.mot_info_laboral[0]?.tipo_contrato,
@@ -571,7 +551,6 @@ router.post('/:id/info-laboral',
                 data: {
                     trabajador_id: parseInt(id),
                     cargo: cargo,
-                    departamento: departamento,
                     salario_base: parseFloat(salario_base),
                     tipo_contrato: tipo_contrato,
                     fecha_ingreso_at: new Date(fecha_ingreso),

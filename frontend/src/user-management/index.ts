@@ -1,3 +1,3 @@
 export { UserManagementView } from './presentation/components/UserManagementView';
 export { UserManagementService } from './services/UserManagementService';
-export * from './types';
+export * from '../features/user-management/types';

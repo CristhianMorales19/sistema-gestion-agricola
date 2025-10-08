@@ -1,30 +1,15 @@
 import React, {useState, useCallback} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
-<<<<<<< HEAD:frontend/src/authentication/presentation/components/SoloLecturaDashboard/SoloLecturaDashboard.tsx
-import { StatsCards } from '../../../../dashboard/presentation/components/StatsCards/StatsCards';
-import { ActivityFeed } from '../../../../dashboard/presentation/components/ActivityFeed/ActivityFeed';
-import { ConditionsPanel } from '../../../../dashboard/presentation/components/ConditionsPanel/ConditionsPanel';
-import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../dashboard/domain/entities/Dashboard';
-=======
 import { StatsCards } from '../../../../../app/layout/presentation/components/StatsCards/StatsCards';
 import { ActivityFeed } from '../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel';
->>>>>>> origin/main:frontend/src/features/authentication/presentation/components/GerenteRRHHDashboard/GerenteRRHHDashboard.tsx
 
 interface GerenteRRHHDashboardProps {
   user: {
     permisos?: string[];
     [key: string]: unknown;
   };
-<<<<<<< HEAD:frontend/src/authentication/presentation/components/SoloLecturaDashboard/SoloLecturaDashboard.tsx
-  dashboardData: {
-    stats?: DashboardStatistic[];
-    activities?: DashboardActivity[];
-    conditions?: DashboardCondition[];
-    [key: string]: unknown;
-  };
-=======
 
 
     dashboardData: {
@@ -33,7 +18,6 @@ interface GerenteRRHHDashboardProps {
       conditions?: any;
       [key: string]: any;
     };
->>>>>>> origin/main:frontend/src/features/authentication/presentation/components/GerenteRRHHDashboard/GerenteRRHHDashboard.tsx
 }
 
 export const GerenteRRHHDashboard: React.FC<GerenteRRHHDashboardProps> = ({ user, dashboardData }) => {

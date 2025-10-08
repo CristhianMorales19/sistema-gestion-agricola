@@ -190,6 +190,12 @@ class ApiService {
     return this.put(`/asistencias/${id}`, data);
   }
 
+  // Cuadrillas
+  async getCuadrillas(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    const response = await this.axiosInstance.get('/cuadrillas', { params });
+    return response.data;
+  }
+
   // Nóminas
   async getNominas(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
     const response = await this.axiosInstance.get('/nominas', { params });

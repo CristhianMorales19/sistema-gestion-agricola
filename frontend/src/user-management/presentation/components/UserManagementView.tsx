@@ -40,7 +40,7 @@ import {
 import { useAuth0 } from '@auth0/auth0-react';
 import { UserManagementService } from '../../services/UserManagementService';
 import { UsuariosSistemaService } from '../../../services/usuarios-sistema.service';
-import { UserWithRoles, Role, UserFilters } from '../../types';
+import { UserWithRoles, Role, UserFilters } from '../../../features/user-management/types';
 import { UserRow } from './UserRow';
 
 export const UserManagementView: React.FC = () => {

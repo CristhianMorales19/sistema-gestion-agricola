@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { auth0ManagementService } from '../services/auth0-management.service';
+import { auth0ManagementService } from '../../../../features/authentication/application/services/auth0-management.service';
 
 const prisma = new PrismaClient();
 

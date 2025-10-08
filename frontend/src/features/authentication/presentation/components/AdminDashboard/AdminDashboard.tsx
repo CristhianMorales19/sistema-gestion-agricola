@@ -10,14 +10,10 @@ import { StatsCards } from '../../../../../app/layout/presentation/components/St
 import { ActivityFeed } from '../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed';
 import { ConditionsPanel } from '../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel';
 import { DashboardLayout, PermissionsPanel } from './components';
-<<<<<<< HEAD:frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
-import { EmployeeManagementView } from '../../../../employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView';
-import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
-=======
 import { EmployeeManagementView } from '../../../../personnel-management/presentation/components/EmployeeManagementView';
 import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 import { AbsenceManagementView } from '../../../../attendance-tracking';
->>>>>>> origin/main:frontend/src/features/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
+import { CrewManagementView } from '../../../../crew-managenet/presentation/components/CrewManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -127,19 +123,21 @@ export const AdminDashboard: React.FC = () => {
           <UserManagementView/>
         );
 
-<<<<<<< HEAD:frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
-=======
       case 'absences':
         return (
           <AbsenceManagementView />
         );
 
->>>>>>> origin/main:frontend/src/features/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx
       case 'farms':
         return (
           <Box sx={{ p: 3, color: '#ffffff' }}>
             Vista no implementada
           </Box>
+        );
+
+      case 'crews':
+        return (
+          <CrewManagementView />
         );
 
       // Agrega más casos para otras vistas...

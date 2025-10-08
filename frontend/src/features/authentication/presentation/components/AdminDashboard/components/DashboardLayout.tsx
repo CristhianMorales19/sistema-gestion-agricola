@@ -37,6 +37,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
     { id: 'employee-management', icon: <People />, text: 'Gestión de Personal', active: currentView === 'employee-management' },
     { id: 'absences', icon: <EventBusy />, text: 'Ausencias', active: currentView === 'absences' },
     { id: 'farms', icon: <Agriculture />, text: 'Granjas', active: currentView === '-farms' },
+    { id: 'crews', icon: <Agriculture />, text: 'Cuadrillas', active: currentView === '-crews' },
     { id: 'users', icon: <People />, text: 'Usuarios', active: currentView === 'users' },
     { id: 'reports', icon: <Assessment />, text: 'Reportes', active: currentView === 'reports' },
     { id: 'settings', icon: <Settings />, text: 'Configuración', active: currentView === 'settings' },

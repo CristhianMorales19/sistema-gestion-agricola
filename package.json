@@ -16,9 +16,6 @@
     "@emotion/styled": "^11.14.1",
     "framer-motion": "^12.23.22",
     "react-icons": "^5.5.0"
-  },
-  "scripts": {
-    "serve-docs": "npx docsify-cli serve docs"
   }
   ,
   "scripts": {

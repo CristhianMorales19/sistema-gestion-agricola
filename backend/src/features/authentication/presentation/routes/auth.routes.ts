@@ -1,11 +1,6 @@
 import { Router } from 'express';
-<<<<<<< HEAD:backend/src/routes/auth.ts
-import { checkJwt } from '../config/auth0-simple.config';
-import { requirePermission } from '../middleware/auth0';
-=======
 import { checkJwt } from '../../../../shared/infrastructure/config/auth0-simple.config';
 import { requirePermission } from '../../infrastructure/middleware/auth0.middleware';
->>>>>>> origin/main:backend/src/features/authentication/presentation/routes/auth.routes.ts
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -204,8 +199,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-<<<<<<< HEAD:backend/src/routes/auth.ts
-=======
     // Validar que el usuario tenga contraseña configurada
     if (!usuario.password_hash) {
       return res.status(401).json({ 
@@ -214,7 +207,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
->>>>>>> origin/main:backend/src/features/authentication/presentation/routes/auth.routes.ts
     const passwordMatches = await bcrypt.compare(password, usuario.password_hash);
     if (!passwordMatches) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
