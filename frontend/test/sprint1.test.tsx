@@ -1,9 +1,9 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import LoginPage from "../../frontend/src/authentication/presentation/components/LoginPage/LoginPage";
-import AdminDashboard from "../../frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard";
-import EmpleadoCampoDashboard from "../../frontend/src/authentication/presentation/components/EmpleadoCampoDashboard/EmpleadoCampoDashboard";
-import AuthService from "../../frontend/src/authentication/application/services/AuthService";
+import LoginPage from "../../frontend/src/features/authentication/presentation/components/LoginPage/LoginPage";
+import AdminDashboard from "../../frontend/src/features/authentication/presentation/components/AdminDashboard/AdminDashboard";
+import EmpleadoCampoDashboard from "../../frontend/src/features/authentication/presentation/components/EmpleadoCampoDashboard/EmpleadoCampoDashboard";
+import AuthService from "../../frontend/src/features/authentication/application/services/AuthService";
 
 // HU-033: Login de usuario
 test("HU-033: debería renderizar el login y permitir iniciar sesión", async () => {
