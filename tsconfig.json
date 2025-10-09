@@ -2,14 +2,15 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "./backend/src/types"]
+    "typeRoots": ["./node_modules/@types", "./backend/src/types"],
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "backend/src/**/*",

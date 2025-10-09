@@ -93,12 +93,23 @@ app.use(helmet());
 const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3001';
 const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
 
+console.log('🔧 CORS Configuration:');
+console.log('  Raw FRONTEND_URLS:', process.env.FRONTEND_URLS);
+console.log('  Allowed Origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('🌐 CORS Request - Origin:', origin);
     // Allow requests with no origin (e.g. mobile apps, curl, or same-origin)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    console.warn(`CORS: origin not allowed -> ${origin}. Allowed: ${allowedOrigins.join(',')}`);
+    if (!origin) {
+      console.log('✅ CORS: No origin - allowing');
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS: Origin allowed');
+      return callback(null, true);
+    }
+    console.warn(`❌ CORS: origin not allowed -> ${origin}. Allowed: ${allowedOrigins.join(',')}`);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
