@@ -60,9 +60,13 @@
     ]
   },
   "devDependencies": {
-    "@types/jest": "^27.5.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^27.5.2",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
-    "eslint": "^8.33.0"
+    "eslint": "^8.33.0",
+    "jest": "^27.5.1",
+    "supertest": "^7.1.4"
   }
 }
