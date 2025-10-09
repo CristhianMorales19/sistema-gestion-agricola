@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PrismaClient } from '@prisma/client';
 import hybridAuthSyncMiddleware from './middleware/hybrid-auth-sync.middleware';
 // Si usas require/module, instala los tipos: npm i --save-dev @types/node

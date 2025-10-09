@@ -18,7 +18,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "paths": {
+      "@features/*": ["features/*"],
+      "@shared/*": ["shared/*"],
+      "@app/*": ["app/*"],
+      "@pages/*": ["pages/*"],
+      "@authentication/*": ["features/authentication/*"],
+      "@personnel/*": ["features/personnel-management/*"],
+      "@attendance/*": ["features/attendance-tracking/*"],
+      "@user-management/*": ["features/user-management/*"],
+      "@payroll/*": ["features/payroll-processing/*"]
+    }
   },
   "include": [
     "src"

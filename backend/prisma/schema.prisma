@@ -461,6 +461,21 @@ model mot_info_laboral {
   cargo                         String         @db.VarChar(100)
   fecha_ingreso_at              DateTime       @db.DateTime(0)
   tipo_contrato                 String         @db.VarChar(50)
+  // Campos añadidos para soportar reportes y comprobantes
+  codigo_nomina                 String?        @db.VarChar(50)
+  salario_bruto                 Decimal?       @db.Decimal(13, 2)
+  rebajas_ccss                  Decimal?       @db.Decimal(13, 2)
+  otras_rebajas                 Decimal?       @db.Decimal(13, 2)
+  salario_por_hora              Decimal?       @db.Decimal(13, 2)
+  horas_ordinarias              Decimal?       @db.Decimal(7, 2)
+  horas_extras                  Decimal?       @db.Decimal(7, 2)
+  horas_otras                   Decimal?       @db.Decimal(7, 2)
+  vacaciones_monto              Decimal?       @db.Decimal(13, 2)
+  incapacidad_monto             Decimal?       @db.Decimal(13, 2)
+  lactancia_monto               Decimal?       @db.Decimal(13, 2)
+  salario_promedio              Decimal?       @db.Decimal(13, 2)
+  meses_trabajados              Int?
+  area                          String?        @db.VarChar(120)
   salario_base                  Decimal        @db.Decimal(13, 2)
   fecha_ultima_actualizacion_at DateTime       @db.DateTime(0)
   usuario_ultima_actualizacion  Int
@@ -569,12 +584,28 @@ model mot_tarea_programada {
 model mot_usuario {
   usuario_id                 Int             @id @default(autoincrement())
   auth0_user_id              String?         @unique
+  auth0_id                   String?         @unique @db.VarChar(255)
   trabajador_id              Int?
   username                   String          @unique(map: "username") @db.VarChar(100)
-  password_hash              String          @db.VarChar(255)
+  email                      String?         @db.VarChar(255)
+  password_hash              String?         @db.VarChar(255)
   rol_id                     Int
   estado                     String          @default("activo") @db.VarChar(50)
+  auth_provider              String?         @default("local") @db.VarChar(50)
+  email_verified             Boolean?        @default(false)
+  last_login_at              DateTime?       @db.DateTime(0)
   fecha_ultimo_cambio_rol_at DateTime?       @db.DateTime(0)
+  
+  // 🔐 Sistema de Fallback de Autenticación Local
+  auth0_enabled              Boolean?        @default(true)
+  local_auth_enabled         Boolean?        @default(true)
+  last_auth_method           String?         @db.VarChar(20)
+  failed_login_attempts      Int?            @default(0)
+  account_locked_until       DateTime?       @db.DateTime(0)
+  password_changed_at        DateTime?       @db.DateTime(0)
+  password_expires_at        DateTime?       @db.DateTime(0)
+  require_password_change    Boolean?        @default(false)
+  
   created_at                 DateTime        @db.DateTime(0)
   updated_at                 DateTime?       @db.DateTime(0)
   created_by                 Int
@@ -585,6 +616,8 @@ model mot_usuario {
 
   @@index([rol_id], map: "FK_MOT_USUARIO_RELATION_MOM_ROL")
   @@index([trabajador_id], map: "FK_MOT_USUARIO_RELATION_MOM_TRABAJADOR")
+  @@index([email], map: "idx_mot_usuario_email")
+  @@index([last_auth_method], map: "idx_mot_usuario_auth_method")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

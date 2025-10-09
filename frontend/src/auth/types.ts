@@ -1,5 +1,5 @@
 // Tipos para el sistema RBAC
-import { Employee } from "../employee-management";
+import { Employee } from "../features/personnel-management";
 
 export interface UserPermissions {
   gestionar_usuarios: boolean;
