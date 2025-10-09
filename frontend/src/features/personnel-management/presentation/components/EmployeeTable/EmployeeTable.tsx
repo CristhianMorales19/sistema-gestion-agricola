@@ -27,11 +27,11 @@ interface EmployeeTableProps {
 }
 
 // Funciones auxiliares fuera del componente
-const getStatusColor = (status: string) => {
+const getStatusColor = (status: boolean) => {
   switch (status) {
-    case 'activo': return 'success';
-    case 'inactivo': return 'error';
-    case 'on_leave': return 'warning';
+    case true: return 'success';
+    case false: return 'error';
+    case false: return 'warning';
     default: return 'default';
   }
 };
@@ -82,8 +82,8 @@ const EmployeeRow = React.memo<{
       <TableCell sx={{ color: '#e2e8f0' }}>{formatDate(employee.hireDate)}</TableCell>
       <TableCell>
         <Chip 
-          label={employee.status === 'activo' ? 'Activo' : 
-                  employee.status === 'inactivo' ? 'Inactivo' : 'Permiso'} 
+          label={employee.status ? 'Activo' : 'Inactivo'} 
+
           color={getStatusColor(employee.status)}
           size="small"
         />

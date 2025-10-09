@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 import { auth0Config, appConfig } from '../config';
-import { apiService } from '../../services/api.service'; // Importar el apiService
+import { apiService } from '../../services/api.service';
 
 // Tema personalizado de Material-UI
 const theme = createTheme({

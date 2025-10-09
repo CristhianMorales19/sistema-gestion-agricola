@@ -37,6 +37,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
     { id: 'employee-management', icon: <People />, text: 'Gestión de Personal', active: currentView === 'employee-management' },
     { id: 'absences', icon: <EventBusy />, text: 'Ausencias', active: currentView === 'absences' },
     { id: 'farms', icon: <Agriculture />, text: 'Granjas', active: currentView === '-farms' },
+    { id: 'crews', icon: <Agriculture />, text: 'Cuadrillas', active: currentView === '-crews' },
     { id: 'users', icon: <People />, text: 'Usuarios', active: currentView === 'users' },
     { id: 'reports', icon: <Assessment />, text: 'Reportes', active: currentView === 'reports' },
     { id: 'settings', icon: <Settings />, text: 'Configuración', active: currentView === 'settings' },
@@ -222,11 +223,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
           </Box>
         </Box>
       </Box>
-
-      {/* Top Header */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
+      
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column'}}>
+        {/* #f8fbffff */}
+        {/* <Box
+          sx={{ 
             backgroundColor: '#1e293b',
             borderBottom: '1px solid #334155',
             p: 4,
@@ -300,7 +301,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
               Cerrar Sesión
             </Button>
           </Box>
-        </Box>
+        </Box> */}
 
         {/* Main Content */}
         {children}

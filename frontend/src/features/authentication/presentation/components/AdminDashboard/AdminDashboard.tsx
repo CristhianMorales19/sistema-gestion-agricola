@@ -13,6 +13,7 @@ import { DashboardLayout, PermissionsPanel } from './components';
 import { EmployeeManagementView } from '../../../../personnel-management/presentation/components/EmployeeManagementView';
 import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 import { AbsenceManagementView } from '../../../../attendance-tracking';
+import { CrewManagementView } from '../../../../crew-managenet/presentation/components/CrewManagementView';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -134,6 +135,11 @@ export const AdminDashboard: React.FC = () => {
           </Box>
         );
 
+      case 'crews':
+        return (
+          <CrewManagementView />
+        );
+
       // Agrega más casos para otras vistas...
 
       default:
@@ -171,7 +177,7 @@ export const AdminDashboard: React.FC = () => {
       onNavigationChange={handleNavigationChange}
       currentView={currentView}
     >
-      <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
+      <Box sx={{ flex: 1, p: 5, backgroundColor: '#0f172a' }}>
         {renderContent()}
       </Box>
     </DashboardLayout>

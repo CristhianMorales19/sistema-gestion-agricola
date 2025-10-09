@@ -16,7 +16,7 @@ interface ApiTrabajadorResponse {
   fecha_registro_at: string;
   hireDate?: string;
   is_activo?: boolean;
-  status?: string;
+  status: boolean;
   email?: string;
   telefono?: string;
   phone?: string;
@@ -46,14 +46,14 @@ interface ApiCreateTrabajadorResponse {
 }
 
 // Helper function to normalize status
-const normalizeStatus = (status?: string, isActivo?: boolean): 'activo' | 'inactivo' => {
-  if (status) {
-    const normalized = status.toLowerCase();
-    if (normalized === 'active' || normalized === 'activo') return 'activo';
-    if (normalized === 'inactive' || normalized === 'inactivo') return 'inactivo';
-  }
-  return isActivo ? 'activo' : 'inactivo';
-};
+// const normalizeStatus = (status?: string, isActivo?: boolean): 'activo' | 'inactivo' => {
+//   if (status) {
+//     const normalized = status.toLowerCase();
+//     if (normalized === 'active' || normalized === 'activo') return 'activo';
+//     if (normalized === 'inactive' || normalized === 'inactivo') return 'inactivo';
+//   }
+//   return isActivo ? 'activo' : 'inactivo';
+// };
 
 export class ApiEmployeeRepository implements EmployeeRepository {
 
@@ -72,7 +72,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       cargo: item.cargo || 'Sin definir',
       department: item.department || 'Sin definir',
       hireDate: new Date(item.hireDate || item.fecha_registro_at),
-      status: normalizeStatus(item.status, item.is_activo),
+      status: item.status,
       email: item.email,
       phone: item.telefono,
       createdAt: new Date(item.createdAt || item.created_at),
@@ -91,7 +91,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       cargo: data.cargo,
       department: data.department,
       hireDate: new Date(data.hireDate || data.fecha_registro_at),
-      status: normalizeStatus(data.status, data.is_activo),
+      status: data.status,
       email: data.email,
       phone: data.phone || data.telefono,
       createdAt: new Date(data.createdAt || data.created_at),
@@ -128,7 +128,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
         identification: employeeData.identification || employeeData.documento_identidad,
         position: employeeData.cargo || 'Sin definir',
         hireDate: new Date(employeeData.fecha_registro_at || employeeData.hireDate || new Date()),
-        status: normalizeStatus(employeeData.status, employeeData.is_activo),
+        status: employeeData.status,
         email: employeeData.email,
         phone: employeeData.telefono || employeeData.phone,
         cargo: employeeData.cargo,
@@ -164,7 +164,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       cargo: responseData.cargo,
       department: responseData.department,
       hireDate: new Date(responseData.hireDate || responseData.fecha_registro_at),
-      status: normalizeStatus(responseData.status, responseData.is_activo),
+      status: responseData.status,
       email: responseData.email,
       phone: responseData.phone || responseData.telefono,
       createdAt: new Date(responseData.createdAt || responseData.created_at),
@@ -187,7 +187,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
       identification: item.identification || item.documento_identidad,
       position: item.cargo || 'Sin definir',
       hireDate: new Date(item.hireDate || item.fecha_registro_at),
-      status: normalizeStatus(item.status, item.is_activo),
+      status: item.status,
       email: item.email,
       phone: item.phone || item.telefono,
       createdAt: new Date(item.createdAt || item.created_at),

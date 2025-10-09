@@ -1,6 +1,6 @@
 // src/employee-management/domain/use-cases/EmployeeUseCases.ts
 import { EmployeeRepository } from '../repositories/EmployeeRepository';
-import { Employee, CreateEmployeeData, UpdateEmployeeData, LaborInfoData, CreateLaborInfoResponse } from '../entities/Employee';
+import { Employee, CreateEmployeeData, LaborInfoData, CreateLaborInfoResponse, UpdateEmployeeData } from '../entities/Employee';
 
 export class EmployeeUseCases {
   constructor(private employeeRepository: EmployeeRepository) {}

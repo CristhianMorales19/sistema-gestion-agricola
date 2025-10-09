@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import { Box, Grid } from '@mui/material';
 import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
 import { StatsCards } from '../../../../../app/layout/presentation/components/StatsCards/StatsCards';
@@ -8,7 +8,7 @@ import { ConditionsPanel } from '../../../../../app/layout/presentation/componen
 interface GerenteRRHHDashboardProps {
   user: {
     permisos?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
   };
 
 
@@ -23,9 +23,9 @@ interface GerenteRRHHDashboardProps {
 export const GerenteRRHHDashboard: React.FC<GerenteRRHHDashboardProps> = ({ user, dashboardData }) => {
   const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
-  const handleNavigationChange = (view: string) => {
+  const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
-  };
+  }, []);
 
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);
@@ -40,7 +40,7 @@ export const GerenteRRHHDashboard: React.FC<GerenteRRHHDashboardProps> = ({ user
         <Grid container spacing={3}>
           {hasPermission('dashboard:view:advanced') && (
             <Grid item xs={12}>
-              <StatsCards stats={dashboardData.stats} />
+              <StatsCards stats={dashboardData.stats || []} />
             </Grid>
           )}
           <Grid item xs={12}>
@@ -49,12 +49,12 @@ export const GerenteRRHHDashboard: React.FC<GerenteRRHHDashboardProps> = ({ user
           <Grid container spacing={3} item xs={12}>
             {hasPermission('reportes:read:advanced') && (
               <Grid item xs={12} md={6}>
-                <ActivityFeed activities={dashboardData.activities} />
+                <ActivityFeed activities={dashboardData.activities || []} />
               </Grid>
             )}
             {hasPermission('dashboard:view:advanced') && (
               <Grid item xs={12} md={6}>
-                <ConditionsPanel conditions={dashboardData.conditions} />
+                <ConditionsPanel conditions={dashboardData.conditions || []} />
               </Grid>
             )}
           </Grid>
