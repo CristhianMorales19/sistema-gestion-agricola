@@ -36,6 +36,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, user
     { id: 'dashboard', icon: <DashboardIcon />, text: 'Dashboard', active: currentView === 'dashboard' },
     { id: 'employee-management', icon: <People />, text: 'Gestión de Personal', active: currentView === 'employee-management' },
     { id: 'absences', icon: <EventBusy />, text: 'Ausencias', active: currentView === 'absences' },
+    // Item específico de asistencia con intención de navegación externa o futura ruta
+    { id: 'asistencia', icon: <EventBusy />, text: 'Asistencia', active: currentView === 'asistencia' },
     { id: 'farms', icon: <Agriculture />, text: 'Granjas', active: currentView === '-farms' },
     { id: 'users', icon: <People />, text: 'Usuarios', active: currentView === 'users' },
     { id: 'reports', icon: <Assessment />, text: 'Reportes', active: currentView === 'reports' },

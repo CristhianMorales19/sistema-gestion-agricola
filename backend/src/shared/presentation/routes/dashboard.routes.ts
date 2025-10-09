@@ -103,7 +103,8 @@ router.get('/general',
                 console.log('🔐 Consultando permisos...');
                 const totalPermisos = await prisma.mom_permiso.count({
                     where: {
-                        is_activo: 1
+                        // is_activo es boolean en el esquema Prisma, usar true en lugar de 1
+                        is_activo: true
                     }
                 }).catch((err: Error) => {
                     console.log('⚠️ Error consultando permisos:', err.message);
