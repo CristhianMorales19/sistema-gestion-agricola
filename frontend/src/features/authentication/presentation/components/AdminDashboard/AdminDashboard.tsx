@@ -14,6 +14,7 @@ import { EmployeeManagementView } from '../../../../personnel-management/present
 import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 import { AbsenceManagementView } from '../../../../attendance-tracking';
 import { CrewManagementView } from '../../../../crew-managenet/presentation/components/CrewManagementView';
+import AsistenciaPage from '../../../../asistencia/AsistenciaPage';
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -54,6 +55,9 @@ export const AdminDashboard: React.FC = () => {
     setCurrentView(view);
   }, []);
 
+  // Sincroniza SOLO la vista asistencia con la ruta /asistencia
+  // useSyncAsistenciaView(currentView, setCurrentView); // Comentado para evitar navegación automática
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#0f172a', color: '#fff' }}>
@@ -65,7 +69,7 @@ export const AdminDashboard: React.FC = () => {
   if (error) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#0f172a', color: '#ef4444' }}>
-        <Box sx={{ mb: 2, fontSize: '1.2rem' }}>⚠️ Error de Conexión</Box>
+        <Box sx={{ mb: 2, fontSize: '1.2rem' }}>⚠ Error de Conexión</Box>
         <Box sx={{ textAlign: 'center', color: '#94a3b8' }}>{error}</Box>
         <Box sx={{ mt: 2, color: '#64748b', fontSize: '0.9rem' }}>
           Verifica que el servidor backend esté ejecutándose en http://localhost:3000
@@ -128,6 +132,11 @@ export const AdminDashboard: React.FC = () => {
           <AbsenceManagementView />
         );
 
+      case 'asistencia':
+        return (
+          <AsistenciaPage />
+        );
+
       case 'farms':
         return (
           <Box sx={{ p: 3, color: '#ffffff' }}>
@@ -162,7 +171,7 @@ export const AdminDashboard: React.FC = () => {
   if (error && currentView === 'dashboard') {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#0f172a', color: '#ef4444' }}>
-        <Box sx={{ mb: 2, fontSize: '1.2rem' }}>⚠️ Error de Conexión</Box>
+        <Box sx={{ mb: 2, fontSize: '1.2rem' }}>⚠ Error de Conexión</Box>
         <Box sx={{ textAlign: 'center', color: '#94a3b8' }}>{error}</Box>
         <Box sx={{ mt: 2, color: '#64748b', fontSize: '0.9rem' }}>
           Verifica que el servidor backend esté ejecutándose en http://localhost:3000
@@ -181,5 +190,5 @@ export const AdminDashboard: React.FC = () => {
         {renderContent()}
       </Box>
     </DashboardLayout>
-  );
+  );
 };

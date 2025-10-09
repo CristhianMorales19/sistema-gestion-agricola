@@ -1,10 +1,5 @@
-// Importación compatible con webpack/react
-import * as axiosModule from 'axios';
-import { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { apiConfig } from '../config/auth0.config';
-
-// Obtener axios de manera compatible con diferentes formatos de módulo
-const axios = (axiosModule as any).default || axiosModule;
 
 // Tipos para las respuestas de la API
 export interface ApiResponse<T = unknown> {
@@ -80,7 +75,7 @@ class ApiService {
 
   private handleError(error: AxiosError) {
     const response = error.response;
-    
+
     if (!response) {
       console.error('Error de conexión. Verifique su conexión a internet.');
       return;

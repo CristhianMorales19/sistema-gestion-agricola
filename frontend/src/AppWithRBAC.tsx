@@ -1,26 +1,17 @@
+// src/AppWithRBAC.tsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProviders } from './app/providers/AppProviders';
 import { LoginPage, ProtectedRoute, AdminDashboard, CallbackPage } from './features/authentication';
 
-// Componente de Dashboard que usa el AdminDashboard profesional
-const Dashboard: React.FC = () => {
-  // Usar directamente AdminDashboard con la nueva arquitectura Clean
-  return <AdminDashboard />;
-};
+const Dashboard: React.FC = () => <AdminDashboard />;
 
-// Componente principal de la aplicación
 const AppContent: React.FC = () => {
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
-      <Route
-        path="/callback"
-        element={<CallbackPage />}
-      />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/callback" element={<CallbackPage />} />
+
       <Route
         path="/dashboard"
         element={
@@ -29,40 +20,19 @@ const AppContent: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/"
-        element={<Navigate to="/dashboard" replace />}
-      />
-      {/* Aquí otros miembros del equipo pueden agregar sus rutas */}
-      {/*
-      <Route
-        path="/usuarios"
-        element={
-          <ProtectedRoute requiredPermission="gestionar_usuarios">
-            <UserManagementPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/personal"
-        element={
-          <ProtectedRoute requiredPermission="gestionar_personal">
-            <PersonnelManagementPage />
-          </ProtectedRoute>
-        }
-      />
-      */}
+
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Fallback explícito para detectar no-match */}
+      <Route path="*" element={<div style={{ padding: 32, color: '#fff' }}>404 - Ruta no encontrada</div>} />
     </Routes>
   );
 };
 
-// Aplicación principal con todos los providers
-const App: React.FC = () => {
-  return (
-    <AppProviders>
-      <AppContent />
-    </AppProviders>
-  );
-};
+const App: React.FC = () => (
+  <AppProviders>
+    <AppContent />
+  </AppProviders>
+);
 
 export default App;

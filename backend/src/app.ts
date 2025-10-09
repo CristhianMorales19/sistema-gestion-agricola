@@ -34,6 +34,10 @@ import ausenciasRoutes from '../src/routes/ausencias.routes';
 // 👥 FEATURE: Crew Management
 import crewRoutes from './features/crew-management/presentation/routes/crew.routes';
 
+// 🚨 NUEVO: Asistencia (Screaming Architecture)
+import { asistenciaRouter } from './caracteristicas/asistencia/infrastructure/asistencia.routes';
+
+
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
   try {
@@ -163,6 +167,12 @@ app.get('/api/test/public', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// 🚨 NUEVO endpoint de asistencia (Screaming)
+app.use('/api/asistencia', asistenciaRouter);
+
+
+
 
 // Manejo de rutas no encontradas
 app.use('*', (req, res) => {

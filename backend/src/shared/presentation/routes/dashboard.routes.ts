@@ -103,6 +103,10 @@ router.get('/general',
                 console.log('🔐 Consultando permisos...');
                 const totalPermisos = await prisma.mom_permiso.count({
                     where: {
+<<<<<<< HEAD
+=======
+                        // is_activo es boolean en el esquema Prisma, usar true en lugar de 1
+>>>>>>> origin/Rafael
                         is_activo: true
                     }
                 }).catch((err: Error) => {
