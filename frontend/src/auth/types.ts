@@ -1,5 +1,9 @@
 // Tipos para el sistema RBAC
+<<<<<<< HEAD
 import { Employee } from "../employee-management";
+=======
+import { Employee } from "../features/personnel-management";
+>>>>>>> 5a7c7fa (Primer commit)
 
 export interface UserPermissions {
   gestionar_usuarios: boolean;

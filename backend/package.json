@@ -2,12 +2,22 @@
   "name": "sistema-gestion-agricola-backend",
   "version": "1.0.0",
   "description": "Backend API para sistema de gestión agrícola con Node.js, Express y TypeScript",
+<<<<<<< HEAD
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
     "build": "tsc",
     "test": "jest",
+=======
+  "main": "dist/src/app.js",
+  "scripts": {
+    "start": "node dist/src/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:user-roles": "tsx scripts/test-user-roles.ts",
+>>>>>>> 5a7c7fa (Primer commit)
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "db:generate": "prisma generate",
@@ -28,8 +38,15 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+<<<<<<< HEAD
     "auth0": "^4.29.0",
     "axios": "^1.11.0",
+=======
+    "@types/bcrypt": "^6.0.0",
+    "auth0": "^4.29.0",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+>>>>>>> 5a7c7fa (Primer commit)
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dayjs": "^1.11.0",
@@ -41,7 +58,11 @@
     "express-rate-limit": "^6.7.0",
     "helmet": "^6.0.0",
     "joi": "^17.7.0",
+<<<<<<< HEAD
     "jsonwebtoken": "^9.0.0",
+=======
+    "jsonwebtoken": "^9.0.2",
+>>>>>>> 5a7c7fa (Primer commit)
     "jwks-rsa": "^3.2.0",
     "lodash": "^4.17.0",
     "multer": "^1.4.5-lts.1",
@@ -60,7 +81,11 @@
     "@types/bcryptjs": "^2.4.0",
     "@types/cors": "^2.8.0",
     "@types/express": "^4.17.23",
+<<<<<<< HEAD
     "@types/jsonwebtoken": "^9.0.0",
+=======
+    "@types/jsonwebtoken": "^9.0.10",
+>>>>>>> 5a7c7fa (Primer commit)
     "@types/lodash": "^4.14.0",
     "@types/multer": "^1.4.0",
     "@types/node": "^18.14.0",
@@ -76,6 +101,10 @@
     "prisma": "^5.22.0",
     "ts-jest": "^29.0.0",
     "ts-node": "^10.9.2",
+<<<<<<< HEAD
+=======
+    "tsconfig-paths": "^4.2.0",
+>>>>>>> 5a7c7fa (Primer commit)
     "tsx": "^3.12.0",
     "typescript": "^4.9.5"
   },

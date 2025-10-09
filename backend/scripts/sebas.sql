@@ -59,7 +59,11 @@ WHERE codigo IN ('trabajadores:read:all', 'asistencia:read:all', 'asistencia:app
 INSERT IGNORE INTO rel_mom_rol__mom_permiso (rol_id, permiso_id, created_at, created_by)
 SELECT @gerente_rrhh_id, permiso_id, NOW(), 1 FROM mom_permiso 
 WHERE codigo IN ('trabajadores:create', 'trabajadores:read:all', 'trabajadores:update:all', 'trabajadores:delete', 
+<<<<<<< HEAD
                  'asistencia:read:all', 'nomina:process', 'nomina:read:all', 'nomina:approve', 'nomina:reports', 'reportes:read:advanced');
+=======
+                    'asistencia:read:all', 'nomina:process', 'nomina:read:all', 'nomina:approve', 'nomina:reports', 'reportes:read:advanced');
+>>>>>>> 5a7c7fa (Primer commit)
 
 -- SUPERVISOR RRHH: Permisos limitados
 INSERT IGNORE INTO rel_mom_rol__mom_permiso (rol_id, permiso_id, created_at, created_by)
@@ -78,11 +82,20 @@ WHERE codigo IN ('trabajadores:read:all', 'asistencia:read:all');
 -- );
 
 INSERT IGNORE INTO mot_usuario (
+<<<<<<< HEAD
     trabajador_id, auth0_user_id, username, password_hash, rol_id, estado,
+=======
+    trabajador_id, auth0_user_id, auth0_id, username, email, password_hash, rol_id, estado,
+>>>>>>> 5a7c7fa (Primer commit)
     created_at, created_by
 ) VALUES (
     NULL, 
     'auth0|68c6f8947a6e3d8d71f0360f',
+<<<<<<< HEAD
+=======
+    'auth0|68c6f8947a6e3d8d71f0360f',
+    'admin@agromano.com',
+>>>>>>> 5a7c7fa (Primer commit)
     'admin@agromano.com',
     'auth0_managed', 
     @admin_id,
@@ -102,13 +115,24 @@ INSERT IGNORE INTO mot_usuario (
 -- );
 
 INSERT IGNORE INTO mot_usuario (
+<<<<<<< HEAD
     trabajador_id, auth0_user_id, username, password_hash, rol_id, estado,
+=======
+    trabajador_id, auth0_user_id, auth0_id, username, email, password_hash, rol_id, estado,
+>>>>>>> 5a7c7fa (Primer commit)
     created_at, created_by
 ) VALUES (
     NULL,
     'auth0|68cb20febf717e002030f72b',
+<<<<<<< HEAD
     'supervisor.campo@agromano.com',
     'auth0_managed', 
+=======
+    'auth0|68cb20febf717e002030f72b',
+    'supervisor.campo@agromano.com',
+    'supervisor.campo@agromano.com',
+    'auth0_managed',
+>>>>>>> 5a7c7fa (Primer commit)
     @supervisor_campo_id,
     'activo',
     NOW(),
@@ -126,13 +150,24 @@ INSERT IGNORE INTO mot_usuario (
 -- );
 
 INSERT IGNORE INTO mot_usuario (
+<<<<<<< HEAD
     trabajador_id, auth0_user_id, username, password_hash, rol_id, estado,
+=======
+    trabajador_id, auth0_user_id, auth0_id, username, email, password_hash, rol_id, estado,
+>>>>>>> 5a7c7fa (Primer commit)
     created_at, created_by
 ) VALUES (
     NULL,
     'auth0|68c6f9487a6e3d8d71f0364e',
+<<<<<<< HEAD
     'gerente.rrhh@agromano.com',
     'auth0_managed', 
+=======
+    'auth0|68c6f9487a6e3d8d71f0364e',
+    'gerente.rrhh@agromano.com',
+    'gerente.rrhh@agromano.com',
+    'auth0_managed',
+>>>>>>> 5a7c7fa (Primer commit)
     @gerente_rrhh_id,
     'activo',
     NOW(),
@@ -150,11 +185,20 @@ INSERT IGNORE INTO mot_usuario (
 -- );
 
 INSERT IGNORE INTO mot_usuario (
+<<<<<<< HEAD
     trabajador_id, auth0_user_id, username, password_hash, rol_id, estado,
+=======
+    trabajador_id, auth0_user_id, auth0_id, username, email, password_hash, rol_id, estado,
+>>>>>>> 5a7c7fa (Primer commit)
     created_at, created_by
 ) VALUES (
     NULL,
     'auth0|68c6f91e7a6e3d8d71f03641',
+<<<<<<< HEAD
+=======
+    'auth0|68c6f91e7a6e3d8d71f03641',
+    'supervisor.rrhh@agromano.com',
+>>>>>>> 5a7c7fa (Primer commit)
     'supervisor.rrhh@agromano.com',
     'auth0_managed', 
     @supervisor_rrhh_id,

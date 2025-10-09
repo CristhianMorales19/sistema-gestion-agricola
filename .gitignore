@@ -89,4 +89,10 @@ backend/uploads/
 
 # TypeScript build outputs
 lib/
+<<<<<<< HEAD
 types/
+=======
+types/
+!backend/src/types/
+!frontend/src/types/
+>>>>>>> 5a7c7fa (Primer commit)

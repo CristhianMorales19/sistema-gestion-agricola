@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
@@ -14,4 +15,21 @@
   },
   "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["node_modules", "dist"]
+=======
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./src/types"
+        ],
+        "outDir": "./dist"
+    },
+    "include": ["src/**/*", "prisma/**/*"],
+    "exclude": ["node_modules", "dist"]
+>>>>>>> 5a7c7fa (Primer commit)
 }

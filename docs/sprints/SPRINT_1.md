@@ -23,6 +23,7 @@
 - **Riesgo Técnico** (1-5): Complejidad de implementación
 - **Impacto de Negocio** (1-5): Criticidad para el funcionamiento del sistema
 - **Esfuerzo** (1-5): Story Points y tiempo estimado
+<<<<<<< HEAD
 - **Calor Total**: Riesgo × Impacto × Esfuerzo
 
 | HU | User Story | Riesgo Técnico | Impacto Negocio | Esfuerzo | 🔥 Calor | Prioridad |
@@ -67,6 +68,8 @@
 
 ## 📋 User Stories & Tasks
 
+=======
+>>>>>>> 5a7c7fa (Primer commit)
 ### 🔐 Epic: Gestión de Identidad y Acceso
 
 #### HU-033: Login de usuario ⭐ **CRÍTICO** (5 SP) - **[EN AZURE]**
@@ -78,6 +81,7 @@
 Como usuario del sistema quiero poder iniciar sesión con mi email y contraseña para acceder a las funcionalidades del sistema
 
 **Acceptance Criteria:**
+<<<<<<< HEAD
 - [ ] Formulario de login con email y contraseña
 - [ ] Validación de credenciales en backend  
 - [ ] Generación y persistencia de token JWT
@@ -86,21 +90,43 @@ Como usuario del sistema quiero poder iniciar sesión con mi email y contraseña
 
 **Development Tasks:**
 - [ ] **Task 1.1**: Crear modelo de Usuario en base de datos (4h)
+=======
+- [x] Formulario de login con email y contraseña
+- [x] Validación de credenciales en backend  
+- [x] Generación y persistencia de token JWT
+- [x] Redirección a dashboard después de login exitoso
+- [x] Manejo de errores de autenticación con mensajes claros
+
+**Development Tasks:**
+- [x] **Task 1.1**: Crear modelo de Usuario en base de datos (4h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Definir tabla usuarios con campos email, password hash, rol, timestamps
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
+<<<<<<< HEAD
 - [ ] **Task 1.2**: Implementar endpoint POST /auth/login (6h)
+=======
+- [x] **Task 1.2**: Implementar endpoint POST /auth/login (6h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Controlador para autenticar usuario y generar JWT
   - *Assigned To*: [Developer 1]  
   - *Area*: Backend\API
 
+<<<<<<< HEAD
 - [ ] **Task 1.3**: Crear componente LoginForm en React (4h)
+=======
+- [x] **Task 1.3**: Crear componente LoginForm en React (4h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Formulario con validaciones frontend
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Autenticacion
 
+<<<<<<< HEAD
 - [ ] **Task 1.4**: Implementar hook useAuth para gestión de estado (3h)
+=======
+- [x] **Task 1.4**: Implementar hook useAuth para gestión de estado (3h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Context y hook para manejar autenticación global
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Autenticacion
@@ -121,10 +147,17 @@ Como usuario del sistema quiero poder iniciar sesión con mi email y contraseña
 Como usuario autenticado quiero poder cerrar mi sesión para proteger mi información al salir del sistema
 
 **Acceptance Criteria:**
+<<<<<<< HEAD
 - [ ] Botón de logout visible en header
 - [ ] Invalidación del token JWT en backend
 - [ ] Limpieza del estado local de autenticación
 - [ ] Redirección automática a página de login
+=======
+- [x] Botón de logout visible en header
+- [ ] Invalidación del token JWT en backend
+- [x] Limpieza del estado local de autenticación
+- [x] Redirección automática a página de login
+>>>>>>> 5a7c7fa (Primer commit)
 
 **Development Tasks:**
 - [ ] **Task 2.1**: Crear endpoint POST /auth/logout (2h)
@@ -158,16 +191,28 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
 - [ ] Formulario completo con datos personales y laborales
 - [ ] Validación de cédula y email únicos
 - [ ] Selección de cargo y departamento desde catálogos
+<<<<<<< HEAD
 - [ ] Guardado exitoso en base de datos
 - [ ] Confirmación visual de registro exitoso
 
 **Development Tasks:**
 - [ ] **Task 3.1**: Diseñar modelo de Trabajador en BD (3h)
+=======
+- [x] Guardado exitoso en base de datos
+- [ ] Confirmación visual de registro exitoso
+
+**Development Tasks:**
+- [x] **Task 3.1**: Diseñar modelo de Trabajador en BD (3h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Tabla trabajadores con todos los campos requeridos
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
+<<<<<<< HEAD
 - [ ] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
+=======
+- [x] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: API para crear trabajador con validaciones
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
@@ -183,6 +228,43 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
   - *Area*: Backend\Validaciones
 
 ---
+<<<<<<< HEAD
+=======
+---
+### 👥 Epic: Administración de Personal
+
+#### HU-001: Crear registro de trabajador ⭐ **CRÍTICO** (5 SP) - **[EN AZURE]**
+**Parent Feature**: CRUD de Trabajadores  
+**Priority**: 1  
+
+**User Story:**  
+Como administrador quiero registrar un nuevo trabajador para gestionar el personal de la empresa agrícola
+
+**Acceptance Criteria:**
+- [ ] Formulario completo con datos personales y laborales
+- [ ] Validación de cédula y email únicos
+- [ ] Selección de cargo y departamento desde catálogos
+- [ ] Guardado exitoso en base de datos
+- [ ] Formulario completo con datos personales y laborales
+- [ ] Validación de cédula y email únicos
+- [ ] Selección de cargo y departamento desde catálogos
+- [x] Guardado exitoso en base de datos
+- [ ] Confirmación visual de registro exitoso
+  - *Assigned To*: [Developer 1]
+
+- [ ] **Task 3.2**: Crear endpoint POST /trabajadores (5h)
+  - *Description*: API para crear trabajador con validaciones
+  - *Area*: Backend\API
+
+- [ ] **Task 3.3**: Desarrollar FormularioTrabajador component (6h)
+  - *Assigned To*: [Developer 2]
+  - *Area*: Frontend\Personal
+
+  - *Description*: Validar cédula única, formato email, campos requeridos
+  - *Assigned To*: [Developer 1]
+  - *Area*: Backend\Validaciones
+
+>>>>>>> 5a7c7fa (Primer commit)
 
 #### HU-002: Asignar información laboral al trabajador (3 SP) - **[EN AZURE]**
 **Parent Feature**: CRUD de Trabajadores  
@@ -193,6 +275,7 @@ Como administrador quiero registrar un nuevo trabajador para gestionar el person
 Como administrador quiero asignar información laboral específica al trabajador para mantener datos completos y actualizados
 
 **Acceptance Criteria:**
+<<<<<<< HEAD
 - [ ] Formulario específico para información laboral
 - [ ] Campos: fecha ingreso, salario base, tipo contrato, especialidades
 - [ ] Validación de fechas y rangos salariales
@@ -208,15 +291,29 @@ Como administrador quiero asignar información laboral específica al trabajador
   - *Description*: API para actualizar información laboral específica
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
+=======
+
+**Development Tasks:**
+  - *Description*: Agregar campos laborales a tabla trabajadores
+  - *Assigned To*: [Developer 1]
+  - *Area*: Backend\Base-Datos
+- [ ] **Task 4.2**: Crear endpoint PATCH /trabajadores/:id/info-laboral (3h)
+  - *Description*: API para actualizar información laboral específica
+  - *Assigned To*: [Developer 1]
+>>>>>>> 5a7c7fa (Primer commit)
 
 - [ ] **Task 4.3**: Desarrollar FormularioInfoLaboral component (4h)
   - *Description*: Formulario específico para datos laborales
   - *Assigned To*: [Developer 2]
+<<<<<<< HEAD
   - *Area*: Frontend\Personal
+=======
+>>>>>>> 5a7c7fa (Primer commit)
 
 ---
 
 #### HU-000: Consulta de empleados (3 SP) - **[EN AZURE]**
+<<<<<<< HEAD
 **Parent Feature**: CRUD de Trabajadores  
 **Assigned To**: [Developer 2]  
 **Priority**: 2  
@@ -230,11 +327,23 @@ Como usuario quiero consultar la lista de empleados para ver información del pe
 - [ ] Búsqueda por nombre, cédula o email
 - [ ] Vista detallada al hacer click en empleado
 
+=======
+**Assigned To**: [Developer 2]  
+**Priority**: 2  
+
+Como usuario quiero consultar la lista de empleados para ver información del personal y realizar búsquedas específicas
+
+**Acceptance Criteria:**
+- [ ] Filtros por departamento, cargo y estado
+- [ ] Búsqueda por nombre, cédula o email
+- [ ] Vista detallada al hacer click en empleado
+>>>>>>> 5a7c7fa (Primer commit)
 **Development Tasks:**
 - [ ] **Task 5.1**: Crear endpoint GET /trabajadores con filtros (4h)
   - *Description*: API con paginación, filtros y búsqueda
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
+<<<<<<< HEAD
 
 - [ ] **Task 5.2**: Desarrollar componente ListaTrabajadores (5h)
   - *Description*: Lista con paginación, filtros y búsqueda
@@ -244,11 +353,22 @@ Como usuario quiero consultar la lista de empleados para ver información del pe
 - [ ] **Task 5.3**: Crear componente DetalleTrabajador (3h)
   - *Description*: Modal o página con información completa
   - *Assigned To*: [Developer 2]
+=======
+- [ ] **Task 5.2**: Desarrollar componente ListaTrabajadores (5h)
+  - *Description*: Lista con paginación, filtros y búsqueda
+  - *Assigned To*: [Developer 2]
+
+- [ ] **Task 5.3**: Crear componente DetalleTrabajador (3h)
+  - *Description*: Modal o página con información completa
+>>>>>>> 5a7c7fa (Primer commit)
   - *Area*: Frontend\Personal
 
 ---
 
+<<<<<<< HEAD
 #### HU-005: Crear roles de usuario (2 SP) - **[EN AZURE]**
+=======
+>>>>>>> 5a7c7fa (Primer commit)
 **Parent Feature**: Gestión de Roles  
 **Assigned To**: [Developer 1]  
 **Priority**: 1  
@@ -311,22 +431,38 @@ Como administrador quiero registrar nuevos usuarios en el sistema para que pueda
 ## 🏗️ Infrastructure & Setup Tasks
 
 ### Environment Setup
+<<<<<<< HEAD
 - [ ] **Task 7.1**: Configurar proyecto backend Express + TypeScript (4h)
+=======
+- [X ] **Task 7.1**: Configurar proyecto backend Express + TypeScript (4h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Setup inicial con estructura de carpetas, dependencias básicas
   - *Assigned To*: [Developer 1]
   - *Area*: DevOps\Setup
 
+<<<<<<< HEAD
 - [ ] **Task 7.2**: Configurar proyecto frontend React + TypeScript (3h)  
+=======
+- [ X] **Task 7.2**: Configurar proyecto frontend React + TypeScript (3h)  
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Create React App con TypeScript, estructura de carpetas
   - *Assigned To*: [Developer 2]
   - *Area*: DevOps\Setup
 
+<<<<<<< HEAD
 - [ ] **Task 7.3**: Configurar base de datos MySQL (3h)
+=======
+- [ X] **Task 7.3**: Configurar base de datos MySQL (3h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Instancia local, configuración de conexión, migraciones básicas
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\Base-Datos
 
+<<<<<<< HEAD
 - [ ] **Task 7.4**: Configurar CORS y middleware básico (2h)
+=======
+- [x] **Task 7.4**: Configurar CORS y middleware básico (2h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Middleware de autenticación, CORS, body-parser, logging
   - *Assigned To*: [Developer 1]
   - *Area*: Backend\API
@@ -337,12 +473,20 @@ Como administrador quiero registrar nuevos usuarios en el sistema para que pueda
   - *Assigned To*: [Developer 1]
   - *Area*: DevOps\Configuration
 
+<<<<<<< HEAD
 - [ ] **Task 8.2**: Setup de Axios y servicios API (2h)
+=======
+- [x] **Task 8.2**: Setup de Axios y servicios API (2h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Cliente HTTP configurado con interceptors
   - *Assigned To*: [Developer 2]  
   - *Area*: Frontend\Services
 
+<<<<<<< HEAD
 - [ ] **Task 8.3**: Configurar React Router y estructura de rutas (2h)
+=======
+- [x] **Task 8.3**: Configurar React Router y estructura de rutas (2h)
+>>>>>>> 5a7c7fa (Primer commit)
   - *Description*: Rutas principales, guards de autenticación
   - *Assigned To*: [Developer 2]
   - *Area*: Frontend\Routing
@@ -462,4 +606,65 @@ Una User Story está completa cuando:
 - [ ] Agregar validaciones más robustas
 - [ ] Mejorar manejo de errores global
 
+<<<<<<< HEAD
+=======
+---
+
+## 🔔 Actualización - Estado en `main` (22/09/2025)
+
+Esta sección resume el estado real del Sprint 1 según el contenido actual de la rama `main`. Para cada User Story / Task muestro: Estado (Done / Partial / Missing), evidencia de archivos y notas.
+
+- HU-033: Login de usuario — Partial/Done
+  - Estado: El backend expone `POST /api/auth/login` (local login) y firma JWT.
+  - Evidencia: `backend/src/routes/auth.ts` (implementación de `/login`).
+  - Notas: Frontend está integrado principalmente con Auth0 (`frontend/src/components/Login.tsx`), por lo que coexisten dos flujos (Auth0 y login local). Falta un `LoginForm` que consuma el endpoint local si se quiere usar ese flujo.
+
+- HU-034: Logout de usuario — Partial
+  - Estado: Frontend logout via Auth0 implementado; backend no tiene `POST /api/auth/logout`.
+  - Evidencia: `frontend/src/contexts/AuthContext.tsx`, `frontend/src/components/rbac/RBACLayout.tsx` (Logout). Backend: falta ruta `/logout` en `backend/src/routes/auth.ts`.
+
+- HU-001: Crear registro de trabajador — Partial
+  - Estado: Backend CRUD para trabajadores presente (GET, POST, PUT, DELETE). Frontend tiene cliente API y vistas referenciadas pero falta el formulario UI completado y confirmaciones visuales.
+  - Evidencia: `backend/src/routes/trabajadores.ts`, `frontend/src/employee-management/infrastructure/ApiEmployeeRepository.ts`, `frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx` (referencia `EmployeeManagementView`).
+
+- HU-002: Asignar información laboral al trabajador — Partial
+  - Estado: Existe `PUT /api/trabajadores/:id` para actualizar trabajador; no existe ruta específica `PATCH /trabajadores/:id/info-laboral` (puede usarse PUT como alternativa).
+  - Evidencia: `backend/src/routes/trabajadores.ts` (PUT).
+
+- HU-000: Consulta de empleados — Partial
+  - Estado: `GET /api/trabajadores` implementado (lista básica). Búsqueda y endpoints auxiliares referenciados desde frontend (`/trabajadores/search/...`), pero UI de filtros/paginación no completa.
+  - Evidencia: `backend/src/routes/trabajadores.ts`, `frontend/src/employee-management/infrastructure/ApiEmployeeRepository.ts`.
+
+- Gestión de Roles — Partial
+  - Estado: Modelo y scripts de BD están (roles y permisos). Middleware híbrido carga permisos desde BD. Falta endpoints CRUD de roles y UI para gestión.
+  - Evidencia: `database/SCRIPT_SEBASTIAN_CORREGIDO.sql`, `backend/src/middleware/hybrid-auth-final.middleware.ts`, `backend/src/middleware/agromano-rbac.middleware.ts`.
+
+- HU-035: Registro de nuevo usuario — Missing/Partial
+  - Estado: No se encontró `POST /api/usuarios/registro` ni UI para crear usuarios desde el frontend. La tabla `mot_usuario` existe y hay scripts de inserción.
+  - Evidencia: `database/SCRIPT_SEBASTIAN_CORREGIDO.sql`, pero falta `backend/src/routes/usuarios.ts`.
+
+### RBAC / Permisos
+- Estado: Done (robusto)
+  - El middleware híbrido une permisos desde la BD y del token, con fallbacks para administradores y para tokens con permisos. Esto cubre la lógica crítica para evitar 403 imprevistos.
+  - Evidencia: `backend/src/middleware/hybrid-auth-final.middleware.ts`, `backend/src/middleware/agromano-rbac.middleware.ts`.
+
+### Frontend Auth & Dashboard
+- Estado: Done/Partial
+  - `AuthContext` y hooks para obtener perfil desde backend están implementados; `AdminDashboard` está completo y consume la API (usa `ApiDashboardRepository`).
+  - Evidencia: `frontend/src/contexts/AuthContext.tsx`, `frontend/src/authentication/presentation/components/AdminDashboard/AdminDashboard.tsx`, `frontend/src/dashboard/infrastructure/ApiDashboardRepository.ts`.
+
+### Tests
+- Estado: Partial
+  - Existen pruebas y documentación de pruebas en `test/` pero faltan tests unitarios/integración explícitos para login (Task 1.5) y para endpoints nuevos (trabajadores, roles).
+
+## Recomendaciones (próximos pasos mínimos)
+1. Decidir flujo de autenticación principal (Auth0 SSO o login local). Si se opta por login local, crear `LoginForm` frontend que consuma `POST /api/auth/login` y gestione el token.
+2. Implementar `POST /api/auth/logout` si se desea invalidación server-side de tokens locales.
+3. Crear `FormularioTrabajador` frontend y mostrar confirmación visual al crear trabajador; reusar `ApiEmployeeRepository.post('/trabajadores')`.
+4. Agregar endpoints CRUD para roles (`backend/src/routes/roles.ts`) y UI `GestionRoles`.
+5. Añadir tests unitarios para `/auth/login`, `/trabajadores` (create + get) y flujos RBAC.
+
+Si quieres, puedo empezar a implementar los items 1 y 3 ahora (crear `LoginForm` y `FormularioTrabajador`) en una rama nueva y añadir tests básicos; dime si prefieres que commit/push vaya a `main` o a una rama y abro PR.
+
+>>>>>>> 5a7c7fa (Primer commit)
 

@@ -61,7 +61,11 @@ app.use('*', (req, res) => {
 });
 
 // Manejo global de errores
+<<<<<<< HEAD
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+=======
+app.use((error: Error & { status?: number }, req: express.Request, res: express.Response, next: express.NextFunction) => {
+>>>>>>> 5a7c7fa (Primer commit)
   console.error('Error Global:', error);
   
   res.status(error.status || 500).json({

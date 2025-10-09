@@ -6,6 +6,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
+<<<<<<< HEAD
 // Importar rutas DESPUÉS de cargar .env
 import authRoutes from './routes/auth';
 import authTestingRoutes from './routes/auth-testing';
@@ -16,12 +17,46 @@ import agroManoDashboardRoutes from './routes/agromano-dashboard';
 import dashboardSimpleRoutes from './routes/dashboard-simple';
 import debugRoutes from './routes/debug-routes';
 import debugPrismaRoutes from './routes/debug-prisma';
+=======
+// ==========================================
+// ✅ IMPORTAR RUTAS - SCREAMING ARCHITECTURE
+// ==========================================
+// Las rutas están organizadas por features (dominios de negocio)
+
+// 🔐 FEATURE: Authentication
+import authRoutes from './features/authentication/presentation/routes/auth.routes';
+import usuariosSistemaRoutes from './features/authentication/presentation/routes/user-system.routes';
+import fallbackAuthRoutes from './features/authentication/presentation/routes/fallback-auth.routes';
+
+// 👥 FEATURE: Personnel Management
+import agroManoTrabajadoresRoutes from './features/personnel-management/presentation/routes/employee.routes';
+
+// ⏰ FEATURE: Attendance Tracking
+import agroManoAsistenciaRoutes from './features/attendance-tracking/presentation/routes/attendance.routes';
+
+// 📊 SHARED: Dashboard & Config
+import agroManoDashboardRoutes from './shared/presentation/routes/dashboard.routes';
+
+// 👑 ADMIN: User & Role Management
+import userRoleManagementRoutes from '../src/routes/user-role-management';
+
+// 🏖️ ABSENCES: Ausencias/Permisos
+import ausenciasRoutes from '../src/routes/ausencias.routes';
+
+// 👥 FEATURE: Crew Management
+import crewRoutes from './features/crew-management/presentation/routes/crew.routes';
+
+import ProductivityRoutes from './features/productivity-management/presentation/routes/productivity.routes';
+
+
+>>>>>>> 5a7c7fa (Primer commit)
 
 // Función de verificación de conexión a BD
 async function verificarConexionBD() {
   try {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
+<<<<<<< HEAD
     
     console.log('🔄 Intentando conectar a la base de datos...');
     await prisma.$connect();
@@ -46,6 +81,27 @@ async function verificarConexionBD() {
       console.log('❌ Usuario Auth0 NO encontrado en la base de datos');
     }
     
+=======
+
+    console.log('🔄 Intentando conectar a la base de datos...');
+    await prisma.$connect();
+    console.log('✅ Conexión a la base de datos exitosa');
+
+    // Verificar que existe la tabla de usuarios (si la tabla no existe esto lanzará)
+    try {
+      const usuarios = await prisma.mot_usuario.count();
+      console.log(`✅ Tabla usuarios encontrada: ${usuarios} registros`);
+    } catch (err) {
+      const error = err as Error & { code?: string };
+      // Manejo suave si la tabla/columna no existe (p. ej. entorno con esquema distinto)
+      if (error && (error.code === 'P2022' || error.code === 'P2025')) {
+        console.warn('⚠️ Advertencia: tabla o columna ausente al verificar mot_usuario. Omitiendo verificación.');
+      } else {
+        console.warn('⚠️ Advertencia al verificar tabla mot_usuario:', error instanceof Error ? error.message : String(error));
+      }
+    }
+
+>>>>>>> 5a7c7fa (Primer commit)
     await prisma.$disconnect();
     return true;
   } catch (error) {
@@ -60,7 +116,11 @@ console.log('🔍 Variables de entorno cargadas:');
 console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
 console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
 console.log('AUTH0_CLIENT_ID:', process.env.AUTH0_CLIENT_ID ? '✅ Configurado' : '❌ Faltante');
+<<<<<<< HEAD
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+=======
+console.log('DATABASE_URL exists:', Boolean(process.env.DATABASE_URL));
+>>>>>>> 5a7c7fa (Primer commit)
 console.log('DATABASE_URL value:', process.env.DATABASE_URL || 'UNDEFINED!');
 console.log('PORT:', process.env.PORT || 3000);
 
@@ -72,8 +132,24 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares globales
 app.use(helmet());
+<<<<<<< HEAD
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+=======
+// Configurar CORS permitiendo múltiples orígenes desde la variable de entorno
+// FRONTEND_URLS (coma-separados) o FRONTEND_URL.
+const rawFrontendUrls = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3001';
+const allowedOrigins = rawFrontendUrls.split(',').map(s => s.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, or same-origin)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    console.warn(`CORS: origin not allowed -> ${origin}. Allowed: ${allowedOrigins.join(',')}`);
+    return callback(new Error('Not allowed by CORS'));
+  },
+>>>>>>> 5a7c7fa (Primer commit)
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -96,18 +172,59 @@ app.get('/health', (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 // Rutas principales
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', authTestRoutes);
 app.use('/api/testing', authTestingRoutes);
+=======
+// ==========================================
+// CONFIGURACIÓN DE RUTAS
+// ==========================================
+
+// 🔐 Rutas de autenticación con fallback (Auth0 + Local)
+app.use('/api/auth', fallbackAuthRoutes);
+
+// Rutas principales de autenticación (legacy - mantener por compatibilidad)
+app.use('/api/auth/legacy', authRoutes);
+>>>>>>> 5a7c7fa (Primer commit)
 
 // Rutas AgroMano con RBAC granular
 app.use('/api/trabajadores', agroManoTrabajadoresRoutes);
 app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
 app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
+<<<<<<< HEAD
 app.use('/api/dashboard-simple', dashboardSimpleRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/debug-prisma', debugPrismaRoutes);
+=======
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de ausencias/permisos
+app.use('/api/ausencias', ausenciasRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/admin', userRoleManagementRoutes);
+
+// Rutas de usuarios del sistema (híbrido Auth0/BD)
+app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/cuadrillas', crewRoutes);
+
+// Rutas de administración de usuarios y roles
+app.use('/api/productividad', ProductivityRoutes);
+
+
+
+// Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
+app.use('/api/test', userRoleManagementRoutes);
+>>>>>>> 5a7c7fa (Primer commit)
 
 // Rutas de prueba simples
 app.get('/api/test/public', (req, res) => {
@@ -128,7 +245,11 @@ app.use('*', (req, res) => {
 });
 
 // Manejo global de errores
+<<<<<<< HEAD
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+=======
+app.use((error: Error & { status?: number; stack?: string }, req: express.Request, res: express.Response, next: express.NextFunction) => {
+>>>>>>> 5a7c7fa (Primer commit)
   console.error('Error Global:', error);
   
   res.status(error.status || 500).json({

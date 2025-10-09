@@ -1,7 +1,11 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProviders } from './app/providers/AppProviders';
+<<<<<<< HEAD
 import { LoginPage, ProtectedRoute, AdminDashboard, CallbackPage } from './authentication';
+=======
+import { LoginPage, ProtectedRoute, AdminDashboard, CallbackPage } from './features/authentication';
+>>>>>>> 5a7c7fa (Primer commit)
 
 // Componente de Dashboard que usa el AdminDashboard profesional
 const Dashboard: React.FC = () => {

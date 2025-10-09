@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+<<<<<<< HEAD
 import { authenticateToken, requirePermissions } from '../middleware/rbac.middleware';
+=======
+import { authenticateToken, requirePermissions } from '../features/authentication/infrastructure/middleware/rbac.middleware';
+>>>>>>> 5a7c7fa (Primer commit)
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -91,10 +95,18 @@ router.post('/',
         data: nuevoTrabajador,
         message: 'Trabajador creado exitosamente'
       });
+<<<<<<< HEAD
     } catch (error: any) {
       console.error('Error al crear trabajador:', error);
       
       if (error.code === 'P2002') {
+=======
+    } catch (error) {
+      console.error('Error al crear trabajador:', error);
+      const err = error as Error & { code?: string };
+      
+      if (err.code === 'P2002') {
+>>>>>>> 5a7c7fa (Primer commit)
         return res.status(409).json({
           success: false,
           message: 'El documento de identidad ya existe'
@@ -144,10 +156,18 @@ router.put('/:id',
         data: trabajadorActualizado,
         message: 'Trabajador actualizado exitosamente'
       });
+<<<<<<< HEAD
     } catch (error: any) {
       console.error('Error al actualizar trabajador:', error);
       
       if (error.code === 'P2025') {
+=======
+    } catch (error) {
+      console.error('Error al actualizar trabajador:', error);
+      const err = error as Error & { code?: string };
+      
+      if (err.code === 'P2025') {
+>>>>>>> 5a7c7fa (Primer commit)
         return res.status(404).json({
           success: false,
           message: 'Trabajador no encontrado'
@@ -187,10 +207,18 @@ router.delete('/:id',
         success: true,
         message: 'Trabajador eliminado exitosamente'
       });
+<<<<<<< HEAD
     } catch (error: any) {
       console.error('Error al eliminar trabajador:', error);
       
       if (error.code === 'P2025') {
+=======
+    } catch (error) {
+      console.error('Error al eliminar trabajador:', error);
+      const err = error as Error & { code?: string };
+      
+      if (err.code === 'P2025') {
+>>>>>>> 5a7c7fa (Primer commit)
         return res.status(404).json({
           success: false,
           message: 'Trabajador no encontrado'
@@ -205,4 +233,8 @@ router.delete('/:id',
   }
 );
 
+<<<<<<< HEAD
 export default router;
+=======
+export default router;
+>>>>>>> 5a7c7fa (Primer commit)

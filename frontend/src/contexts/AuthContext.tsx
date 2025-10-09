@@ -67,7 +67,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   } = useAuth0();
 
   // Función para obtener el perfil del usuario desde la BD
+<<<<<<< HEAD
   const fetchUserProfile = async (): Promise<UserProfile> => {
+=======
+  const fetchUserProfile = React.useCallback(async (): Promise<UserProfile> => {
+>>>>>>> 5a7c7fa (Primer commit)
     if (!isAuthenticated || !user?.email) {
       throw new Error('Usuario no autenticado');
     }
@@ -84,7 +88,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     return response.data;
+<<<<<<< HEAD
   };
+=======
+  }, [isAuthenticated, user?.email, getAccessTokenSilently]);
+>>>>>>> 5a7c7fa (Primer commit)
 
   // Query para obtener el perfil del usuario
   const {
@@ -95,12 +103,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   } = useQuery({
     queryKey: ['userProfile', user?.email],
     queryFn: fetchUserProfile,
+<<<<<<< HEAD
     enabled: isAuthenticated && !!user?.email,
+=======
+    enabled: isAuthenticated && Boolean(user?.email),
+>>>>>>> 5a7c7fa (Primer commit)
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
   // Función para verificar permisos
+<<<<<<< HEAD
   const hasPermission = (resource: string, action: string): boolean => {
     if (!userProfile || !userProfile.permissions) return false;
     
@@ -120,12 +133,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Función de logout personalizada
   const logout = () => {
+=======
+  const hasPermission = React.useCallback((resource: string, action: string): boolean => {
+    if (!userProfile || !userProfile.permissions) return false;
+    
+    return userProfile.permissions.some(
+      (permission: Permission) => 
+        permission.resource === resource && 
+        permission.action === action
+    );
+  }, [userProfile]);
+
+  // Función para verificar roles
+  const hasRole = React.useCallback((roleName: string): boolean => {
+    if (!userProfile || !userProfile.roles) return false;
+    
+    return userProfile.roles.some((role: Role) => role.name === roleName);
+  }, [userProfile]);
+
+  // Función de logout personalizada
+  const logout = React.useCallback(() => {
+>>>>>>> 5a7c7fa (Primer commit)
     auth0Logout({
       logoutParams: {
         returnTo: window.location.origin
       }
     });
+<<<<<<< HEAD
   };
+=======
+  }, [auth0Logout]);
+>>>>>>> 5a7c7fa (Primer commit)
 
   const contextValue: AuthContextType = {
     // Auth0 básico

@@ -6,6 +6,11 @@
 
 Sistema integral para la gestión de personal, asistencia, nómina, productividad y reportes en el sector agrícola.
 
+<<<<<<< HEAD
+=======
+> Nota: La documentación detallada del proyecto se centralizó en la carpeta `docs/`. Ver `docs/README.md` para el índice principal.
+
+>>>>>>> 5a7c7fa (Primer commit)
 ## 📋 Tabla de Contenidos
 
 - [Características](#características)
