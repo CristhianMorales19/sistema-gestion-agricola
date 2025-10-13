@@ -184,19 +184,52 @@ export class AsistenciaService {
   // Obtiene lista mínima de trabajadores activos desde el endpoint expuesto por el módulo de asistencia.
   async listarTrabajadoresActivos(): Promise<Array<{ value: number; label: string; trabajador_id: number; documento_identidad: string; nombre_completo: string }>> {
     try {
+      console.log('🔍 Cargando trabajadores activos desde /trabajadores-activos...');
       const base = await this.ensureBaseUrl();
+      console.log('🌐 Base URL resuelta:', base);
       const token = await this.options.getToken();
-      const resp = await fetch(`${base}/trabajadores-activos`, {
+      
+      const url = `${base}/trabajadores-activos`;
+      console.log('🔗 URL completa:', url);
+      
+      const resp = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
-      if (!resp.ok) return [];
+      
+      console.log('📦 Respuesta trabajadores-activos:', resp.status, resp.statusText);
+      console.log('📋 Content-Type:', resp.headers.get('content-type'));
+      
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error('❌ Error en respuesta:', resp.status, 'Body:', text.substring(0, 200));
+        return [];
+      }
+      
+      const contentType = resp.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await resp.text();
+        console.error('⚠️ Respuesta no es JSON. Content-Type:', contentType);
+        console.error('📄 Body (primeros 500 chars):', text.substring(0, 500));
+        return [];
+      }
+      
       const json: any = await resp.json();
-      if (Array.isArray(json?.data)) return json.data;
+      console.log('✅ JSON recibido:', json);
+      console.log('📋 Array de trabajadores:', json?.data);
+      
+      if (Array.isArray(json?.data)) {
+        console.log('✨ Total trabajadores recibidos:', json.data.length);
+        console.log('📊 Trabajadores:', json.data);
+        return json.data;
+      }
+      
+      console.warn('⚠️ No se recibió un array válido');
       return [];
-    } catch (_) {
+    } catch (error) {
+      console.error('❌ Error en listarTrabajadoresActivos:', error);
       return [];
     }
   }

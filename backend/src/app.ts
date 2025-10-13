@@ -34,7 +34,10 @@ import ausenciasRoutes from '../src/routes/ausencias.routes';
 // 👥 FEATURE: Crew Management
 import crewRoutes from './features/crew-management/presentation/routes/crew.routes';
 
-// 🚨 NUEVO: Asistencia (Screaming Architecture)
+// � FEATURE: Productivity Management
+import productivityRoutes from './features/productivity-management/presentation/routes/productivity.routes';
+
+// �🚨 NUEVO: Asistencia (Screaming Architecture)
 import { asistenciaRouter } from './caracteristicas/asistencia/infrastructure/asistencia.routes';
 
 
@@ -105,7 +108,12 @@ app.use(cors({
       console.log('✅ CORS: No origin - allowing');
       return callback(null, true);
     }
-    if (allowedOrigins.includes(origin)) {
+    
+    // Normalizar origin y allowedOrigins removiendo trailing slash para comparación
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    const normalizedAllowedOrigins = allowedOrigins.map(o => o.replace(/\/$/, ''));
+    
+    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
       console.log('✅ CORS: Origin allowed');
       return callback(null, true);
     }
@@ -166,6 +174,9 @@ app.use('/api/usuarios-sistema', usuariosSistemaRoutes);
 
 // Rutas de administración de usuarios y roles
 app.use('/api/cuadrillas', crewRoutes);
+
+// Rutas de productividad
+app.use('/api/productividad', productivityRoutes);
 
 // Rutas de test para gestión de usuarios (SIN AUTENTICACIÓN - SOLO PARA DEVELOPMENT)
 app.use('/api/test', userRoleManagementRoutes);

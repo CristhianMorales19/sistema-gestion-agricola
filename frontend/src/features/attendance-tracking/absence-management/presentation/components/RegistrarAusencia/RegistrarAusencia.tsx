@@ -12,7 +12,8 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  SelectChangeEvent
+  SelectChangeEvent,
+  Autocomplete
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -20,9 +21,10 @@ import {
   Upload as UploadIcon
 } from '@mui/icons-material';
 import { CreateAbsenceData, ABSENCE_REASONS } from '../../../domain/entities/Absence';
+import { useTrabajadores } from '../../../application/hooks/useTrabajadores';
 
 export interface RegistrarAusenciaFormData {
-  trabajador_id: string;
+  trabajador_id: string; // Se mantiene como string en el formulario para facilitar el input
   fecha_ausencia: string;
   motivo: string;
   motivo_personalizado?: string;
@@ -45,6 +47,16 @@ export const RegistrarAusencia: React.FC<RegistrarAusenciaProps> = ({
   onCancel,
   loading = false
 }) => {
+  const { trabajadores, loading: loadingTrabajadores, error: errorTrabajadores } = useTrabajadores();
+  
+  // Log para debugging
+  console.log('📊 Estado del hook useTrabajadores:', {
+    trabajadores,
+    count: trabajadores.length,
+    loading: loadingTrabajadores,
+    error: errorTrabajadores
+  });
+  
   const [formData, setFormData] = useState<RegistrarAusenciaFormData>({
     trabajador_id: propTrabajadorId || '',
     fecha_ausencia: new Date().toISOString().split('T')[0],
@@ -148,7 +160,7 @@ export const RegistrarAusencia: React.FC<RegistrarAusenciaProps> = ({
 
     try {
       const submitData: CreateAbsenceData = {
-        trabajador_id: formData.trabajador_id,
+        trabajador_id: parseInt(formData.trabajador_id), // Convertir a número
         fecha_ausencia: formData.fecha_ausencia,
         motivo: formData.motivo,
         motivo_personalizado: formData.motivo_personalizado,
@@ -193,9 +205,55 @@ export const RegistrarAusencia: React.FC<RegistrarAusenciaProps> = ({
             {submitError}
           </Alert>
         )}
+        
+        {errorTrabajadores && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            Error al cargar trabajadores: {errorTrabajadores}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Selector de Trabajador (solo si no se proporciona propTrabajadorId) */}
+            {!propTrabajadorId && (
+              <Autocomplete
+                options={trabajadores}
+                getOptionLabel={(option) => `${option.nombre_completo} - ${option.documento_identidad}`}
+                loading={loadingTrabajadores}
+                value={trabajadores.find(t => t.trabajador_id.toString() === formData.trabajador_id) || null}
+                onChange={(_, newValue) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    trabajador_id: newValue ? newValue.trabajador_id.toString() : ''
+                  }));
+                  if (errors.trabajador_id) {
+                    setErrors(prev => ({
+                      ...prev,
+                      trabajador_id: undefined
+                    }));
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Seleccionar Trabajador *"
+                    error={!!errors.trabajador_id}
+                    helperText={errors.trabajador_id}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#334155',
+                        color: '#ffffff',
+                        '& fieldset': { borderColor: '#475569' },
+                        '&:hover fieldset': { borderColor: '#64748b' },
+                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+                      },
+                      '& .MuiInputLabel-root': { color: '#94a3b8' }
+                    }}
+                  />
+                )}
+              />
+            )}
+
             {/* Fecha de Ausencia */}
             <TextField
               fullWidth

@@ -115,13 +115,22 @@ class ApiService {
     return response.data;
   }
 
-  async post<T = unknown, D = any>(url: string, data?: D): Promise<ApiResponse<T>> {
-    const response = await this.axiosInstance.post<ApiResponse<T>>(url, data);
+  async post<T = unknown>(url: string, data?: Record<string, unknown> | FormData): Promise<ApiResponse<T>> {
+    const response = await this.axiosInstance.post(url, data);
     return response.data;
   }
 
-  async put<T = unknown, D = any>(url: string, data?: D): Promise<ApiResponse<T>> {
-    const response = await this.axiosInstance.put<ApiResponse<T>>(url, data);
+  async postFormData<T = unknown>(url: string, formData: FormData): Promise<ApiResponse<T>> {
+    const response = await this.axiosInstance.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  }
+
+  async put<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
+    const response = await this.axiosInstance.put(url, data);
     return response.data;
   }
 

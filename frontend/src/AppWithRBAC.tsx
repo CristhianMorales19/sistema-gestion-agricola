@@ -3,6 +3,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppProviders } from './app/providers/AppProviders';
 import { LoginPage, ProtectedRoute, AdminDashboard, CallbackPage } from './features/authentication';
+import { ProductivityManagementView } from './features/productivity-management';
 
 const Dashboard: React.FC = () => <AdminDashboard />;
 
@@ -17,6 +18,15 @@ const AppContent: React.FC = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/productividad"
+        element={
+          <ProtectedRoute>
+            <ProductivityManagementView />
           </ProtectedRoute>
         }
       />

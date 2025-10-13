@@ -7,14 +7,16 @@ const prisma = new PrismaClient();
 
 /**
  * @route GET /api/trabajadores
- * @desc Obtener todos los trabajadores
- * @access Requiere permiso 'trabajadores:read'
+ * @desc Obtener todos los trabajadores activos
+ * @access Requiere permisos: trabajadores:read:all OR trabajadores:read:own
  */
 router.get('/', 
   authenticateToken,
-  requirePermissions(['trabajadores:read']),
+  requirePermissions(['trabajadores:read:all', 'trabajadores:read:own']),
   async (req, res) => {
     try {
+      console.log('📋 GET /api/trabajadores - Obteniendo lista de trabajadores');
+      
       const trabajadores = await prisma.mom_trabajador.findMany({
         where: { is_activo: true },
         select: {
@@ -25,8 +27,13 @@ router.get('/',
           email: true,
           fecha_registro_at: true,
           is_activo: true
+        },
+        orderBy: {
+          nombre_completo: 'asc'
         }
       });
+
+      console.log(`✅ Se encontraron ${trabajadores.length} trabajadores activos`);
 
       res.json({
         success: true,
@@ -34,7 +41,7 @@ router.get('/',
         message: 'Trabajadores obtenidos correctamente'
       });
     } catch (error) {
-      console.error('Error al obtener trabajadores:', error);
+      console.error('❌ Error al obtener trabajadores:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

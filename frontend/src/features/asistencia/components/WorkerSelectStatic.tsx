@@ -20,11 +20,22 @@ export const WorkerSelectStatic: React.FC<WorkerSelectStaticProps> = ({ service,
 
   useEffect(() => {
     let active = true;
+    console.log('🔄 WorkerSelectStatic: Iniciando carga de trabajadores...');
     setLoading(true);
     service.listarTrabajadoresActivos()
-      .then(data => { if (active) setOptions(data); })
-      .catch(e => { if (active) setError(e.message || 'Error cargando trabajadores'); })
-      .finally(() => { if (active) setLoading(false); });
+      .then(data => { 
+        console.log('✅ WorkerSelectStatic: Datos recibidos:', data);
+        console.log('📊 WorkerSelectStatic: Total trabajadores:', data.length);
+        if (active) setOptions(data); 
+      })
+      .catch(e => { 
+        console.error('❌ WorkerSelectStatic: Error:', e);
+        if (active) setError(e.message || 'Error cargando trabajadores'); 
+      })
+      .finally(() => { 
+        console.log('🏁 WorkerSelectStatic: Carga finalizada');
+        if (active) setLoading(false); 
+      });
     return () => { active = false; };
   }, [service]);
 

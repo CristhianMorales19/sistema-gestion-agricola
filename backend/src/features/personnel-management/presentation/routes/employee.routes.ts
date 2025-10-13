@@ -54,6 +54,16 @@ router.get('/',
                     }
                 }
             });
+            
+            console.log('📊 Trabajadores encontrados:', trabajadores.length);
+            if (trabajadores.length > 0) {
+                console.log('🔬 Primer trabajador (raw):', JSON.stringify({
+                    trabajador_id: trabajadores[0].trabajador_id,
+                    nombre_completo: trabajadores[0].nombre_completo,
+                    is_activo: trabajadores[0].is_activo,
+                    tipo: typeof trabajadores[0].is_activo
+                }, null, 2));
+            }
 
             res.json({
                 success: true,
@@ -64,7 +74,7 @@ router.get('/',
                         identification: t.documento_identidad,
                         role: t.mot_info_laboral[0]?.cargo,
                         entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
-                        status: t.is_activo,
+                        status: Boolean(t.is_activo), // Conversión explícita a boolean
                         email: t.email,
                         phone: t.telefono,
                         contractType: t.mot_info_laboral[0]?.tipo_contrato,

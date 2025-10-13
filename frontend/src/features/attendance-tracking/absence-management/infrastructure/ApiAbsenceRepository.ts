@@ -252,17 +252,33 @@ export class ApiAbsenceRepository implements AbsenceRepository {
    */
   async uploadDocument(absenceId: string, file: File): Promise<string> {
     try {
+      console.log('📎 Preparando para subir archivo:', {
+        absenceId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      });
+
       const formData = new FormData();
       formData.append('documento', file);
       
-      const response = await apiService.post<DocumentResponse>(
+      console.log('📤 Enviando FormData al endpoint:', `${this.baseUrl}/${absenceId}/documento`);
+      
+      const response = await apiService.postFormData<DocumentResponse>(
         `${this.baseUrl}/${absenceId}/documento`,
-        formData as any
+        formData
       );
+      
+      console.log('✅ Documento subido exitosamente:', response);
       
       return response.data.url || response.data.documentacion_respaldo || '';
     } catch (error: any) {
-      console.error('Error uploading document:', error);
+      console.error('❌ Error uploading document:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw new Error(error.response?.data?.message || 'Error al subir el documento');
     }
   }

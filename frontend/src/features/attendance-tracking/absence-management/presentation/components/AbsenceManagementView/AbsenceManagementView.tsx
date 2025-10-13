@@ -60,9 +60,12 @@ export const AbsenceManagementView: React.FC = () => {
     try {
       const newAbsence = await registerAbsence(data);
       
-      // Si hay documento, subirlo
-      if (documento && newAbsence.id) {
+      // Si hay documento, subirlo (verificación estricta)
+      if (documento && documento instanceof File && newAbsence.id) {
+        console.log('📎 Subiendo documento:', documento.name, documento.size);
         await uploadDocument(newAbsence.id, documento);
+      } else {
+        console.log('📝 No hay documento para subir o ausencia sin ID');
       }
       
       setViewMode('list');
