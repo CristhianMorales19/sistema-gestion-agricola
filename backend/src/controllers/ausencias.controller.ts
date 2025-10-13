@@ -216,7 +216,7 @@ export class AusenciasController {
         where: {
           trabajador_id: validatedData.trabajador_id,
           deleted_at: null,
-          is_activo: 1
+          is_activo: true
         }
       });
 

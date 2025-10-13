@@ -170,7 +170,9 @@ router.post('/salida', async (req: Request, res: Response) => {
         hora_salida_at: horaSalidaDate,
         horas_trabajadas: horasTrab,
         observaciones_salida: observacion || null,
+        estado: 'completa', // Cambiar estado a completa cuando se registra salida
         updated_at: new Date(),
+        updated_by: 1, // ajustar según lógica de auditoría
       },
     });
 
@@ -199,10 +201,20 @@ router.post('/salida', async (req: Request, res: Response) => {
 
 router.post('/entrada', async (req: Request, res: Response) => {
   try {
+    console.log('[ASISTENCIA][ENTRADA] Request body =>', req.body);
     const { trabajadorId, fecha, horaEntrada, ubicacion } = req.body ?? {};
+    
     if (!trabajadorId) {
+      console.warn('[ASISTENCIA][ENTRADA] Falta trabajadorId');
       return res.status(400).json({ error: 'trabajadorId es obligatorio' });
     }
+
+    console.log('[ASISTENCIA][ENTRADA] Ejecutando registrarEntrada =>', {
+      trabajadorId: Number(trabajadorId),
+      fecha,
+      horaEntrada,
+      ubicacion,
+    });
 
     const asistencia = await registrarEntrada.execute({
       trabajadorId: Number(trabajadorId),
@@ -210,6 +222,8 @@ router.post('/entrada', async (req: Request, res: Response) => {
       horaEntrada,
       ubicacion,
     });
+
+    console.log('[ASISTENCIA][ENTRADA] Entrada registrada exitosamente =>', asistencia);
 
     res.status(201).json({
       id: asistencia.id,
@@ -220,10 +234,12 @@ router.post('/entrada', async (req: Request, res: Response) => {
       creadoEn: asistencia.creadoEn,
     });
   } catch (err: any) {
+    console.error('[ASISTENCIA][ENTRADA] Error =>', err);
+    console.error('[ASISTENCIA][ENTRADA] Stack =>', err.stack);
     if (err.message?.includes('Ya existe')) {
       return res.status(409).json({ error: err.message });
     }
-    res.status(500).json({ error: 'Error al registrar entrada', detalle: err.message });
+    res.status(500).json({ error: 'Error al registrar entrada', detalle: err.message, stack: err.stack });
   }
 });
 
