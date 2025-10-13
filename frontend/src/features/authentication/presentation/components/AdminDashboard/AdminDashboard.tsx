@@ -14,6 +14,7 @@ import { EmployeeManagementView } from '../../../../personnel-management/present
 import { UserManagementView } from '../../../../user-management/presentation/components/UserManagementView';
 import { AbsenceManagementView } from '../../../../attendance-tracking';
 import { CrewManagementView } from '../../../../crew-managenet/presentation/components/CrewManagementView';
+import { ProductivityManagementView } from '../../../../productivity-management';
 import AsistenciaPage from '../../../../asistencia/AsistenciaPage';
 
 export const AdminDashboard: React.FC = () => {
@@ -135,6 +136,11 @@ export const AdminDashboard: React.FC = () => {
       case 'asistencia':
         return (
           <AsistenciaPage />
+        );
+
+      case 'productivity':
+        return (
+          <ProductivityManagementView />
         );
 
       case 'farms':

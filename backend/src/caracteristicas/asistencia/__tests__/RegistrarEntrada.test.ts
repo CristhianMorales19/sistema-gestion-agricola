@@ -1,11 +1,12 @@
 // NOTA: Test simplificado para compatibilidad de parser; se evita sintaxis TS avanzada
 import { RegistrarEntrada } from '../application/RegistrarEntrada';
 import { Asistencia } from '../domain/Asistencia';
+import { AsistenciaRepository } from '../domain/AsistenciaRepository';
 
-function crearRepoMock() {
-  const registros = [];
+function crearRepoMock(): AsistenciaRepository {
+  const registros: Asistencia[] = [];
   return {
-    async registrarEntrada(data) {
+    async registrarEntrada(data: Asistencia): Promise<Asistencia> {
       const nuevo = Asistencia.crear({
         id: registros.length + 1,
         trabajadorId: data.trabajadorId,
@@ -17,7 +18,7 @@ function crearRepoMock() {
       registros.push(nuevo);
       return nuevo;
     },
-    async existeEntradaHoy(trabajadorId, fechaISO) {
+    async existeEntradaHoy(trabajadorId: number, fechaISO: string): Promise<boolean> {
       return registros.some(r => r.trabajadorId === trabajadorId && r.fecha === fechaISO);
     }
   };
