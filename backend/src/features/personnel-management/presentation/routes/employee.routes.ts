@@ -8,6 +8,7 @@ import {
     requirePermissions,
     AgroManoPermission 
 } from '../../../authentication/infrastructure/middleware/agromano-rbac.middleware';
+import { create } from 'lodash';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -150,7 +151,7 @@ router.get('/',
 router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores:create'),
     async (req, res) => {
         try {
-            console.log('5. Datos recibidos en controller:', req.body);
+            console.log('5. Datos recibidos en controller:', req);
             
             const {
                 documento_identidad,
@@ -262,6 +263,7 @@ router.put('/:id',
             const { id } = req.params;
             const userPermissions = (req as any).user?.permissions || [];
             const canUpdateAll = userPermissions.includes('trabajadores:update:all');
+            const userId = (req as any).user?.usuario_id;
             
             // Validar datos requeridos
             const { cargo, salario_base, tipo_contrato } = req.body;
@@ -322,7 +324,9 @@ router.put('/:id',
                 lactancia_monto: req.body.lactancia_monto ? parseFloat(String(req.body.lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
                 fecha_ultima_actualizacion_at: new Date(),
                 usuario_ultima_actualizacion: (req as any).user?.sub || 1,
-                updated_at: new Date()
+                updated_at: new Date(),
+                created_at: new Date(),
+                created_by: userId
             };
 
             if (existingInfo) {
@@ -534,6 +538,7 @@ router.post('/:id/info-laboral',
             const { id } = req.params;
             const userId = (req as any).user?.id;            
             const { cargo, salario_base, tipo_contrato, fecha_ingreso, departamento } = req.body;
+            console.log('En el backend, datos recibidos para crear info laboral:', req);
 
             const existingInfo = await prisma.mot_info_laboral.findFirst({
                 where: { trabajador_id: parseInt(id) }

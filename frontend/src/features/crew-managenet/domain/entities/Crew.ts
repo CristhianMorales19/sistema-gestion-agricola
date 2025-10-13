@@ -7,6 +7,7 @@ export interface CrewMember {
 export interface CreateCrewData {
     code: string;
     description: string;
+    workArea: string;
     workers: string[]; // Array of employee IDs
 }
 
@@ -30,4 +31,9 @@ export interface CrewApiResponse {
         name: string;
         identification: string;
     }>;
+}
+
+export interface ApiResponseMessage {
+    success: boolean;
+    message: string;
 }

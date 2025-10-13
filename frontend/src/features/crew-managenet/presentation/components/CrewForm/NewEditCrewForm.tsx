@@ -9,6 +9,7 @@ import {
 import { CreateCrewData } from '../../../domain/entities/Crew';
 import { Employee } from '@features/personnel-management';
 import { CrewMembersTable } from './CrewMembersTable';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 
 export interface NewCrewFormData {
     code: string;
@@ -18,13 +19,13 @@ export interface NewCrewFormData {
 }
 
 interface NewCrewFormProps {
-    onSubmit: (data: CreateCrewData) => Promise<void>;
+    onSubmit: (data: CreateCrewData) => Promise<boolean>;
     onCancel: () => void;
     employees: Employee[];
     initialData?: NewCrewFormData;
 }
 
-export const NewCrewForm: React.FC<NewCrewFormProps> = ({
+export const NewEditCrewForm: React.FC<NewCrewFormProps> = ({
     onSubmit,
     onCancel,
     employees,
@@ -40,14 +41,32 @@ export const NewCrewForm: React.FC<NewCrewFormProps> = ({
     );
     const [loading, setLoading] = useState(false);
 
+    const getChangedFields = (initial: NewCrewFormData, current: NewCrewFormData) => {
+        const changes: Partial<NewCrewFormData> = {};
+
+        (Object.keys(current) as Array<keyof NewCrewFormData>).forEach(key => {
+            if (JSON.stringify(initial[key]) !== JSON.stringify(current[key]))
+                changes[key] = current[key] as any;
+        });
+
+        return changes;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        try {
-            await onSubmit(formData);
-        } finally {
-            setLoading(false);
-        }
+
+        const changes = initialData ? getChangedFields(initialData, formData) : formData;
+
+        if (await onSubmit(changes as CreateCrewData))
+            if (!initialData)
+                setFormData({
+                    code: '',
+                    description: '',
+                    workArea: '',
+                    workers: [],
+                });
+        setLoading(false);
     };
 
     const handleChange = (field: keyof NewCrewFormData) => (
@@ -104,6 +123,7 @@ export const NewCrewForm: React.FC<NewCrewFormProps> = ({
                         label="Descripción"
                         value={formData.description}
                         onChange={handleChange('description')}
+                        required
                         multiline
                         rows={3}
                         fullWidth
@@ -122,6 +142,7 @@ export const NewCrewForm: React.FC<NewCrewFormProps> = ({
                         label="Área de Trabajo"
                         value={formData.workArea}
                         onChange={handleChange('workArea')}
+                        required
                         multiline
                         rows={3}
                         fullWidth
@@ -149,6 +170,7 @@ export const NewCrewForm: React.FC<NewCrewFormProps> = ({
                             type="button"
                             onClick={onCancel}
                             variant="outlined"
+                            startIcon={<ArrowBackIcon />}
                             sx={{
                                 color: '#94a3b8',
                                 borderColor: '#475569',
@@ -158,7 +180,7 @@ export const NewCrewForm: React.FC<NewCrewFormProps> = ({
                                 }
                             }}
                         >
-                            Cancelar
+                            Volver
                         </Button>
                         <Button
                             type="submit"

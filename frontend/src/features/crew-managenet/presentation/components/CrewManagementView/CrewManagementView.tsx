@@ -12,7 +12,7 @@ import {
     GroupAdd as GroupAddIcon,
     } from '@mui/icons-material';
     import { CrewTable } from '../CrewTable/CrewTable';
-    import { NewCrewForm, NewCrewFormData } from '../CrewForm/NewCrewForm';
+    import { NewEditCrewForm } from '../CrewForm/NewEditCrewForm';
     import { UseCrewManagement } from '../../../application/hooks/UseCrewManagement';
     import { CreateCrewData, Crew } from '../../../domain/entities/Crew';
     import { useEmployeeManagement } from '../../../../personnel-management/application/hooks/useEmployeeManagement';
@@ -20,7 +20,7 @@ import {
     type CrewView = 'list' | 'new-crew' | 'edit-crew';
 
     export const CrewManagementView: React.FC = () => {
-    const { crews, loading, error, fetchCrews, searchCrews} = UseCrewManagement();
+    const { crews, loading, fetchCrews, searchCrews, createCrew, updateCrew, deleteCrew } = UseCrewManagement();
     const { employees, refreshEmployees } = useEmployeeManagement();
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
@@ -74,65 +74,52 @@ import {
     };
 
     const handleCreateCrew = async (data: CreateCrewData) => {
-        // try {
-        // await createCrew(data);
-        // await fetchCrews();
-        // } catch (err) {
-        // console.error('Error creating crew:', err);
-        // throw err;
-        // }
+        return await createCrew(data);
     };
 
     const handleUpdateCrew = async (data: CreateCrewData) => {
-        // if (!selectedCrew) throw new Error('No crew selected for update');
-        // try {
-        // await updateCrew(selectedCrew.id, data);
-        // await fetchCrews();
-        // } catch (err) {
-        // console.error('Error updating crew:', err);
-        // throw err;
-        // }
+        return await updateCrew(selectedCrew!.id, data);
     };
 
-    // const handleDelete = useCallback(async (id: string) => {
-    //     if (window.confirm('Are you sure you want to delete this crew?')) {
-    //     try {
-    //         await deleteCrew(id);
-    //         if (selectedCrew && selectedCrew.id === id) {
-    //         setSelectedCrew(null);
-    //         }
-    //         await fetchCrews();
-    //     } catch (err) {
-    //         console.error('Error deleting crew:', err);
-    //     }
-    //     }
-    // }, [deleteCrew, selectedCrew, fetchCrews]);
+    const handleDelete = useCallback(async (id: string) => {
+        if (window.confirm('Are you sure you want to delete this crew?')) {
+        try {
+            await deleteCrew(id);
+            if (selectedCrew && selectedCrew.id === id) {
+            setSelectedCrew(null);
+            }
+            await fetchCrews();
+        } catch (err) {
+            console.error('Error deleting crew:', err);
+        }
+        }
+    }, [selectedCrew, fetchCrews, deleteCrew]);
 
     // Render content based on current view
     const renderContent = () => {
         switch (currentView) {
         case 'new-crew':
             return (
-            <NewCrewForm
-                onSubmit={handleCreateCrew}
-                onCancel={handleBackToList}
-                employees={employees}
-            />
+                <NewEditCrewForm
+                    onSubmit={handleCreateCrew}
+                    onCancel={handleBackToList}
+                    employees={employees}
+                />
             );
 
         case 'edit-crew':
             return (
-            <NewCrewForm
-                onSubmit={handleUpdateCrew}
-                onCancel={handleBackToList}
-                employees={employees}
-                initialData={selectedCrew ? {
-                    code: selectedCrew.code,
-                    description: selectedCrew.description,
-                    workArea: selectedCrew.workArea,
-                    workers: selectedCrew.workers.map(worker => worker.id)
-                } : undefined}
-            />
+                <NewEditCrewForm
+                    onSubmit={handleUpdateCrew}
+                    onCancel={handleBackToList}
+                    employees={employees}
+                    initialData={selectedCrew ? {
+                        code: selectedCrew.code,
+                        description: selectedCrew.description,
+                        workArea: selectedCrew.workArea,
+                        workers: selectedCrew.workers.map(worker => worker.id.toString())
+                    } : undefined}
+                />
             );
 
         case 'list':
@@ -227,7 +214,7 @@ import {
                     <CrewTable
                         crews={crews}
                         onEdit={handleEditCrew}
-                        // onDelete={handleDelete}
+                        onDelete={handleDelete}
                     />
                 )}
             </>

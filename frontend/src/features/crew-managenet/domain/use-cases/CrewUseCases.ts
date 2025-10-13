@@ -1,4 +1,4 @@
-import { Crew, CreateCrewData } from '../entities/Crew';
+import { Crew, CreateCrewData, ApiResponseMessage } from '../entities/Crew';
 import { CrewRepository } from '../repositories/CrewRepository';
 
 export class CrewUseCases {
@@ -11,20 +11,16 @@ export class CrewUseCases {
     async getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]> {
         return this.crewRepository.getCrewByCodeOrArea(codeOrArea);
     }
-    
-    // async createCrew(crewData: CreateCrewData): Promise<Crew> {
-    //     return this.crewRepository.createCrew(crewData);
-    // }
 
-    // async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<Crew> {
-    //     return this.crewRepository.updateCrew(id, crewData);
-    // }
+    async createCrew(crewData: CreateCrewData): Promise<ApiResponseMessage> {
+        return this.crewRepository.createCrew(crewData);
+    }
 
-    // async deleteCrew(id: string): Promise<void> {
-    //     return this.crewRepository.deleteCrew(id);
-    // }
+    async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<ApiResponseMessage> {
+        return this.crewRepository.updateCrew(id, crewData);
+    }
 
-    // async searchCrews(query: string): Promise<Crew[]> {
-    //     return this.crewRepository.searchCrews(query);
-    // }
+    async deleteCrew(id: string): Promise<ApiResponseMessage> {
+        return this.crewRepository.deleteCrew(id);
+    }
 }
