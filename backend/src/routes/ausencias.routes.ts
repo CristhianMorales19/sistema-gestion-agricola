@@ -1,33 +1,44 @@
 import { Router } from 'express';
 import { checkJwt } from '../shared/infrastructure/config/auth0.config';
+import { AusenciasController } from '../controllers/ausencias.controller';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
 
-/**
- * Rutas de ausencias (alias para permisos/asistencia)
- * Estas rutas son un puente temporal hasta que se implemente el sistema completo de ausencias
- */
-
-/**
- * @route GET /api/ausencias
- * @desc Obtener lista de ausencias
- * @access Requiere autenticación Auth0
- */
-router.get('/', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Endpoint de ausencias - En desarrollo',
-            data: {
-                ausencias: [],
-                total: 0,
-                page: 1,
-                limit: 10
-            }
-        });
+// Configuración de multer para subida de archivos
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../uploads/ausencias');
+    // Crear directorio si no existe
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
-);
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `ausencia-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /pdf|jpg|jpeg|png/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Solo se permiten archivos PDF, JPG y PNG'));
+  }
+});
 
 /**
  * @route GET /api/ausencias/estadisticas
@@ -35,25 +46,28 @@ router.get('/',
  * @access Requiere autenticación Auth0
  */
 router.get('/estadisticas', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Estadísticas de ausencias',
-            data: {
-                total: 0,
-                pendientes: 0,
-                aprobadas: 0,
-                rechazadas: 0,
-                porTipo: {
-                    enfermedad: 0,
-                    personal: 0,
-                    vacaciones: 0,
-                    otro: 0
-                }
-            }
-        });
-    }
+  checkJwt,
+  AusenciasController.getEstadisticas
+);
+
+/**
+ * @route GET /api/ausencias
+ * @desc Obtener lista de ausencias con filtros
+ * @access Requiere autenticación Auth0
+ */
+router.get('/', 
+  checkJwt,
+  AusenciasController.getAll
+);
+
+/**
+ * @route GET /api/ausencias/:id
+ * @desc Obtener ausencia por ID
+ * @access Requiere autenticación Auth0
+ */
+router.get('/:id',
+  checkJwt,
+  AusenciasController.getById
 );
 
 /**
@@ -62,19 +76,8 @@ router.get('/estadisticas',
  * @access Requiere autenticación Auth0
  */
 router.post('/', 
-    checkJwt,
-    (req, res) => {
-        res.status(201).json({
-            success: true,
-            message: 'Ausencia creada exitosamente',
-            data: {
-                id: 1,
-                ...req.body,
-                estado: 'pendiente',
-                fechaCreacion: new Date()
-            }
-        });
-    }
+  checkJwt,
+  AusenciasController.create
 );
 
 /**
@@ -83,17 +86,8 @@ router.post('/',
  * @access Requiere autenticación Auth0
  */
 router.put('/:id', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Ausencia actualizada exitosamente',
-            data: {
-                id: req.params.id,
-                ...req.body
-            }
-        });
-    }
+  checkJwt,
+  AusenciasController.update
 );
 
 /**
@@ -102,54 +96,39 @@ router.put('/:id',
  * @access Requiere autenticación Auth0
  */
 router.delete('/:id', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Ausencia eliminada exitosamente'
-        });
-    }
+  checkJwt,
+  AusenciasController.delete
 );
 
 /**
- * @route PUT /api/ausencias/:id/aprobar
+ * @route POST /api/ausencias/:id/aprobar
  * @desc Aprobar ausencia
  * @access Requiere autenticación Auth0
  */
-router.put('/:id/aprobar', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Ausencia aprobada exitosamente',
-            data: {
-                id: req.params.id,
-                estado: 'aprobada',
-                fechaAprobacion: new Date()
-            }
-        });
-    }
+router.post('/:id/aprobar', 
+  checkJwt,
+  AusenciasController.aprobar
 );
 
 /**
- * @route PUT /api/ausencias/:id/rechazar
+ * @route POST /api/ausencias/:id/rechazar
  * @desc Rechazar ausencia
  * @access Requiere autenticación Auth0
  */
-router.put('/:id/rechazar', 
-    checkJwt,
-    (req, res) => {
-        res.json({
-            success: true,
-            message: 'Ausencia rechazada',
-            data: {
-                id: req.params.id,
-                estado: 'rechazada',
-                fechaRechazo: new Date(),
-                motivoRechazo: req.body.motivo
-            }
-        });
-    }
+router.post('/:id/rechazar', 
+  checkJwt,
+  AusenciasController.rechazar
+);
+
+/**
+ * @route POST /api/ausencias/:id/documento
+ * @desc Subir documento de respaldo
+ * @access Requiere autenticación Auth0
+ */
+router.post('/:id/documento',
+  checkJwt,
+  upload.single('documento'),
+  AusenciasController.subirDocumento
 );
 
 export default router;

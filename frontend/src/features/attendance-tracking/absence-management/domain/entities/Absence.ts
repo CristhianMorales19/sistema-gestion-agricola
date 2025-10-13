@@ -5,7 +5,7 @@
  */
 export interface Absence {
   id: string;
-  trabajador_id: string;
+  trabajador_id: number; // Cambiado a number para coincidir con la BD
   trabajador_nombre: string;
   trabajador_documento: string;
   fecha_ausencia: Date | string;
@@ -26,7 +26,7 @@ export interface Absence {
  * Datos para crear una nueva ausencia
  */
 export interface CreateAbsenceData {
-  trabajador_id: string;
+  trabajador_id: number; // Cambiado a number para coincidir con la BD
   fecha_ausencia: string; // formato: YYYY-MM-DD
   motivo: string;
   motivo_personalizado?: string;

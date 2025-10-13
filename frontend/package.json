@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend para sistema de gestión agrícola con React y TypeScript",
   "private": true,
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "@auth0/auth0-react": "^2.4.0",
     "@chakra-ui/react": "^2.8.2",
