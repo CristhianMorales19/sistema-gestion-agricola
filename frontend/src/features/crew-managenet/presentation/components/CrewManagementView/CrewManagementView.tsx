@@ -16,6 +16,7 @@ import {
     import { UseCrewManagement } from '../../../application/hooks/UseCrewManagement';
     import { CreateCrewData, Crew } from '../../../domain/entities/Crew';
     import { useEmployeeManagement } from '../../../../personnel-management/application/hooks/useEmployeeManagement';
+    import { ConfirmDeleteDialog } from '../../../../../shared/presentation/components/ConfirmDeleteDialog';
 
     type CrewView = 'list' | 'new-crew' | 'edit-crew';
 
@@ -26,12 +27,39 @@ import {
     const [isSearching, setIsSearching] = useState(false);
     const [currentView, setCurrentView] = useState<CrewView>('list');
     const [selectedCrew, setSelectedCrew] = useState<Crew | null>(null);
+    
+    // Para el diálogo de eliminar
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [crewToDelete, setCrewToDelete] = useState<{ id: string; label?: string } | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     // Fetch crews on component mount
     useEffect(() => {
         fetchCrews();
         refreshEmployees();
     }, [fetchCrews, refreshEmployees]);
+
+    // Funciones para el diálogo
+    const handleOpenDeleteDialog = useCallback((id: string, label?: string) => {
+        setCrewToDelete({ id, label });
+        setDeleteDialogOpen(true);
+    }, []);
+
+    const handleCloseDeleteDialog = useCallback(() => {
+        setDeleteDialogOpen(false);
+        setCrewToDelete(null);
+    }, []);
+
+    const handleConfirmDelete = useCallback(async () => {
+        if (!crewToDelete) return;
+        setDeleting(true);
+        await deleteCrew(crewToDelete.id);
+        // si la cuadrilla seleccionada es la borrada, limpiar selección
+        if (selectedCrew && selectedCrew.id === crewToDelete.id)
+            setSelectedCrew(null);
+        setDeleting(false);
+        handleCloseDeleteDialog();
+    }, [crewToDelete, deleteCrew, selectedCrew, handleCloseDeleteDialog]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
@@ -52,9 +80,8 @@ import {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-        handleSearch();
-        }
+        if (e.key === 'Enter')
+            handleSearch();
     };
 
     const handleAddCrewClick = useCallback(() => {
@@ -80,20 +107,6 @@ import {
     const handleUpdateCrew = async (data: CreateCrewData) => {
         return await updateCrew(selectedCrew!.id, data);
     };
-
-    const handleDelete = useCallback(async (id: string) => {
-        if (window.confirm('Are you sure you want to delete this crew?')) {
-        try {
-            await deleteCrew(id);
-            if (selectedCrew && selectedCrew.id === id) {
-            setSelectedCrew(null);
-            }
-            await fetchCrews();
-        } catch (err) {
-            console.error('Error deleting crew:', err);
-        }
-        }
-    }, [selectedCrew, fetchCrews, deleteCrew]);
 
     // Render content based on current view
     const renderContent = () => {
@@ -214,7 +227,7 @@ import {
                     <CrewTable
                         crews={crews}
                         onEdit={handleEditCrew}
-                        onDelete={handleDelete}
+                        onDelete={(id: string, label?: string) => handleOpenDeleteDialog(id, label)}
                     />
                 )}
             </>
@@ -224,30 +237,39 @@ import {
 
     return (
         <Box sx={{ p: 3 }}>
-        {/* Header - Always visible */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
-            Gestión de Cuadrillas
-            </Typography>
-            
-            {/* Show buttons only in list view */}
-            {currentView === 'list' && (
-            <Button
-                variant="contained"
-                startIcon={<GroupAddIcon />}
-                onClick={handleAddCrewClick}
-                sx={{
-                backgroundColor: '#10b981',
-                '&:hover': { backgroundColor: '#059669' }
-                }}
-            >
-                Crear Cuadrilla
-            </Button>
-            )}
-        </Box>
+            <ConfirmDeleteDialog
+                open={deleteDialogOpen}
+                title="Eliminar cuadrilla"
+                message="Esta acción eliminará permanentemente la cuadrilla y no podrá revertirse. ¿Deseas continuar?"
+                itemLabel={crewToDelete?.label}
+                onCancel={handleCloseDeleteDialog}
+                onConfirm={handleConfirmDelete}
+                loading={deleting}
+            />
 
-        {/* Dynamic content */}
-        {renderContent()}
+            {/* Header - Always visible */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
+                Gestión de Cuadrillas
+                </Typography>
+                
+                {/* Show buttons only in list view */}
+                {currentView === 'list' && (
+                <Button
+                    variant="contained"
+                    startIcon={<GroupAddIcon />}
+                    onClick={handleAddCrewClick}
+                    sx={{
+                    backgroundColor: '#10b981',
+                    '&:hover': { backgroundColor: '#059669' }
+                    }}
+                >
+                    Crear Cuadrilla
+                </Button>
+                )}
+            </Box>
+            {/* Dynamic content */}
+            {renderContent()}
         </Box>
     );
 };

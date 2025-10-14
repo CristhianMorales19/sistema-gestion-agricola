@@ -1,62 +1,63 @@
-import { Crew, CreateCrewData, CrewApiResponse, ApiResponseMessage } from '../domain/entities/Crew';
+import { Crew, CreateCrewData } from '../domain/entities/Crew';
 import { CrewRepository } from '../domain/repositories/CrewRepository';
 import { apiService } from '../../../services/api.service';
-import { safeCall } from '../../../shared/utils/safeCall';
+import { safeCall, SafeResult } from '../../../shared/utils/safeCall';
 
 export class ApiCrewRepository implements CrewRepository {
     private baseUrl = '/cuadrillas';
 
-    async getAllCrews(): Promise<Crew[]> {
+    async getAllCrews(): Promise<SafeResult<Crew[]>> {
         const result = await safeCall(apiService.get(this.baseUrl));
         if (!result.success)
-            throw result.error.message;
-        const crewData = result.data.data as CrewApiResponse[];
-        return crewData.map(this.mapCrew);
+            return { success: false, data: null, error: result.error };
+        const crewData = result.data?.data as Crew[];
+        const mapped = crewData.map(this.mapCrew);
+        return { success: true, data: mapped, error: null}
     }
 
-    async getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]> {
+    async getCrewByCodeOrArea(codeOrArea: string): Promise<SafeResult<Crew[]>> {
         const result = await safeCall(apiService.get(`${this.baseUrl}/${encodeURIComponent(codeOrArea)}`));
-        if (!result.success) 
-            throw result.error.message;
-        const crewData = result.data.data as CrewApiResponse[];
-        return crewData.map(this.mapCrew);
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        const crewData = result.data?.data as Crew[];
+        const mapped = crewData.map(this.mapCrew);
+        return { success: true, data: mapped, error: null}
     }
 
-    async createCrew(crewData: CreateCrewData): Promise<ApiResponseMessage> {
+    async createCrew(crewData: CreateCrewData): Promise<SafeResult<string>> {
         const result = await safeCall(apiService.post(this.baseUrl, crewData));
         if (!result.success)
-            return { success: false, message: result.error.message };
-        return {
-            success: result.data.success,
-            message: result.data.message ?? 'Cuadrilla creada correctamente',
+            return { success: false, data: null, error: result.error };
+        return { 
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla creada correctamente',
+            error: null 
         };
     }
 
-    async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<ApiResponseMessage> {
-        console.log('Updating crew with ID:', id, 'and data:', crewData);
+    async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<SafeResult<string>> {
         const result = await safeCall(apiService.patch(`${this.baseUrl}/${id}`, crewData));
-        console.log('Update result:', result);
         if (!result.success)
-            return { success: false, message: result.error.message };
+            return { success: false, data: null, error: result.error };
         return {
-            success: result.data.success,
-            message: result.data.message ?? 'Cuadrilla actualizada correctamente',
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla actualizada correctamente',
+            error: null 
         };
     }
 
-    async deleteCrew(id: string): Promise<ApiResponseMessage> {
-        console.log('Deleting crew with ID:', id);
+    async deleteCrew(id: string): Promise<SafeResult<string>> {
         const result = await safeCall(apiService.delete(`${this.baseUrl}/${id}`));
-        console.log('Delete result:', result);
         if (!result.success)
-            return { success: false, message: result.error.message };
+            return { success: false, data: null, error: result.error };
         return {
-            success: result.data.success,
-            message: result.data.message ?? 'Cuadrilla eliminada correctamente',
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla eliminada correctamente',
+            error: null 
         };
     }
 
-    private mapCrew(apiCrew: CrewApiResponse): Crew {
+    private mapCrew(apiCrew: Crew): Crew {
         return {
             id: apiCrew.id,
             code: apiCrew.code,

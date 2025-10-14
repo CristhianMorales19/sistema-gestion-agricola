@@ -1,9 +1,10 @@
-import { Crew, CreateCrewData, ApiResponseMessage } from '../entities/Crew';
+import { Crew, CreateCrewData } from '../entities/Crew';
+import { SafeResult } from '@shared/utils/safeCall';
 
 export interface CrewRepository {
-    getAllCrews(): Promise<Crew[]>;
-    getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]>;
-    createCrew(crewData: CreateCrewData) : Promise<ApiResponseMessage>;
-    updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<ApiResponseMessage>;
-    deleteCrew(id: string): Promise<ApiResponseMessage>;
+    getAllCrews(): Promise<SafeResult<Crew[]>>;
+    getCrewByCodeOrArea(codeOrArea: string): Promise<SafeResult<Crew[]>>;
+    createCrew(crewData: CreateCrewData) : Promise<SafeResult<string>>;
+    updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<SafeResult<string>>;
+    deleteCrew(id: string): Promise<SafeResult<string>>;
 }

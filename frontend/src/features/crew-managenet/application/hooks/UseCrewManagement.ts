@@ -12,81 +12,62 @@ export const UseCrewManagement = () => {
 
     const fetchCrews = useCallback(async () => {
         setLoading(true);
-        const result = await safeCall(crewService.getAllCrews());
-        if (result.success) 
-            setCrews(result.data);
-        else 
-            showMessage('error', result.error.message);
+        const result = await crewService.getAllCrews();
         setLoading(false);
+        if (!result.success) {
+            showMessage('error', result.error.message || 'Error al cargar cuadrillas');
+            return;
+        }
+        setCrews(result.data);
     }, [showMessage]);
 
     const searchCrews = useCallback(async (query: string) => {
         setLoading(true);
-        const result = await safeCall(crewService.getCrewByCodeOrArea(query));
-        if (result.success) 
-            setCrews(result.data);
-        else 
-            showMessage('error', result.error.message);
+        const result = await crewService.getCrewByCodeOrArea(query);
         setLoading(false);
+        if (!result.success) {
+            showMessage('error', result.error.message);
+            return;
+        }
+        setCrews(result.data);
     }, [showMessage]);
 
     const createCrew = useCallback(async (crewData: CreateCrewData) => {
         setLoading(true);
-        const result = await safeCall(crewService.createCrew(crewData));
-
-        if (result.success) {
-            const response = result.data; // ApiResponseMessage
-            if (response.success) {
-                showMessage('success', response.message);
-                await fetchCrews(); // refresca la lista
-                setLoading(false);
-                return true;
-            } else 
-                showMessage('error', response.message);
-        } else 
-            showMessage('error', result.error.message || 'Error al crear cuadrilla');
-
+        const result = await crewService.createCrew(crewData);
         setLoading(false);
+        if (result.success) {
+            showMessage('success', result.data);
+            await fetchCrews();
+            return true;
+        }
+        showMessage('error', result.error.message);
         return false;
     }, [fetchCrews, showMessage]);
 
     const updateCrew = useCallback(async (id: string, crewData: Partial<CreateCrewData>) => {
         setLoading(true);
-        const result = await safeCall(crewService.updateCrew(id,  crewData));
-
-        if (result.success) {
-            const response = result.data; // ApiResponseMessage
-            if (response.success) {
-                showMessage('success', response.message);
-                await fetchCrews(); // refresca la lista
-                setLoading(false);
-                return true;
-            } else 
-                showMessage('error', response.message);
-        } else 
-            showMessage('error', result.error.message || 'Error al crear cuadrilla');
-
+        const result = await crewService.updateCrew(id, crewData);
         setLoading(false);
+        if (result.success) {
+            showMessage('success', result.data);
+            await fetchCrews();
+            return true;
+        }
+        showMessage('error', result.error.message);
         return false;
     }, [fetchCrews, showMessage]);
 
     const deleteCrew = useCallback(async (id: string) => {
         setLoading(true);
-        const result = await safeCall(crewService.deleteCrew(id));
-
-        if (result.success) {
-            const response = result.data; // ApiResponseMessage
-            if (response.success) {
-                showMessage('success', response.message);
-                await fetchCrews(); // refresca la lista
-                setLoading(false);
-                return true;
-            } else 
-                showMessage('error', response.message);
-        } else 
-            showMessage('error', result.error.message || 'Error al crear cuadrilla');
-
+        const result = await crewService.deleteCrew(id);
         setLoading(false);
+        if (result.success) {
+            showMessage('success', result.data);
+            await fetchCrews();
+            return true;
+        }
+        showMessage('error', result.error.message);
         return false;
     }, [fetchCrews, showMessage]);
 

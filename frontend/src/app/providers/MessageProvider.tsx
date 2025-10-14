@@ -34,13 +34,12 @@ export const MessageProvider = ({ children }: { children: ReactNode }) => {
                 open
                 autoHideDuration={4000}
                 onClose={clearMessage}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
                 <Alert
                     onClose={clearMessage}
                     severity={message.type}
                     sx={{ width: '100%' }}
-                    variant="filled"
                 >
                 {message.text}
                 </Alert>

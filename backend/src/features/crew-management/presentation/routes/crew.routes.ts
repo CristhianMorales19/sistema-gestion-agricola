@@ -272,11 +272,11 @@ router.patch('/:id', checkJwt, hybridAuthMiddleware, async (req, res) => {
             rel_mom_cuadrilla__mom_trabajador: {
                 deleteMany: {}, // limpias anteriores
                 create: workers.map((id: number) => ({
-                trabajador_id: id,
-                fecha_asignacion_at: new Date(),
-                usuario_asignacion: userId,
-                created_at: new Date(),
-                created_by: userId,
+                    trabajador_id: Number(id),
+                    fecha_asignacion_at: new Date(),
+                    usuario_asignacion: userId,
+                    created_at: new Date(),
+                    created_by: userId,
                 })),
             },
             }),
@@ -361,7 +361,5 @@ router.delete('/:id', checkJwt, hybridAuthMiddleware, async (req, res) => {
         });
     }
 });
-
-
 
 export default router;

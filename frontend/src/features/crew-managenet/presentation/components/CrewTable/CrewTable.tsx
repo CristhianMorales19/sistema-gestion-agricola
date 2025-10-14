@@ -20,7 +20,7 @@ import {
     interface CrewTableProps {
         crews: Crew[];
         onEdit: (crew: Crew) => void;
-        onDelete: (id: string) => void;
+        onDelete: (id: string, label?: string) => void;
     }
 
     const getMemberCountText = (count: number) => {
@@ -31,7 +31,7 @@ import {
     const CrewRow = React.memo<{
         crew: Crew;
         onEdit: (crew: Crew) => void;
-        onDelete: (id: string) => void;
+        onDelete: (id: string, label?: string) => void;
         }>(({ crew, onEdit, onDelete }) => {
         const handleEditClick = React.useCallback((e: React.MouseEvent) => {
             e.stopPropagation();
@@ -40,8 +40,8 @@ import {
 
     const handleDeleteClick = React.useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        onDelete(crew.id);
-    }, [crew.id, onDelete]);
+        onDelete(crew.id, `${crew.code} — ${crew.description}`);
+    }, [crew.id, crew.code, crew.description, onDelete]);
 
     return (
         <TableRow 
@@ -91,9 +91,9 @@ import {
     CrewRow.displayName = 'CrewRow';
 
     export const CrewTable: React.FC<CrewTableProps> = ({
-    crews,
-    onEdit,
-    onDelete
+        crews,
+        onEdit,
+        onDelete
     }) => {
     return (
         <TableContainer component={Paper} sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
