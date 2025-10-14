@@ -1,4 +1,3 @@
-// src/employee-management/presentation/components/LaborInfoView/LaborInfoView.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -7,7 +6,13 @@ import {
   Button,
   Typography,
   MenuItem,
-  Grid
+  Grid,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { validateLaborInfo, LaborInfoErrors } from './validation';
@@ -16,7 +21,7 @@ export interface LaborInfoData {
   position: string;
   baseSalary: number;
   contractType: string;
-  department: string;
+  area?: string; // Área o unidad organizativa (reemplaza a department)
   // Campos añadidos para reportes / comprobantes
   payrollCode?: string;
   salaryGross?: number;
@@ -29,6 +34,9 @@ export interface LaborInfoData {
   vacationAmount?: number;
   incapacityAmount?: number;
   lactationAmount?: number;
+  salaryAverage?: number; // Salario promedio
+  monthsWorked?: number; // Meses trabajados
+  hoursReported?: number; // Horas reportadas
 }
 
 interface LaborInfoViewProps {
@@ -46,7 +54,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     position: '',
     baseSalary: 0,
     contractType: '',
-    department: ''
+    area: ''
   });
   // Inicializar campos adicionales al montar para evitar inputs uncontrolled
   useEffect(() => {
@@ -55,7 +63,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
       position: prev.position ?? '',
       baseSalary: prev.baseSalary ?? 0,
       contractType: prev.contractType ?? '',
-      department: prev.department ?? '',
+      area: prev.area ?? '',
       salaryGross: prev.salaryGross ?? 0,
       ccssDeduction: prev.ccssDeduction ?? 0,
       otherDeductions: prev.otherDeductions ?? 0,
@@ -66,26 +74,24 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
       vacationAmount: prev.vacationAmount ?? 0,
       incapacityAmount: prev.incapacityAmount ?? 0,
       lactationAmount: prev.lactationAmount ?? 0,
+      salaryAverage: prev.salaryAverage ?? 0,
+      monthsWorked: prev.monthsWorked ?? 0,
+      hoursReported: prev.hoursReported ?? 0,
     } as LaborInfoData));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LaborInfoErrors>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const contractTypes = [
     { value: 'full_time', label: 'Tiempo Completo' },
     { value: 'part_time', label: 'Medio Tiempo' },
     { value: 'temporary', label: 'Temporal' },
     { value: 'freelance', label: 'Freelance' }
-  ];
-
-  const departments = [
-    { value: 'hr', label: 'Recursos Humanos' },
-    { value: 'it', label: 'Tecnología' },
-    { value: 'finance', label: 'Finanzas' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'operations', label: 'Operaciones' },
-    { value: 'sales', label: 'Ventas' }
   ];
 
   // Estilo atenuado (igual al campo ID) para campos de información laboral
@@ -101,7 +107,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['baseSalary','salaryGross','ccssDeduction','otherDeductions','salaryPerHour','ordinaryHours','extraHours','otherHours','vacationAmount','incapacityAmount','lactationAmount'].includes(name)
+      [name]: ['baseSalary','salaryGross','ccssDeduction','otherDeductions','salaryPerHour','ordinaryHours','extraHours','otherHours','vacationAmount','incapacityAmount','lactationAmount','salaryAverage','monthsWorked','hoursReported'].includes(name)
         ? (parseFloat(value) || 0)
         : value
     }));
@@ -111,20 +117,45 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     e.preventDefault();
     if (!employee) return;
 
-    // Validar antes de enviar
+    // Limpiar mensajes previos
+    setServerError(null);
+    setSuccessMessage(null);
+
+    // Validar antes de abrir confirmación
     const validation = validateLaborInfo(formData);
     setErrors(validation);
-    if (Object.keys(validation).length > 0) return;
+    if (Object.keys(validation).length > 0) {
+      setServerError('Por favor corrija los errores en el formulario');
+      return;
+    }
 
+    // Abrir diálogo de confirmación
+    setConfirmOpen(true);
+  }, [employee, formData]);
+
+  const handleConfirm = async () => {
+    setConfirmOpen(false);
     setLoading(true);
     try {
       await onSave(formData);
-    } catch (error) {
+      setSuccessMessage('Información laboral guardada exitosamente');
+      setServerError(null);
+    } catch (error: any) {
       console.error('Error al guardar información laboral:', error);
+      let errorMessage = 'Error al guardar la información laboral. Intente nuevamente.';
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      setServerError(errorMessage);
+      setSuccessMessage(null);
     } finally {
       setLoading(false);
     }
-  }, [employee, formData, onSave]);
+  };
+
+  const handleCancelConfirm = () => setConfirmOpen(false);
 
   if (!employee) {
     return (
@@ -143,6 +174,18 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
         <Typography variant="h5" sx={{ color: '#ffffff', mb: 3 }}>
           Información Laboral
         </Typography>
+
+        {/* Mensajes de éxito y error */}
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            {successMessage}
+          </Alert>
+        )}
+        {serverError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {serverError}
+          </Alert>
+        )}
 
         {/* Información del empleado (no editable) */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -267,14 +310,12 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
-              select
-              label="Departamento"
-              name="department"
-              value={formData.department}
+              label="Área / Departamento"
+              name="area"
+              value={formData.area}
               onChange={handleChange}
-              required
-              error={Boolean(errors.department)}
-              helperText={errors.department}
+              error={Boolean(errors.area)}
+              helperText={errors.area || 'Área o unidad organizativa del trabajador'}
               sx={{
                 '& .MuiInputBase-input': { color: '#ffffff' },
                 '& .MuiInputLabel-root': { color: '#94a3b8' },
@@ -284,13 +325,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
                   '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
                 }
               }}
-            >
-              {departments.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            />
           </Grid>
 
           {/* Campos de nómina / comprobantes */}
@@ -480,6 +515,33 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
             {loading ? 'Guardando...' : 'Guardar Información Laboral'}
           </Button>
         </Box>
+        {/* Dialogo de confirmación antes de enviar */}
+        <Dialog
+          open={confirmOpen}
+          onClose={handleCancelConfirm}
+          aria-labelledby="confirm-dialog-title"
+          aria-describedby="confirm-dialog-description"
+        >
+          <DialogTitle id="confirm-dialog-title">Confirmar cambios</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="confirm-dialog-description">
+              ¿Deseas guardar los cambios en la información laboral? Se actualizarán los campos seleccionados.
+            </DialogContentText>
+            {/* Pequeño resumen de los cambios */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2"><strong>Cargo:</strong> {formData.position || '—'}</Typography>
+              <Typography variant="body2"><strong>Tipo de contrato:</strong> {formData.contractType || '—'}</Typography>
+              <Typography variant="body2"><strong>Salario Base:</strong> {formData.baseSalary ?? '—'}</Typography>
+              <Typography variant="body2"><strong>Área:</strong> {formData.area || '—'}</Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelConfirm}>Cancelar</Button>
+            <Button onClick={handleConfirm} autoFocus>
+              Confirmar
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Paper>
   );

@@ -277,6 +277,7 @@ router.put('/:id',
             const { cargo, salario_base, tipo_contrato } = req.body;
             // Campos adicionales que pueden llegar por el formulario laboral
             const {
+                area,
                 codigo_nomina,
                 salario_bruto,
                 rebajas_ccss,
@@ -287,7 +288,10 @@ router.put('/:id',
                 horas_otras,
                 vacaciones_monto,
                 incapacidad_monto,
-                lactancia_monto
+                lactancia_monto,
+                salario_promedio,
+                meses_trabajados,
+                horas_reportadas
             } = req.body;
             
             if (!cargo || !salario_base || !tipo_contrato) {
@@ -313,34 +317,49 @@ router.put('/:id',
                 orderBy: { info_laboral_id: 'desc' }
             });
 
+            const userId = (req as any).user?.sub || 1;
+            const now = new Date();
+
             const laboralData: any = {
                 trabajador_id: trabajadorId,
                 cargo: cargo ? String(cargo) : (existingInfo ? existingInfo.cargo : 'Sin definir'),
-                fecha_ingreso_at: req.body.fecha_ingreso_at ? new Date(req.body.fecha_ingreso_at) : (existingInfo ? existingInfo.fecha_ingreso_at : new Date()),
+                fecha_ingreso_at: req.body.fecha_ingreso_at ? new Date(req.body.fecha_ingreso_at) : (existingInfo ? existingInfo.fecha_ingreso_at : now),
                 tipo_contrato: tipo_contrato ? String(tipo_contrato) : (existingInfo ? existingInfo.tipo_contrato : 'no_definido'),
                 salario_base: salario_base ? parseFloat(String(salario_base)) : (existingInfo ? existingInfo.salario_base : 0),
-                codigo_nomina: req.body.codigo_nomina ? String(req.body.codigo_nomina) : (existingInfo ? existingInfo.codigo_nomina : null),
-                salario_bruto: req.body.salario_bruto ? parseFloat(String(req.body.salario_bruto)) : (existingInfo ? existingInfo.salario_bruto : null),
-                rebajas_ccss: req.body.rebajas_ccss ? parseFloat(String(req.body.rebajas_ccss)) : (existingInfo ? existingInfo.rebajas_ccss : null),
-                otras_rebajas: req.body.otras_rebajas ? parseFloat(String(req.body.otras_rebajas)) : (existingInfo ? existingInfo.otras_rebajas : null),
-                salario_por_hora: req.body.salario_por_hora ? parseFloat(String(req.body.salario_por_hora)) : (existingInfo ? existingInfo.salario_por_hora : null),
-                horas_ordinarias: req.body.horas_ordinarias ? parseFloat(String(req.body.horas_ordinarias)) : (existingInfo ? existingInfo.horas_ordinarias : null),
-                horas_extras: req.body.horas_extras ? parseFloat(String(req.body.horas_extras)) : (existingInfo ? existingInfo.horas_extras : null),
-                horas_otras: req.body.horas_otras ? parseFloat(String(req.body.horas_otras)) : (existingInfo ? existingInfo.horas_otras : null),
-                vacaciones_monto: req.body.vacaciones_monto ? parseFloat(String(req.body.vacaciones_monto)) : (existingInfo ? existingInfo.vacaciones_monto : null),
-                incapacidad_monto: req.body.incapacidad_monto ? parseFloat(String(req.body.incapacidad_monto)) : (existingInfo ? existingInfo.incapacidad_monto : null),
-                lactancia_monto: req.body.lactancia_monto ? parseFloat(String(req.body.lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
-                fecha_ultima_actualizacion_at: new Date(),
-                usuario_ultima_actualizacion: (req as any).user?.sub || 1,
-                updated_at: new Date()
+                area: area ? String(area) : (existingInfo ? existingInfo.area : null),
+                codigo_nomina: codigo_nomina ? String(codigo_nomina) : (existingInfo ? existingInfo.codigo_nomina : null),
+                salario_bruto: salario_bruto ? parseFloat(String(salario_bruto)) : (existingInfo ? existingInfo.salario_bruto : null),
+                rebajas_ccss: rebajas_ccss ? parseFloat(String(rebajas_ccss)) : (existingInfo ? existingInfo.rebajas_ccss : null),
+                otras_rebajas: otras_rebajas ? parseFloat(String(otras_rebajas)) : (existingInfo ? existingInfo.otras_rebajas : null),
+                salario_por_hora: salario_por_hora ? parseFloat(String(salario_por_hora)) : (existingInfo ? existingInfo.salario_por_hora : null),
+                horas_ordinarias: horas_ordinarias ? parseFloat(String(horas_ordinarias)) : (existingInfo ? existingInfo.horas_ordinarias : null),
+                horas_extras: horas_extras ? parseFloat(String(horas_extras)) : (existingInfo ? existingInfo.horas_extras : null),
+                horas_otras: horas_otras ? parseFloat(String(horas_otras)) : (existingInfo ? existingInfo.horas_otras : null),
+                vacaciones_monto: vacaciones_monto ? parseFloat(String(vacaciones_monto)) : (existingInfo ? existingInfo.vacaciones_monto : null),
+                incapacidad_monto: incapacidad_monto ? parseFloat(String(incapacidad_monto)) : (existingInfo ? existingInfo.incapacidad_monto : null),
+                lactancia_monto: lactancia_monto ? parseFloat(String(lactancia_monto)) : (existingInfo ? existingInfo.lactancia_monto : null),
+                salario_promedio: salario_promedio ? parseFloat(String(salario_promedio)) : (existingInfo ? existingInfo.salario_promedio : null),
+                meses_trabajados: meses_trabajados ? parseInt(String(meses_trabajados)) : (existingInfo ? existingInfo.meses_trabajados : null),
+                horas_reportadas: horas_reportadas ? parseFloat(String(horas_reportadas)) : (existingInfo ? (existingInfo as any).horas_reportadas : null),
+                fecha_ultima_actualizacion_at: now,
+                usuario_ultima_actualizacion: userId,
+                updated_at: now
             };
 
             if (existingInfo) {
+                // Solo incluir updated_by al actualizar
+                laboralData.updated_by = userId;
+                
                 await prisma.mot_info_laboral.update({
                     where: { info_laboral_id: existingInfo.info_laboral_id },
                     data: laboralData
                 });
             } else {
+                // Incluir created_at y created_by al crear
+                laboralData.created_at = now;
+                laboralData.created_by = userId;
+                laboralData.updated_by = null;
+                
                 await prisma.mot_info_laboral.create({ data: laboralData });
             }
 
@@ -357,10 +376,41 @@ router.put('/:id',
             });
             
         } catch (error) {
-            console.error('Error al actualizar trabajador:', error);
+            console.error('❌ Error al actualizar información laboral del trabajador:', error);
+            
+            // Manejo de errores específicos de Prisma
+            if (error && typeof error === 'object' && 'code' in error) {
+                const prismaError = error as { code: string; meta?: any };
+                
+                if (prismaError.code === 'P2002') {
+                    return res.status(409).json({
+                        success: false,
+                        message: 'Ya existe un registro con estos datos únicos',
+                        error: 'DUPLICATE_ENTRY'
+                    });
+                }
+                
+                if (prismaError.code === 'P2003') {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'El trabajador especificado no existe',
+                        error: 'FOREIGN_KEY_CONSTRAINT'
+                    });
+                }
+                
+                if (prismaError.code === 'P2025') {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Registro no encontrado',
+                        error: 'NOT_FOUND'
+                    });
+                }
+            }
+            
             res.status(500).json({
                 success: false,
-                message: 'Error interno del servidor al actualizar la información laboral'
+                message: 'Error interno del servidor al actualizar la información laboral',
+                error: error instanceof Error ? error.message : 'Unknown error'
             });
         }
     }
@@ -526,6 +576,53 @@ router.get('/search/:query',
                 success: false,
                 message: 'Error al buscar trabajadores'
             });
+        }
+    }
+);
+
+/**
+ * @route GET /api/trabajadores/:id
+ * @desc Obtener un trabajador por id incluyendo su información laboral más reciente
+ * @access Requiere permisos: trabajadores:read:all OR trabajadores:read:own
+ */
+router.get('/:id',
+    checkJwt,
+    hybridAuthMiddleware,
+    requireAnyPermission(['trabajadores:read:all', 'trabajadores:read:own']),
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const trabajadorId = parseInt(id, 10);
+
+            const trabajador = await prisma.mom_trabajador.findUnique({
+                where: { trabajador_id: trabajadorId },
+                include: {
+                    mot_info_laboral: {
+                        take: 1,
+                        orderBy: { info_laboral_id: 'desc' }
+                    }
+                }
+            });
+
+            if (!trabajador) {
+                return res.status(404).json({ success: false, message: 'Trabajador no encontrado' });
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    id: trabajador.trabajador_id.toString(),
+                    name: trabajador.nombre_completo,
+                    identification: trabajador.documento_identidad,
+                    email: trabajador.email,
+                    phone: trabajador.telefono,
+                    status: Boolean(trabajador.is_activo),
+                    laborInfo: trabajador.mot_info_laboral[0] || null
+                }
+            });
+        } catch (error) {
+            console.error('Error al obtener trabajador por id:', error);
+            res.status(500).json({ success: false, message: 'Error interno al obtener trabajador' });
         }
     }
 );

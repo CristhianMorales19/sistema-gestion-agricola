@@ -2,7 +2,7 @@ export type LaborInfoErrors = Partial<Record<
   | 'position'
   | 'baseSalary'
   | 'contractType'
-  | 'department'
+  | 'area'
   | 'payrollCode'
   , string>>;
 
@@ -24,8 +24,9 @@ export const validateLaborInfo = (data: any): LaborInfoErrors => {
     errors.contractType = 'El tipo de contrato es requerido';
   }
 
-  if (!data.department || String(data.department).trim().length === 0) {
-    errors.department = 'El departamento es requerido';
+  // area es opcional
+  if (data.area && String(data.area).trim().length === 0) {
+    errors.area = 'El área no puede estar vacía si se proporciona';
   }
 
   // payrollCode optional but if present should be trimmed

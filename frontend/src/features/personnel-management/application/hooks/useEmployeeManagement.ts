@@ -70,6 +70,7 @@ export const useEmployeeManagement = () => {
         cargo: laborData.position,
         salario_base: laborData.baseSalary,
         tipo_contrato: laborData.contractType,
+        area: laborData.area,
         codigo_nomina: laborData.payrollCode,
         salario_bruto: laborData.salaryGross,
         rebajas_ccss: laborData.ccssDeduction,
@@ -81,6 +82,9 @@ export const useEmployeeManagement = () => {
         vacaciones_monto: laborData.vacationAmount,
         incapacidad_monto: laborData.incapacityAmount,
         lactancia_monto: laborData.lactationAmount,
+        salario_promedio: laborData.salaryAverage,
+        meses_trabajados: laborData.monthsWorked,
+        horas_reportadas: laborData.hoursReported,
       };
 
       const updated = await updateEmployee(id, payload);

@@ -476,6 +476,7 @@ model mot_info_laboral {
   salario_promedio              Decimal?       @db.Decimal(13, 2)
   meses_trabajados              Int?
   area                          String?        @db.VarChar(120)
+  horas_reportadas              Decimal?       @db.Decimal(7, 2)
   salario_base                  Decimal        @db.Decimal(13, 2)
   fecha_ultima_actualizacion_at DateTime       @db.DateTime(0)
   usuario_ultima_actualizacion  Int
