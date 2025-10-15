@@ -5,6 +5,7 @@ import { CssBaseline } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 import { auth0Config, appConfig } from '../config';
 import { apiService } from '../../services/api.service';
+import { MessageProvider } from './MessageProvider';
 
 // Tema personalizado de Material-UI
 const theme = createTheme({
@@ -78,7 +79,9 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <ApiServiceConfig />
-          {children}
+          <MessageProvider>
+            {children}
+          </MessageProvider>
         </ThemeProvider>
       </BrowserRouter>
     </Auth0Provider>

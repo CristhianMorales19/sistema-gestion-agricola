@@ -1,94 +1,74 @@
-import { Crew, CreateCrewData, CrewApiResponse } from '../domain/entities/Crew';
+import { Crew, CreateCrewData } from '../domain/entities/Crew';
 import { CrewRepository } from '../domain/repositories/CrewRepository';
 import { apiService } from '../../../services/api.service';
+import { safeCall, SafeResult } from '../../../shared/utils/safeCall';
 
 export class ApiCrewRepository implements CrewRepository {
     private baseUrl = '/cuadrillas';
 
-    async getAllCrews(): Promise<Crew[]> {
-        const response = await apiService.get<CrewApiResponse[]>(this.baseUrl);
-        
-        console.log('Cuadrillas:', response.data);
-        
-        // Verificar si la respuesta fue exitosa
-        if (!response.success) {
-            throw new Error('Failed to fetch crews');
-        }
-
-        // Mapear la respuesta del backend a la interfaz Crew
-        const crews: Crew[] = response.data.map((crewData: CrewApiResponse) => ({
-            id: crewData.id,
-            code: crewData.code,
-            description: crewData.description,
-            workArea: crewData.workArea,
-            active: crewData.active,
-            workers: crewData.workers.map((worker: any) => ({
-                id: worker.id,
-                name: worker.name,
-                identification: worker.identification,
-            })),
-        }));
-
-        return crews;
+    async getAllCrews(): Promise<SafeResult<Crew[]>> {
+        const result = await safeCall(apiService.get(this.baseUrl));
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        const crewData = result.data?.data as Crew[];
+        const mapped = crewData.map(this.mapCrew);
+        return { success: true, data: mapped, error: null}
     }
 
-    async getCrewByCodeOrArea(codeOrArea: string): Promise<Crew[]> {
-
-        const response = await apiService.get<CrewApiResponse[]>(`${this.baseUrl}/${encodeURIComponent(codeOrArea)}`);
-
-        console.log('Cuadrillas:', response.data);
-        // Verificar si la respuesta fue exitosa
-        if (!response.success) {
-            throw new Error('Failed to fetch crews');
-        }
-
-        // Mapear la respuesta del backend a la interfaz Crew
-        const crews: Crew[] = response.data.map((crewData: CrewApiResponse) => ({
-            id: crewData.id,
-            code: crewData.code,
-            description: crewData.description,
-            workArea: crewData.workArea,
-            active: crewData.active,
-            workers: crewData.workers.map((worker: any) => ({
-                id: worker.id,
-                name: worker.name,
-                identification: worker.identification,
-            })),
-        }));
-
-        return crews;
+    async getCrewByCodeOrArea(codeOrArea: string): Promise<SafeResult<Crew[]>> {
+        const result = await safeCall(apiService.get(`${this.baseUrl}/${encodeURIComponent(codeOrArea)}`));
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        const crewData = result.data?.data as Crew[];
+        const mapped = crewData.map(this.mapCrew);
+        return { success: true, data: mapped, error: null}
     }
 
-    // async createCrew(crewData: CreateCrewData): Promise<Crew> {
-    //     const response = await fetch(this.baseUrl, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(crewData),
-    //     });
-    //     if (!response.ok) throw new Error('Failed to create crew');
-    //     return response.json();
-    // }
+    async createCrew(crewData: CreateCrewData): Promise<SafeResult<string>> {
+        const result = await safeCall(apiService.post(this.baseUrl, crewData));
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        return { 
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla creada correctamente',
+            error: null 
+        };
+    }
 
-    // async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<Crew> {
-    //     const response = await fetch(`${this.baseUrl}/${id}`, {
-    //     method: 'PUT',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(crewData),
-    //     });
-    //     if (!response.ok) throw new Error('Failed to update crew');
-    //     return response.json();
-    // }
+    async updateCrew(id: string, crewData: Partial<CreateCrewData>): Promise<SafeResult<string>> {
+        const result = await safeCall(apiService.patch(`${this.baseUrl}/${id}`, crewData));
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        return {
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla actualizada correctamente',
+            error: null 
+        };
+    }
 
-    // async deleteCrew(id: string): Promise<void> {
-    //     const response = await fetch(`${this.baseUrl}/${id}`, {
-    //     method: 'DELETE',
-    //     });
-    //     if (!response.ok) throw new Error('Failed to delete crew');
-    // }
+    async deleteCrew(id: string): Promise<SafeResult<string>> {
+        const result = await safeCall(apiService.delete(`${this.baseUrl}/${id}`));
+        if (!result.success)
+            return { success: false, data: null, error: result.error };
+        return {
+            success: true, 
+            data: result.data.message ?? 'Cuadrilla eliminada correctamente',
+            error: null 
+        };
+    }
 
-    // async searchCrews(query: string): Promise<Crew[]> {
-    //     const response = await fetch(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`);
-    //     if (!response.ok) throw new Error('Failed to search crews');
-    //     return response.json();
-    // }
+    private mapCrew(apiCrew: Crew): Crew {
+        return {
+            id: apiCrew.id,
+            code: apiCrew.code,
+            description: apiCrew.description,
+            workArea: apiCrew.workArea,
+            active: apiCrew.active,
+            workers: apiCrew.workers.map((w) => ({
+                id: w.id,
+                name: w.name,
+                identification: w.identification,
+            })),
+        };
+    }
 }

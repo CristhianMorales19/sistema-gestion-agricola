@@ -18,35 +18,30 @@ import {
     import { Crew } from '../../../domain/entities/Crew';
 
     interface CrewTableProps {
-    crews: Crew[];
-    onEdit: (crew: Crew) => void;
-    // onDelete: (id: string) => void;
+        crews: Crew[];
+        onEdit: (crew: Crew) => void;
+        onDelete: (id: string, label?: string) => void;
     }
 
-    // Helper functions outside the component
-    const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US');
-    };
-
     const getMemberCountText = (count: number) => {
-    return `${count}`;
+        return `${count}`;
     };
 
     // Optimized row component
     const CrewRow = React.memo<{
-    crew: Crew;
-    onEdit: (crew: Crew) => void;
-    // onDelete: (id: string) => void;
-    }>(({ crew, onEdit }) => {
-    const handleEditClick = React.useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        onEdit(crew);
+        crew: Crew;
+        onEdit: (crew: Crew) => void;
+        onDelete: (id: string, label?: string) => void;
+        }>(({ crew, onEdit, onDelete }) => {
+        const handleEditClick = React.useCallback((e: React.MouseEvent) => {
+            e.stopPropagation();
+            onEdit(crew);
     }, [crew, onEdit]);
 
-    // const handleDeleteClick = React.useCallback((e: React.MouseEvent) => {
-    //     e.stopPropagation();
-    //     onDelete(crew.id);
-    // }, [crew.id, onDelete]);
+    const handleDeleteClick = React.useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete(crew.id, `${crew.code} — ${crew.description}`);
+    }, [crew.id, crew.code, crew.description, onDelete]);
 
     return (
         <TableRow 
@@ -82,7 +77,7 @@ import {
             </IconButton>
             <IconButton 
                 size="small" 
-                // onClick={handleDeleteClick}
+                onClick={handleDeleteClick}
                 sx={{ color: '#ef4444' }}
             >
                 <DeleteIcon />
@@ -96,8 +91,9 @@ import {
     CrewRow.displayName = 'CrewRow';
 
     export const CrewTable: React.FC<CrewTableProps> = ({
-    crews,
-    onEdit,
+        crews,
+        onEdit,
+        onDelete
     }) => {
     return (
         <TableContainer component={Paper} sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
@@ -118,7 +114,7 @@ import {
                 key={crew.id}
                 crew={crew}
                 onEdit={onEdit}
-                // onDelete={onDelete}
+                onDelete={onDelete}
                 />
             ))}
             </TableBody>

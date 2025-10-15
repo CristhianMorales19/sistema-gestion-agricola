@@ -84,10 +84,6 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
   const validateForm = useCallback((): boolean => {
     const newErrors: Partial<Record<keyof NewEmployeeFormData, string>> = {};
 
-    if (!formData.documento_identidad.trim()) {
-      newErrors.documento_identidad = 'La cédula es requerida';
-    }
-
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'El formato del email no es válido';
     }

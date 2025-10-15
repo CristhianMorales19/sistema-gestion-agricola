@@ -45,16 +45,6 @@ interface ApiCreateTrabajadorResponse {
   };
 }
 
-// Helper function to normalize status
-// const normalizeStatus = (status?: string, isActivo?: boolean): 'activo' | 'inactivo' => {
-//   if (status) {
-//     const normalized = status.toLowerCase();
-//     if (normalized === 'active' || normalized === 'activo') return 'activo';
-//     if (normalized === 'inactive' || normalized === 'inactivo') return 'inactivo';
-//   }
-//   return isActivo ? 'activo' : 'inactivo';
-// };
-
 export class ApiEmployeeRepository implements EmployeeRepository {
 
   async getAllEmployees(): Promise<Employee[]> {

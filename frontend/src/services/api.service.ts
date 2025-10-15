@@ -134,8 +134,8 @@ class ApiService {
     return response.data;
   }
 
-  async patch<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
-    const response = await this.axiosInstance.patch(url, data);
+  async patch<T = unknown, D = any>(url: string, data?: D): Promise<ApiResponse<T>> {
+    const response = await this.axiosInstance.patch<ApiResponse<T>>(url, data);
     return response.data;
   }
 
