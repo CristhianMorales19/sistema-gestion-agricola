@@ -16,6 +16,9 @@ import authRoutes from './features/authentication/presentation/routes/auth.route
 import usuariosSistemaRoutes from './features/authentication/presentation/routes/user-system.routes';
 import fallbackAuthRoutes from './features/authentication/presentation/routes/fallback-auth.routes';
 
+// USUARIOS: Rutas de gestión de usuarios (sync-auth0)
+import usuariosRoutes from './routes/usuarios.routes';
+
 // 👥 FEATURE: Personnel Management
 import agroManoTrabajadoresRoutes from './features/personnel-management/presentation/routes/employee.routes';
 
@@ -156,6 +159,9 @@ app.use('/api/auth/legacy', authRoutes);
 app.use('/api/trabajadores', agroManoTrabajadoresRoutes);
 app.use('/api/agromano/asistencia', agroManoAsistenciaRoutes);
 app.use('/api/agromano/dashboard', agroManoDashboardRoutes);
+
+// Rutas de usuarios (sync-auth0 y gestión)
+app.use('/api/usuarios', usuariosRoutes);
 
 // Rutas de usuarios del sistema (híbrido Auth0/BD)
 app.use('/api/usuarios-sistema', usuariosSistemaRoutes);

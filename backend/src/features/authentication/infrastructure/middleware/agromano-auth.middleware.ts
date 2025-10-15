@@ -49,6 +49,7 @@ export const agroManoAuthMiddleware = async (
     const auth0EmailVerified = auth0User.email_verified;
 
     console.log(`🔐 Autenticando usuario Auth0: ${auth0UserId}`);
+    console.log(`📧 Email del token: ${auth0Email}`);
 
     // Sincronizar/obtener usuario local
     let localUser: {
@@ -96,6 +97,7 @@ export const agroManoAuthMiddleware = async (
     }
 
     if (!localUser) {
+      console.error(`❌ No se pudo encontrar o crear el usuario local para Auth0 ID: ${auth0UserId}`);
       return res.status(500).json({
         success: false,
         error: 'USER_NOT_FOUND',
@@ -103,8 +105,11 @@ export const agroManoAuthMiddleware = async (
       });
     }
 
+    console.log(`✅ Usuario local encontrado: ${localUser.username} (ID: ${localUser.usuario_id}, Rol ID: ${localUser.rol_id})`);
+
     // Verificar que el usuario esté activo
     if (localUser.estado !== 'activo' && localUser.estado !== 'ACTIVO') {
+      console.error(`❌ Usuario inactivo: ${localUser.username} (Estado: ${localUser.estado})`);
       return res.status(403).json({
         success: false,
         error: 'USER_INACTIVE',
@@ -226,6 +231,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
   const user = req.user;
 
   if (!user) {
+    console.error('❌ requireAdmin: Usuario no encontrado en req.user');
     return res.status(401).json({
       success: false,
       error: 'UNAUTHORIZED',
@@ -233,7 +239,10 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
     });
   }
 
+  console.log(`🔍 requireAdmin: Verificando permisos de admin para ${user.username} (Rol: ${user.rol_codigo})`);
+
   if (!user.isAdmin()) {
+    console.error(`❌ requireAdmin: Usuario ${user.username} no tiene permisos de admin (Rol: ${user.rol_codigo})`);
     return res.status(403).json({
       success: false,
       error: 'FORBIDDEN',
@@ -242,6 +251,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
     });
   }
 
+  console.log(`✅ requireAdmin: Usuario ${user.username} tiene permisos de admin`);
   next();
 };
 

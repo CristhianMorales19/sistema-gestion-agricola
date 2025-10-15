@@ -26,8 +26,8 @@
       "@app/*": ["src/app/*"],
       "@pages/*": ["src/pages/*"],
       "@authentication/*": ["src/features/authentication/*"],
-      "@personnel/*": ["src/features/personnel-management/*"],
-      "@attendance/*": ["src/features/attendance-tracking/*"],
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
       "@user-management/*": ["src/features/user-management/*"],
       "@payroll/*": ["src/features/payroll-processing/*"]
     }

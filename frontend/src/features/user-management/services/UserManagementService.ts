@@ -67,7 +67,7 @@ export class UserManagementService {
   }
 
   async syncUsers(): Promise<{ message: string }> {
-    const response = await this.request<any>('/admin/sync/users', {
+    const response = await this.request<any>('/usuarios/sync-auth0', {
       method: 'POST',
     });
     return response.data || response;

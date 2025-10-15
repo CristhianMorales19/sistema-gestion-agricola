@@ -1,4 +1,6 @@
+
 import { Router, Request, Response } from 'express';
+import { ManagementClient } from 'auth0';
 import {
   checkJwt,
   agroManoAuthMiddleware,
@@ -11,13 +13,8 @@ const router = Router();
 const prisma = new PrismaClient();
 
 // ============================================
-// RUTAS PÚBLICAS (sin autenticación)
+// RUTA DE SALUD (SIN AUTENTICACIÓN)
 // ============================================
-
-/**
- * GET /api/usuarios/health
- * Endpoint de salud - no requiere autenticación
- */
 router.get('/health', (req: Request, res: Response) => {
   res.json({
     success: true,
@@ -32,6 +29,164 @@ router.get('/health', (req: Request, res: Response) => {
 // Todas las rutas después de este punto requieren autenticación
 router.use(checkJwt);
 router.use(agroManoAuthMiddleware);
+
+/**
+ * POST /api/usuarios/sync-auth0
+ * Sincroniza usuarios de Auth0 con la base de datos local
+ * Solo administradores
+ * Solo asocia trabajador si ya existe en la tabla
+ */
+router.post('/sync-auth0', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    console.log('🔄 Iniciando sincronización de usuarios Auth0...');
+    
+    const domain = process.env.AUTH0_DOMAIN;
+    const clientId = process.env.AUTH0_CLIENT_ID;
+    const clientSecret = process.env.AUTH0_CLIENT_SECRET;
+    
+    if (!domain || !clientId || !clientSecret) {
+      console.error('❌ Faltan variables de entorno Auth0');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Faltan variables de entorno Auth0',
+        details: { 
+          domain: !!domain, 
+          clientId: !!clientId, 
+          clientSecret: !!clientSecret 
+        }
+      });
+    }
+
+    console.log('✅ Variables de entorno Auth0 configuradas');
+    console.log(`📡 Conectando a Auth0: ${domain}`);
+
+    // Usar Client Credentials en lugar de token estático
+    const auth0 = new ManagementClient({
+      domain,
+      clientId,
+      clientSecret
+    });
+
+    // 1. Obtén usuarios de Auth0
+    console.log('📥 Obteniendo usuarios de Auth0...');
+    const auth0Users = await auth0.users.getAll();
+    const usersArray = Array.isArray(auth0Users) ? auth0Users : auth0Users.data;
+    console.log(`✅ Obtenidos ${usersArray?.length || 0} usuarios de Auth0`);
+
+    // 2. Obtén usuarios locales
+    console.log('📥 Obteniendo usuarios locales...');
+    const localUsers = await prisma.mot_usuario.findMany();
+    const localAuth0Ids = new Set(localUsers.map(u => u.auth0_user_id));
+    console.log(`✅ ${localUsers.length} usuarios en BD local`);
+
+    // 3. Obtén trabajadores locales
+    console.log('📥 Obteniendo trabajadores locales...');
+    const trabajadores = await prisma.mom_trabajador.findMany();
+    const trabajadoresPorEmail = new Map(trabajadores.map(t => [t.email, t.trabajador_id]));
+    console.log(`✅ ${trabajadores.length} trabajadores en BD local`);
+
+    let nuevos = 0, actualizados = 0, errores = 0;
+    const detallesErrores: any[] = [];
+
+    for (const user of usersArray) {
+      try {
+        console.log(`\n🔍 Procesando usuario: ${user.email || user.user_id}`);
+        
+        // Validar datos requeridos
+        if (!user.user_id) {
+          console.warn('⚠️ Usuario sin user_id, saltando...');
+          continue;
+        }
+
+        let trabajadorId = null;
+        if (user.email && trabajadoresPorEmail.has(user.email)) {
+          trabajadorId = trabajadoresPorEmail.get(user.email);
+          console.log(`✅ Trabajador encontrado (ID: ${trabajadorId})`);
+        }
+
+        if (!localAuth0Ids.has(user.user_id)) {
+          console.log('➕ Creando nuevo usuario en BD...');
+          
+          // Validar que el username no exista
+          const usernameToUse = user.username || user.email || user.user_id;
+          const existingByUsername = await prisma.mot_usuario.findFirst({
+            where: { username: usernameToUse }
+          });
+
+          if (existingByUsername) {
+            console.warn(`⚠️ Username ${usernameToUse} ya existe, usando user_id como username`);
+          }
+
+          const finalUsername = existingByUsername ? user.user_id : usernameToUse;
+
+          // Crear usuario
+          const nuevoUsuario = await prisma.mot_usuario.create({
+            data: {
+              auth0_id: user.user_id,
+              auth0_user_id: user.user_id,
+              trabajador_id: trabajadorId || undefined,
+              username: finalUsername,
+              email: user.email || undefined,
+              password_hash: 'AUTH0_MANAGED',
+              rol_id: 2, // Rol ADMIN_AGROMANO por defecto
+              estado: 'activo',
+              auth_provider: 'auth0',
+              email_verified: !!user.email_verified,
+              created_at: new Date(),
+              created_by: 1
+            }
+          });
+          
+          console.log(`✅ Usuario creado con ID: ${nuevoUsuario.usuario_id}`);
+          nuevos++;
+        } else {
+          console.log('ℹ️ Usuario ya existe, actualizando...');
+          
+          // Actualizar datos del usuario existente
+          await prisma.mot_usuario.updateMany({
+            where: { auth0_user_id: user.user_id },
+            data: {
+              email: user.email || undefined,
+              email_verified: !!user.email_verified,
+              trabajador_id: trabajadorId || undefined,
+              updated_at: new Date(),
+              updated_by: 1
+            }
+          });
+          
+          console.log('✅ Usuario actualizado');
+          actualizados++;
+        }
+      } catch (userError: any) {
+        console.error(`❌ Error procesando usuario ${user.email || user.user_id}:`, userError);
+        errores++;
+        detallesErrores.push({
+          usuario: user.email || user.user_id,
+          error: userError.message
+        });
+      }
+    }
+
+    console.log('\n✅ Sincronización completada');
+    console.log(`📊 Nuevos: ${nuevos}, Actualizados: ${actualizados}, Errores: ${errores}`);
+
+    res.json({ 
+      success: true, 
+      nuevos, 
+      actualizados,
+      errores,
+      detalles: errores > 0 ? detallesErrores : undefined
+    });
+  } catch (error: any) {
+    console.error('❌ Error sincronizando usuarios:', error);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      error: error?.message || 'INTERNAL_ERROR',
+      details: error?.stack
+    });
+  }
+});
 
 // ============================================
 // RUTAS PROTEGIDAS (requieren autenticación)
