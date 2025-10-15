@@ -200,3 +200,6 @@ export const NewEditCrewForm: React.FC<NewCrewFormProps> = ({
         </Paper>
     );
 };
+
+// Named export for compatibility with existing re-exports
+export const NewCrewForm = NewEditCrewForm;

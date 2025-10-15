@@ -46,7 +46,7 @@ export class AbsenceUseCases {
 
     // Verificar si ya existe ausencia para esa fecha
     const exists = await this.repository.existsForDate(
-      data.trabajador_id,
+      String(data.trabajador_id),
       data.fecha_ausencia
     );
 
