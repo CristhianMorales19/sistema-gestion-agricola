@@ -44,7 +44,34 @@ router.post('/', checkJwt, hybridAuthMiddleware, requirePermission('trabajadores
     const newEmployee = await prisma.mom_trabajador.create({ data: { documento_identidad: String(documento_identidad).trim(), nombre_completo: String(nombre_completo).trim(), fecha_nacimiento: new Date(fecha_nacimiento), fecha_registro_at: fecha_registro_at ? new Date(fecha_registro_at) : new Date(), telefono: telefono ? String(telefono).trim() : null, email: email ? String(email).trim() : null, created_at: new Date(), created_by: created_by, is_activo: true } });
 
     if (cargo || salario_bruto || codigo_nomina) {
-      await prisma.mot_info_laboral.create({ data: { trabajador_id: newEmployee.trabajador_id, cargo: cargo ? String(cargo) : 'Sin definir', fecha_ingreso_at: fecha_registro_at ? new Date(fecha_registro_at) : new Date(), tipo_contrato: req.body.tipo_contrato || 'no_definido', salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0, codigo_nomina: codigo_nomina ? String(codigo_nomina) : null, salario_bruto: salario_bruto ? parseFloat(String(salario_bruto)) : null, rebajas_ccss: rebajas_ccss ? parseFloat(String(rebajas_ccss)) : null, otras_rebajas: otras_rebajas ? parseFloat(String(otras_rebajas)) : null, salario_por_hora: salario_por_hora ? parseFloat(String(salario_por_hora)) : null, horas_ordinarias: horas_ordinarias ? parseFloat(String(horas_ordinarias)) : null, horas_extras: horas_extras ? parseFloat(String(horas_extras)) : null, horas_otras: horas_otras ? parseFloat(String(horas_otras)) : null, vacaciones_monto: vacaciones_monto ? parseFloat(String(vacaciones_monto)) : null, incapacidad_monto: incapacidad_monto ? parseFloat(String(incapacidad_monto)) : null, lactancia_monto: lactancia_monto ? parseFloat(String(lactancia_monto)) : null, fecha_ultima_actualizacion_at: new Date(), usuario_ultima_actualizacion: created_by, created_at: new Date(), created_by: created_by } });
+      const now = new Date();
+      const creator = created_by ?? ((req as any).user?.sub ?? 0);
+      await prisma.mot_info_laboral.create({
+        data: {
+          trabajador_id: newEmployee.trabajador_id,
+          cargo: cargo ? String(cargo) : 'Sin definir',
+          fecha_ingreso_at: fecha_registro_at ? new Date(fecha_registro_at) : new Date(),
+          tipo_contrato: req.body.tipo_contrato || 'no_definido',
+          salario_base: salario_bruto ? parseFloat(String(salario_bruto)) : 0,
+          codigo_nomina: codigo_nomina ? String(codigo_nomina) : null,
+          salario_bruto: salario_bruto ? parseFloat(String(salario_bruto)) : null,
+          rebajas_ccss: rebajas_ccss ? parseFloat(String(rebajas_ccss)) : null,
+          otras_rebajas: otras_rebajas ? parseFloat(String(otras_rebajas)) : null,
+          salario_por_hora: salario_por_hora ? parseFloat(String(salario_por_hora)) : null,
+          horas_ordinarias: horas_ordinarias ? parseFloat(String(horas_ordinarias)) : null,
+          horas_extras: horas_extras ? parseFloat(String(horas_extras)) : null,
+          horas_otras: horas_otras ? parseFloat(String(horas_otras)) : null,
+          vacaciones_monto: vacaciones_monto ? parseFloat(String(vacaciones_monto)) : null,
+          incapacidad_monto: incapacidad_monto ? parseFloat(String(incapacidad_monto)) : null,
+          lactancia_monto: lactancia_monto ? parseFloat(String(lactancia_monto)) : null,
+          fecha_ultima_actualizacion_at: now,
+          usuario_ultima_actualizacion: creator,
+          created_at: now,
+          created_by: creator,
+          updated_at: now,
+          updated_by: creator
+        }
+      });
     }
 
     res.status(201).json({ success: true, message: 'Trabajador creado exitosamente', data: { trabajador: newEmployee } });
@@ -81,9 +108,11 @@ router.put('/:id', checkJwt, hybridAuthMiddleware, requireAnyPermission(['trabaj
       laboralData.updated_by = userId;
       await prisma.mot_info_laboral.update({ where: { info_laboral_id: existingInfo.info_laboral_id }, data: laboralData });
     } else {
+      // Ensure required audit fields exist for creation
       laboralData.created_at = now;
       laboralData.created_by = userId;
-      laboralData.updated_by = null;
+      laboralData.updated_by = userId;
+      laboralData.updated_at = now;
       await prisma.mot_info_laboral.create({ data: laboralData });
     }
 
