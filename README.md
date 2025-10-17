@@ -268,3 +268,62 @@ El proyecto está dividido en **5 sprints estratégicos**:
 - **Sprint 5** (2 sem): Reportes avanzados + Optimización (7 HU)
 
 📋 Ver planificación detallada en [`PLANIFICACION_SPRINTS.md`](PLANIFICACION_SPRINTS.md)
+
+# Instrucciones para desplegar y ejecutar AgroMano en un servidor real
+
+## 1. Requisitos previos
+- Node.js y npm instalados
+- IIS instalado (Windows) con el módulo URL Rewrite
+- MySQL o el motor de base de datos configurado
+
+## 2. Clonar el repositorio
+```bash
+git clone https://github.com/CristhianMorales19/sistema-gestion-agricola.git
+cd sistema-gestion-agricola
+```
+
+## 3. Instalar dependencias
+```bash
+cd backend
+npm install
+cd ../frontend
+npm install
+```
+
+## 4. Configurar variables de entorno
+- Copia los archivos `.env.example` a `.env` en `backend` y `frontend`.
+- Edita los valores según tu servidor (IP, credenciales, puertos, etc).
+
+## 5. Compilar el frontend
+```bash
+cd frontend
+npm run build
+```
+
+## 6. Configurar IIS para el frontend
+- Apunta el sitio IIS a la carpeta `frontend/build`.
+- Asegúrate de que `web.config` e `index.html` estén presentes.
+- Configura el puerto (por ejemplo, 3000).
+- Verifica que el módulo URL Rewrite esté instalado.
+
+## 7. Ejecutar el backend
+```bash
+cd backend
+npm start
+```
+- El backend debe estar accesible en el puerto configurado (por defecto 3001).
+
+## 8. Acceso externo
+- Si accedes desde otro dispositivo, usa la IP del servidor en los archivos `.env`.
+- Abre los puertos necesarios en el firewall.
+
+## 9. Base de datos
+- Asegúrate de que la base de datos esté accesible y configurada en el archivo `.env` del backend.
+- Ejecuta los scripts de migración si es necesario.
+
+## 10. Prueba el sistema
+- Accede al frontend desde el navegador: `http://TU_IP:3000`
+- Verifica que el backend responde correctamente.
+
+---
+Para dudas o problemas, revisa la documentación incluida o contacta al responsable del proyecto.

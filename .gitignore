@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# Node.js dependencies
 
 # Variables de entorno
 .env
@@ -25,8 +26,6 @@ logs
 .DS_Store
 Thumbs.db
 
-# Archivos de construcción
-build/
 dist/
 *.tgz
 *.tar.gz
@@ -55,8 +54,9 @@ uploads/
 storage/
 
 # Frontend específico
-frontend/build/
 frontend/.eslintcache
+!frontend/build/web.config
+!frontend/build/index.html
 
 # Backend específico
 backend/dist/
