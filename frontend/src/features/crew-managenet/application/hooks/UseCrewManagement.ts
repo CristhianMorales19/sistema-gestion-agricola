@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { Crew, CreateCrewData } from '../../domain/entities/Crew';
 import { CrewService } from '../services/CrewService';
 import { useMessage } from '../../../../app/providers/MessageProvider';
-import { safeCall } from '../../../../shared/utils/safeCall';
 const crewService = new CrewService();
 
 export const UseCrewManagement = () => {
@@ -15,7 +14,7 @@ export const UseCrewManagement = () => {
         const result = await crewService.getAllCrews();
         setLoading(false);
         if (!result.success) {
-            showMessage('error', result.error.message || 'Error al cargar cuadrillas');
+            showMessage('error', result.error.message);
             return;
         }
         setCrews(result.data);

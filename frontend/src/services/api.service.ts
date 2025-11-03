@@ -155,35 +155,35 @@ class ApiService {
     return this.put('/auth/profile', data);
   }
 
-  async updateLaborInfoEmployee(id: number, data: Record<string, unknown>) {
-    return this.put(`/trabajadores/${id}`, data);
-  }
+  // async updateLaborInfoEmployee(id: number, data: Record<string, unknown>) {
+  //   return this.put(`/trabajadores/${id}`, data);
+  // }
 
-  // Empleados
-  async getEmpleados(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
-    const response = await this.axiosInstance.get('/trabajadores', { params });
-    return response.data;
-  }
+  // // Empleados
+  // async getEmpleados(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+  //   const response = await this.axiosInstance.get('/trabajadores', { params });
+  //   return response.data;
+  // }
 
-  async getEmpleado(id: number) {
-    return this.get(`/trabajadores/${id}`);
-  }
+  // async getEmpleado(id: number) {
+  //   return this.get(`/trabajadores/${id}`);
+  // }
 
-  async createEmpleado(data: Record<string, unknown>) {
-    return this.post('/trabajadores', data);
-  }
+  // async createEmpleado(data: Record<string, unknown>) {
+  //   return this.post('/trabajadores', data);
+  // }
 
-  async updateEmpleado(id: number, data: Record<string, unknown>) {
-    return this.put(`/trabajadores/${id}`, data);
-  }
+  // async updateEmpleado(id: number, data: Record<string, unknown>) {
+  //   return this.put(`/trabajadores/${id}`, data);
+  // }
 
-  async deleteEmpleado(id: number) {
-    return this.delete(`/trabajadores/${id}`);
-  }
+  // async deleteEmpleado(id: number) {
+  //   return this.delete(`/trabajadores/${id}`);
+  // }
 
-  async createLaborInfo(trabajadorId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
-    return this.post(`/trabajadores/${trabajadorId}/info-laboral`, data);
-  }
+  // async createLaborInfo(trabajadorId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+  //   return this.post(`/trabajadores/${trabajadorId}/info-laboral`, data);
+  // }
 
   // Asistencias
   async getAsistencias(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {

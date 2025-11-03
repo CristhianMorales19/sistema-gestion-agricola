@@ -51,6 +51,7 @@ export interface CreateEmployeeData {
   vacaciones_monto?: number;
   incapacidad_monto?: number;
   lactancia_monto?: number;
+  [key: string]: unknown;
 }
 
 export interface UpdateEmployeeData {
@@ -73,6 +74,7 @@ export interface UpdateEmployeeData {
   otherHours?: number;
   vacationAmount?: number;
   incapacityAmount?: number;
+  [key: string]: unknown;
 }
 
 export interface LaborInfoData {
@@ -95,6 +97,7 @@ export interface LaborInfoData {
   vacaciones_monto?: number;
   incapacidad_monto?: number;
   lactancia_monto?: number;
+  [key: string]: unknown;
 }
 
 export interface CreateLaborInfoResponse {

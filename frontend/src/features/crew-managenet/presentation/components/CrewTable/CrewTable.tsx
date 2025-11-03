@@ -90,11 +90,7 @@ import {
 
     CrewRow.displayName = 'CrewRow';
 
-    export const CrewTable: React.FC<CrewTableProps> = ({
-        crews,
-        onEdit,
-        onDelete
-    }) => {
+    const CrewTableComponent: React.FC<CrewTableProps> = ({ crews, onEdit, onDelete }) => {
     return (
         <TableContainer component={Paper} sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
         <Table sx={{ minWidth: 650 }} aria-label="crew table">
@@ -122,3 +118,5 @@ import {
         </TableContainer>
     );
 };
+
+export const CrewTable = React.memo(CrewTableComponent);

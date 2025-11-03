@@ -18,19 +18,10 @@ import {
   Cake as CakeIcon,
   ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
-
-export interface NewEmployeeFormData {
-  documento_identidad: string;
-  nombre_completo: string;
-  fecha_nacimiento: string;
-  fecha_registro_at: string;
-  telefono?: string;
-  email?: string;
-  created_by: number;
-}
+import { CreateEmployeeData } from '@features/personnel-management/domain/entities/Employee';
 
 interface NewEmployeeFormProps {
-  onSubmit: (data: NewEmployeeFormData) => void;
+  onSubmit: (data: CreateEmployeeData) => Promise<boolean>;
   onCancel: () => void;
 }
 
@@ -38,7 +29,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const [formData, setFormData] = useState<NewEmployeeFormData>({
+  const [formData, setFormData] = useState<CreateEmployeeData>({
     documento_identidad: '',
     nombre_completo: '',
     fecha_nacimiento: '',
@@ -48,7 +39,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     created_by: 1
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof NewEmployeeFormData, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof CreateEmployeeData, string>>>({});
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,7 +62,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
 
     // Limpiar error del campo al escribir
     setErrors(prev => {
-      if (prev[name as keyof NewEmployeeFormData]) {
+      if (prev[name as keyof CreateEmployeeData]) {
         return {
           ...prev,
           [name]: '',
@@ -82,7 +73,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
   }, []);
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: Partial<Record<keyof NewEmployeeFormData, string>> = {};
+    const newErrors: Partial<Record<keyof CreateEmployeeData, string>> = {};
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'El formato del email no es válido';
@@ -102,7 +93,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
     if (!validateForm()) return;
 
     // Limpiar espacios finales antes de enviar
-    const cleanedData: NewEmployeeFormData = {
+    const cleanedData: CreateEmployeeData = {
       ...formData,
       documento_identidad: formData.documento_identidad.trim(),
       nombre_completo: formData.nombre_completo.trim(),
@@ -110,28 +101,17 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
       email: formData.email?.trim(),
       created_by: 1
     };
-
-    try {
-      await onSubmit(cleanedData);
-    } catch (error: any) {
-      if (error.message.includes('cédula')) {
-        setErrors(prev => ({
-          ...prev,
-          documento_identidad: error.message,
-          submit: undefined
-        }));
-      } else if (error.message.includes('electrónico')) {
-        setErrors(prev => ({
-          ...prev,
-          email: error.message,
-          submit: undefined
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          submit: error.message || 'Error al crear el empleado'
-        }));
-      }
+    const result = await onSubmit(cleanedData);
+    if (result) {
+      setFormData({
+        documento_identidad: '',
+        nombre_completo: '',
+        fecha_nacimiento: '',
+        fecha_registro_at: '',
+        telefono: '',
+        email: '',
+        created_by: 0
+      });
     }
   }, [validateForm, formData, onSubmit]);
 
@@ -350,7 +330,7 @@ export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
                 }
               }}
             >
-              Cancelar
+              Volver
             </Button>
             <Button
               type="submit"

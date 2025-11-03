@@ -65,25 +65,23 @@ router.get('/',
                 }, null, 2));
             }
 
+            const mappedTrabajadores = trabajadores.map(t => ({
+                id: t.trabajador_id.toString(),
+                name: t.nombre_completo,
+                identification: t.documento_identidad,
+                role: t.mot_info_laboral[0]?.cargo,
+                entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
+                status: Boolean(t.is_activo),
+                email: t.email,
+                phone: t.telefono,
+                contractType: t.mot_info_laboral[0]?.tipo_contrato,
+                baseSalary: t.mot_info_laboral[0]?.salario_base,
+                birthDate: t.fecha_nacimiento,
+            }));
+
             res.json({
                 success: true,
-                data: {
-                    trabajadores: trabajadores.map(t => ({
-                        id: t.trabajador_id.toString(),
-                        name: t.nombre_completo,
-                        identification: t.documento_identidad,
-                        role: t.mot_info_laboral[0]?.cargo,
-                        entryDate: t.mot_info_laboral[0]?.fecha_ingreso_at,
-                        status: Boolean(t.is_activo), // Conversión explícita a boolean
-                        email: t.email,
-                        phone: t.telefono,
-                        contractType: t.mot_info_laboral[0]?.tipo_contrato,
-                        baseSalary: t.mot_info_laboral[0]?.salario_base,
-                        birthDate: t.fecha_nacimiento,
-                    })),
-                    permissions: userPermissions,
-                    scope: canReadAll ? 'all' : 'own'
-                }
+                data: mappedTrabajadores
             });
         } catch (error) {
             res.status(500).json({
@@ -276,7 +274,8 @@ router.put('/:id',
             const userId = (req as any).user?.usuario_id;
             
             // Validar datos requeridos
-            const { cargo, salario_base, tipo_contrato } = req.body;
+            const { position: cargo, baseSalary: salario_base, contractType: tipo_contrato } = req.body;
+
             // Campos adicionales que pueden llegar por el formulario laboral
             const {
                 codigo_nomina,
@@ -291,13 +290,6 @@ router.put('/:id',
                 incapacidad_monto,
                 lactancia_monto
             } = req.body;
-            
-            if (!cargo || !salario_base || !tipo_contrato) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Todos los campos son requeridos: cargo, salario_base, tipo_contrato'
-                });
-            }
             
             // Validar que el salario sea un número positivo
             if (isNaN(salario_base) || salario_base < 0) {
@@ -375,22 +367,92 @@ router.put('/:id',
  * @desc Eliminar trabajador
  * @access Requiere permiso: trabajadores:delete
  */
-router.delete('/:id', 
+router.delete(
+    '/:id',
     checkJwt,
-    hybridAuthMiddleware, // Verificar usuario en BD y cargar permisos
+    hybridAuthMiddleware,
     requirePermission('trabajadores:delete'),
     async (req, res) => {
         const { id } = req.params;
-        
-        res.json({
-            success: true,
-            message: `Trabajador ${id} eliminado exitosamente`,
-            data: {
-                action: 'delete',
-                trabajadorId: id,
-                permissions: (req as any).user?.permissions
+
+        try {
+            // Buscar el trabajador
+            const trabajador = await prisma.mom_trabajador.findUnique({
+                where: { trabajador_id: parseInt(id) },
+            });
+
+            if (!trabajador) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Trabajador no encontrado`,
+                });
             }
-        });
+
+            // Usar transacción para asegurar atomicidad
+            await prisma.$transaction(async (prisma) => {
+                // Eliminar TODAS las relaciones en orden
+                await prisma.moh_trabajador_historial.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_asignacion_cuadrilla.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_asignacion_tarea.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_asistencia.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_ausencia_justificada.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_deduccion_especial.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_info_laboral.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_liquidacion.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_registro_productividad.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.mot_usuario.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                await prisma.rel_mom_cuadrilla__mom_trabajador.deleteMany({
+                    where: { trabajador_id: parseInt(id) },
+                });
+
+                // Finalmente eliminar al trabajador
+                await prisma.mom_trabajador.delete({
+                    where: { trabajador_id: parseInt(id) },
+                });
+            });
+
+            return res.json({
+                success: true,
+                message: `Trabajador eliminado exitosamente`,
+            });
+        } catch (error) {
+            console.error('Error al eliminar trabajador:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error al eliminar trabajador',
+                error: (error as any).message,
+            });
+        }
     }
 );
 

@@ -1,5 +1,5 @@
 // src/employee-management/presentation/components/EmployeeManagementView/EmployeeManagementView.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import {
   Work as WorkIcon
 } from '@mui/icons-material';
 import { EmployeeTable } from '../EmployeeTable/EmployeeTable';
-import { NewEmployeeForm, NewEmployeeFormData } from '../EmployeeForm/NewEmployeeForm';
+import { NewEmployeeForm } from '../EmployeeForm/NewEmployeeForm';
 import { LaborInfoView } from '../EmployeeLaborInfoForm/LaborInfoView'; // Nueva importación
 import { useEmployeeManagement } from '../../../application/hooks/useEmployeeManagement';
 import { CreateEmployeeData, Employee } from '../../../domain/entities/Employee';
@@ -27,11 +27,15 @@ interface SelectedEmployee {
 }
 
 export const EmployeeManagementView: React.FC = () => {
-  const { employees, loading, error, deleteEmployee, searchEmployees, refreshEmployees, createEmployee } = useEmployeeManagement();
+  const { employees, loading, deleteEmployee, searchEmployees, refreshEmployees, createEmployee } = useEmployeeManagement();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [currentView, setCurrentView] = useState<EmployeeView>('list');
   const [selectedEmployee, setSelectedEmployee] = useState<SelectedEmployee | null>(null);
+
+  useEffect(() => {
+    refreshEmployees();
+  }, [refreshEmployees]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -75,13 +79,7 @@ export const EmployeeManagementView: React.FC = () => {
   };
 
   const handleCreateEmployee = async (data: CreateEmployeeData) => {
-    try {
-      await createEmployee(data);
-      await refreshEmployees();
-    } catch (err) {
-      console.error('Error al crear empleado:', err);
-      throw err;
-    }
+    return await createEmployee(data);
   };
 
   const handleEdit = useCallback((employee: Employee) => {
@@ -91,16 +89,11 @@ export const EmployeeManagementView: React.FC = () => {
 
   const handleDelete = useCallback(async (id: string) => {
     if (window.confirm('¿Está seguro de que desea eliminar este empleado?')) {
-      try {
-        await deleteEmployee(id);
-        // Si el empleado eliminado era el seleccionado, limpiar selección
-        if (selectedEmployee && selectedEmployee.id === id) {
-          setSelectedEmployee(null);
-        }
-        await refreshEmployees();
-      } catch (err) {
-        console.error('Error al eliminar empleado:', err);
-      }
+      await deleteEmployee(id);
+      // Si el empleado eliminado era el seleccionado, limpiar selección
+      if (selectedEmployee && selectedEmployee.id === id)
+        setSelectedEmployee(null);
+      await refreshEmployees();
     }
   }, [deleteEmployee, selectedEmployee, refreshEmployees]);
 
@@ -112,14 +105,9 @@ export const EmployeeManagementView: React.FC = () => {
 
   const handleSaveLaborInfo = async (laborData: any) => {
     if (!selectedEmployee) throw new Error('No hay empleado seleccionado');
-    try {
-      await updateEmployeeLaborInfo(selectedEmployee.id, laborData);
-      await refreshEmployees();
-      await handleBackToList();
-    } catch (err) {
-      console.error('Error al guardar info laboral:', err);
-      throw err;
-    }
+    await updateEmployeeLaborInfo(selectedEmployee.id, laborData);
+    await refreshEmployees();
+    handleBackToList();
   };
 
   // Renderizar contenido basado en la vista actual
@@ -230,10 +218,6 @@ export const EmployeeManagementView: React.FC = () => {
 
   if (loading && currentView === 'list') {
     return <Typography>Cargando empleados...</Typography>;
-  }
-
-  if (error && currentView === 'list') {
-    return <Typography color="error">{error}</Typography>;
   }
 
   return (
