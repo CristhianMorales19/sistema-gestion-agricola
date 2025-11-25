@@ -57,7 +57,7 @@ const ActivityItem = React.memo<{ activity: DashboardActivity }>(({ activity }) 
 
 ActivityItem.displayName = 'ActivityItem';
 
-export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
+export const ActivityFeed = ({ activities }: ActivityFeedProps) => {
   return (
     <Card 
       sx={{ 

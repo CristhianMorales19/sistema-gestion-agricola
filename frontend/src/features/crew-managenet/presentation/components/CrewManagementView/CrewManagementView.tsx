@@ -20,7 +20,7 @@ import { ConfirmDeleteDialog } from '../../../../../shared/presentation/componen
 
 type CrewView = 'list' | 'new-crew' | 'edit-crew';
 
-export const CrewManagementView: React.FC = () => {
+export const CrewManagementView = () => { 
     const { crews, loading, fetchCrews, searchCrews, createCrew, updateCrew, deleteCrew } = UseCrewManagement();
     const { employees, refreshEmployees } = useEmployeeManagement();
     const [searchQuery, setSearchQuery] = useState('');
@@ -239,41 +239,41 @@ export const CrewManagementView: React.FC = () => {
         }
     };
 
-        return (
-            <Box sx={{ p: 3 }}>
-                <ConfirmDeleteDialog
-                    open={deleteDialogOpen}
-                    title="Eliminar cuadrilla"
-                    message="Esta acción eliminará permanentemente la cuadrilla y no podrá revertirse. ¿Deseas continuar?"
-                    itemLabel={crewToDelete?.label}
-                    onCancel={handleCloseDeleteDialog}
-                    onConfirm={handleConfirmDelete}
-                    loading={deleting}
-                />
+    return (
+        <Box sx={{ p: 3 }}>
+            <ConfirmDeleteDialog
+                open={deleteDialogOpen}
+                title="Eliminar cuadrilla"
+                message="Esta acción eliminará permanentemente la cuadrilla y no podrá revertirse. ¿Deseas continuar?"
+                itemLabel={crewToDelete?.label}
+                onCancel={handleCloseDeleteDialog}
+                onConfirm={handleConfirmDelete}
+                loading={deleting}
+            />
 
-                {/* Header - Always visible */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
-                    Gestión de Cuadrillas
-                    </Typography>
-                    
-                    {/* Show buttons only in list view */}
-                    {currentView === 'list' && (
-                    <Button
-                        variant="contained"
-                        startIcon={<GroupAddIcon />}
-                        onClick={handleAddCrewClick}
-                        sx={{
-                        backgroundColor: '#10b981',
-                        '&:hover': { backgroundColor: '#059669' }
-                        }}
-                    >
-                        Crear Cuadrilla
-                    </Button>
-                    )}
-                </Box>
-                {/* Dynamic content */}
-                {renderContent()}
+            {/* Header - Always visible */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
+                Gestión de Cuadrillas
+                </Typography>
+                
+                {/* Show buttons only in list view */}
+                {currentView === 'list' && (
+                <Button
+                    variant="contained"
+                    startIcon={<GroupAddIcon />}
+                    onClick={handleAddCrewClick}
+                    sx={{
+                    backgroundColor: '#10b981',
+                    '&:hover': { backgroundColor: '#059669' }
+                    }}
+                >
+                    Crear Cuadrilla
+                </Button>
+                )}
             </Box>
-        );
+            {/* Dynamic content */}
+            {renderContent()}
+        </Box>
+    );
 };

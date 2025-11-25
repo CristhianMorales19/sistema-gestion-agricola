@@ -1,13 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Crew, CreateCrewData } from '../../domain/entities/Crew';
 import { CrewService } from '../services/CrewService';
 import { useMessage } from '../../../../app/providers/MessageProvider';
-const crewService = new CrewService();
 
 export const UseCrewManagement = () => {
     const [crews, setCrews] = useState<Crew[]>([]);
     const [loading, setLoading] = useState(false);
     const { showMessage } = useMessage();
+    const crewService = useMemo(() => new CrewService(), []);
 
     const fetchCrews = useCallback(async () => {
         setLoading(true);
@@ -18,7 +18,7 @@ export const UseCrewManagement = () => {
             return;
         }
         setCrews(result.data);
-    }, [showMessage]);
+    }, [showMessage, crewService]);
 
     const searchCrews = useCallback(async (query: string) => {
         setLoading(true);

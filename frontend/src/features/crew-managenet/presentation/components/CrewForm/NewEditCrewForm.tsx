@@ -25,12 +25,7 @@ interface NewCrewFormProps {
     initialData?: NewCrewFormData;
 }
 
-export const NewEditCrewForm: React.FC<NewCrewFormProps> = ({
-    onSubmit,
-    onCancel,
-    employees,
-    initialData
-}) => {
+export const NewEditCrewForm = ({ onSubmit, onCancel, employees, initialData }: NewCrewFormProps) => {
     const [formData, setFormData] = useState<NewCrewFormData>(
         initialData || {
             code: '',

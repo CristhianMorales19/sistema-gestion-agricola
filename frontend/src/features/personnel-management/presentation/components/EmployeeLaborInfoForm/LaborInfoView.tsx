@@ -17,7 +17,6 @@ export interface LaborInfoData {
   baseSalary: number;
   contractType: string;
   department: string;
-  // Campos añadidos para reportes / comprobantes
   payrollCode?: string;
   salaryGross?: number;
   ccssDeduction?: number;
@@ -59,27 +58,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
     incapacityAmount: 0,
     lactationAmount: 0,
   });
-  // Inicializar campos adicionales al montar para evitar inputs uncontrolled
-  useEffect(() => {
-    setFormData(prev => ({
-      payrollCode: prev.payrollCode ?? '',
-      position: prev.position ?? '',
-      baseSalary: prev.baseSalary ?? 0,
-      contractType: prev.contractType ?? '',
-      department: prev.department ?? '',
-      salaryGross: prev.salaryGross ?? 0,
-      ccssDeduction: prev.ccssDeduction ?? 0,
-      otherDeductions: prev.otherDeductions ?? 0,
-      salaryPerHour: prev.salaryPerHour ?? 0,
-      ordinaryHours: prev.ordinaryHours ?? 0,
-      extraHours: prev.extraHours ?? 0,
-      otherHours: prev.otherHours ?? 0,
-      vacationAmount: prev.vacationAmount ?? 0,
-      incapacityAmount: prev.incapacityAmount ?? 0,
-      lactationAmount: prev.lactationAmount ?? 0,
-    } as LaborInfoData));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LaborInfoErrors>({});
 
@@ -107,6 +86,16 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
       '& fieldset': { borderColor: '#475569' }
     }
   } as const;
+
+  const editableFieldSx = {
+    '& .MuiInputBase-input': { color: '#ffffff' },
+    '& .MuiInputLabel-root': { color: '#94a3b8' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: '#475569' },
+      '&:hover fieldset': { borderColor: '#64748b' },
+      '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+    }
+  };
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -201,15 +190,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.position)}
               helperText={errors.position}
-              sx={{
-                '& .MuiInputBase-input': { color: '#ffffff' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' },
-                  '&:hover fieldset': { borderColor: '#64748b' },
-                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                }
-              }}
+              sx={editableFieldSx}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -237,15 +218,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               error={Boolean(errors.baseSalary)}
               helperText={errors.baseSalary}
               InputProps={{ startAdornment: '$' }}
-              sx={{
-                '& .MuiInputBase-input': { color: '#ffffff' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' },
-                  '&:hover fieldset': { borderColor: '#64748b' },
-                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                }
-              }}
+              sx={editableFieldSx}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -259,15 +232,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.contractType)}
               helperText={errors.contractType}
-              sx={{
-                '& .MuiInputBase-input': { color: '#ffffff' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' },
-                  '&:hover fieldset': { borderColor: '#64748b' },
-                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                }
-              }}
+              sx={editableFieldSx}
             >
               {contractTypes.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -287,15 +252,7 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.department)}
               helperText={errors.department}
-              sx={{
-                '& .MuiInputBase-input': { color: '#ffffff' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' },
-                  '&:hover fieldset': { borderColor: '#64748b' },
-                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                }
-              }}
+              sx={editableFieldSx}
             >
               {departments.map((option) => (
                 <MenuItem key={option.value} value={option.value}>

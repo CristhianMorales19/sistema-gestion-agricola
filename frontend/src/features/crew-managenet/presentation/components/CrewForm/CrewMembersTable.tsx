@@ -23,14 +23,9 @@ interface CrewMembersTableProps {
     onRemoveWorker: (workerId: string) => void;
 }
 
-export const CrewMembersTable: React.FC<CrewMembersTableProps> = ({
-    employees,
-    selectedWorkers,
-    onAddWorker,
-    onRemoveWorker
-}) => {
+export const CrewMembersTable = ({employees, selectedWorkers, onAddWorker, onRemoveWorker}: CrewMembersTableProps) => {
     const [searchTerm, setSearchTerm] = useState('');
-
+    
     // Filtrar empleados basado en la búsqueda
     const filteredEmployees = useMemo(() => {
         if (!searchTerm) return employees;

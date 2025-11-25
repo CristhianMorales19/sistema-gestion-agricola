@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { Snackbar, Alert } from '@mui/material';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import { MessageSnackbar } from './components/MessageSnackbar';
 
 type MessageType = 'success' | 'error';
 
-interface Message {
+export interface Message {
     type: MessageType | null;
     text: string;
 }
@@ -26,25 +26,15 @@ export const MessageProvider = ({ children }: { children: ReactNode }) => {
         setMessage({ type: null, text: '' });
     }, []);
 
+    const value = useMemo(() => ({
+        showMessage, clearMessage}), 
+        [showMessage, clearMessage]
+    );
+
     return (
-        <MessageContext.Provider value={{ showMessage, clearMessage }}>
-        {children}
-        {!!message.type && (
-            <Snackbar
-                open
-                autoHideDuration={4000}
-                onClose={clearMessage}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <Alert
-                    onClose={clearMessage}
-                    severity={message.type}
-                    sx={{ width: '100%' }}
-                >
-                {message.text}
-                </Alert>
-            </Snackbar>
-            )}       
+        <MessageContext.Provider value={value}>
+            {children}
+            <MessageSnackbar message={message} clearMessage={clearMessage}/>
         </MessageContext.Provider>
     );
 };

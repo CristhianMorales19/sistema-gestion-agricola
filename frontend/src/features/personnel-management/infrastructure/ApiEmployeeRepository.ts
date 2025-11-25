@@ -8,7 +8,6 @@ export class ApiEmployeeRepository implements EmployeeRepository {
     private baseUrl = '/trabajadores';
 
     async getAllEmployees(): Promise<SafeResult<Employee[]>> {
-      
         const result = await safeCall(apiService.get(this.baseUrl));
         console.log("getAllEmployees:", result)
         if (!result.success)
@@ -41,7 +40,7 @@ export class ApiEmployeeRepository implements EmployeeRepository {
     }
 
     async updateEmployee(id: string, data: UpdateEmployeeData): Promise<SafeResult<string>> {
-      console.log("updateEmployee: ", data);
+        console.log("updateEmployee: ", data);
         const result = await safeCall(apiService.put(`${this.baseUrl}/${id}`, data));
         if (!result.success)
             return { success: false, data: null, error: result.error };
