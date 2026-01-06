@@ -1,0 +1,1 @@
+export { ParcelManagementView } from './ParcelManagementView';
