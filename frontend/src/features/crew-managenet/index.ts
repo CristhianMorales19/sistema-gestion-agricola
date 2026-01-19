@@ -1,3 +1,3 @@
-export { CrewManagementView } from './presentation/components/CrewManagementView';
-export { UseCrewManagement } from './application/hooks/UseCrewManagement';
-export type { Crew, CreateCrewData, CrewMember } from './domain/entities/Crew';
+export { CrewManagementView } from "./presentation/components/CrewManagementView";
+export { useCrewManagement as UseCrewManagement } from "./application/hooks/use-crew-management";
+export type { Crew, CreateCrewData } from "./domain/entities/crew";

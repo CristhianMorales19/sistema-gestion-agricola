@@ -232,7 +232,7 @@ export class ApiAbsenceRepository implements AbsenceRepository {
   /**
    * Verificar si existe ausencia para una fecha
    */
-  async existsForDate(trabajadorId: string, fecha: string): Promise<boolean> {
+  async existsForDate(trabajadorId: number, fecha: string): Promise<boolean> {
     try {
       const response = await apiService.get<ExistsResponse>(`${this.baseUrl}/verificar`, {
         params: {

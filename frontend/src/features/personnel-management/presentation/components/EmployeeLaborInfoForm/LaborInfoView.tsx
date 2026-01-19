@@ -1,187 +1,152 @@
-// src/employee-management/presentation/components/LaborInfoView/LaborInfoView.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
+import { MenuItem, Grid } from "@mui/material";
 import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  MenuItem,
-  Grid
-} from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { validateLaborInfo, LaborInfoErrors } from './validation';
-
-export interface LaborInfoData {
-  position: string;
-  baseSalary: number;
-  contractType: string;
-  department: string;
-  payrollCode?: string;
-  salaryGross?: number;
-  ccssDeduction?: number;
-  otherDeductions?: number;
-  salaryPerHour?: number;
-  ordinaryHours?: number;
-  extraHours?: number;
-  otherHours?: number;
-  vacationAmount?: number;
-  incapacityAmount?: number;
-  lactationAmount?: number;
-}
+  validateLaborInfo,
+  LaborInfoErrors,
+  hasErrors,
+} from "./labor-info.validation";
+import {
+  FormContainer,
+  GridItem,
+  ButtonContainer,
+  ErrorMessage,
+  SectionLabel,
+  StyledArrowBackIcon,
+  InputSection,
+} from "../../../../../shared/presentation/styles/Form.styles";
+import { LaborInfoData } from "@features/personnel-management/domain/entities/laborInfoEmployee";
+import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.styles";
+import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
+import { BackButtonGeneric } from "../../../../../shared/presentation/styles/BackButton.styles";
+import { TextGeneric } from "../../../../../shared/presentation/styles/Text.styles";
+import {
+  contractTypes,
+  departments,
+  INITIAL_LABOR_INFO,
+  numericFields,
+} from "./labor-info.constants";
 
 interface LaborInfoViewProps {
-  employee: { id: string; name: string } | null;
+  employee: { identification: string; name: string } | null;
   onCancel: () => void;
   onSave: (data: LaborInfoData) => Promise<void>;
 }
 
-export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
+export const LaborInfoView = ({
   employee,
   onCancel,
-  onSave
-}) => {
-  const [formData, setFormData] = useState<LaborInfoData>({
-    payrollCode: '',
-    position: '',
-    baseSalary: 0,
-    contractType: '',
-    department: '',
-    salaryGross: 0,
-    ccssDeduction: 0,
-    otherDeductions: 0,
-    salaryPerHour: 0,
-    ordinaryHours: 0,
-    extraHours: 0,
-    otherHours: 0,
-    vacationAmount: 0,
-    incapacityAmount: 0,
-    lactationAmount: 0,
-  });
-  
+  onSave,
+}: LaborInfoViewProps) => {
+  const [formData, setFormData] = useState<LaborInfoData>(INITIAL_LABOR_INFO);
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<LaborInfoErrors>({});
 
-  const contractTypes = [
-    { value: 'full_time', label: 'Tiempo Completo' },
-    { value: 'part_time', label: 'Medio Tiempo' },
-    { value: 'temporary', label: 'Temporal' },
-    { value: 'freelance', label: 'Freelance' }
-  ];
-
-  const departments = [
-    { value: 'hr', label: 'Recursos Humanos' },
-    { value: 'it', label: 'Tecnología' },
-    { value: 'finance', label: 'Finanzas' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'operations', label: 'Operaciones' },
-    { value: 'sales', label: 'Ventas' }
-  ];
-
-  // Estilo atenuado (igual al campo ID) para campos de información laboral
-  const mutedFieldSx = {
-    '& .MuiInputBase-input': { color: '#94a3b8' },
-    '& .MuiInputLabel-root': { color: '#94a3b8' },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: '#475569' }
-    }
-  } as const;
-
-  const editableFieldSx = {
-    '& .MuiInputBase-input': { color: '#ffffff' },
-    '& .MuiInputLabel-root': { color: '#94a3b8' },
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: '#475569' },
-      '&:hover fieldset': { borderColor: '#64748b' },
-      '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-    }
-  };
-
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: ['baseSalary','salaryGross','ccssDeduction','otherDeductions','salaryPerHour','ordinaryHours','extraHours','otherHours','vacationAmount','incapacityAmount','lactationAmount'].includes(name)
-        ? (parseFloat(value) || 0)
-        : value
-    }));
+    setFormData((prev) => {
+      if (numericFields.includes(name)) {
+        if (value === "" || value === "-") {
+          return { ...prev, [name]: "" };
+        }
+
+        const numberValue = Number(value);
+        if (!isNaN(numberValue)) {
+          return { ...prev, [name]: numberValue };
+        }
+        return prev;
+      }
+      return { ...prev, [name]: value };
+    });
+
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[name as keyof LaborInfoData];
+      return copy;
+    });
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!employee) return;
+  const validateForm = useCallback((): Boolean => {
+    const newErrors = validateLaborInfo(formData);
+    setErrors(newErrors);
+    return !hasErrors(newErrors);
+  }, [formData]);
 
-    // Validar antes de enviar
-    const validation = validateLaborInfo(formData);
-    setErrors(validation);
-    if (Object.keys(validation).length > 0) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!employee) return;
 
-    setLoading(true);
-    try {
-      await onSave(formData);
-    } catch (error) {
-      console.error('Error al guardar información laboral:', error);
-    } finally {
+      if (!validateForm()) return;
+
+      setLoading(true);
+      onSave(formData);
       setLoading(false);
-    }
-  }, [employee, formData, onSave]);
+    },
+    [employee, formData, onSave, validateForm],
+  );
+
+  const toNumber = (value: number | "" | undefined) =>
+    typeof value === "number" && !isNaN(value) ? value : 0;
+
+  const gross = toNumber(formData.salaryGross) || toNumber(formData.baseSalary);
+
+  const netSalary =
+    gross -
+    toNumber(formData.ccssDeduction) -
+    toNumber(formData.otherDeductions);
+
+  const hourlySalary =
+    toNumber(formData.salaryPerHour) > 0
+      ? toNumber(formData.salaryPerHour)
+      : gross > 0
+        ? gross / (30 * 8)
+        : 0;
 
   if (!employee) {
     return (
-      <Paper sx={{ p: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-        <Typography color="error">No se ha seleccionado ningún empleado</Typography>
-        <Button onClick={onCancel} startIcon={<ArrowBackIcon />} sx={{ mt: 2 }}>
-          Volver a la lista
-        </Button>
-      </Paper>
+      <>
+        <ErrorMessage>No se ha seleccionado ningún empleado</ErrorMessage>
+        <ButtonContainer>
+          <BackButtonGeneric
+            onClick={onCancel}
+            startIcon={<StyledArrowBackIcon />}
+          >
+            Volver a la lista
+          </BackButtonGeneric>
+        </ButtonContainer>
+      </>
     );
   }
 
   return (
-    <Paper sx={{ p: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-      <Box component="form" onSubmit={handleSubmit}>
-        <Typography variant="h5" sx={{ color: '#ffffff', mb: 3 }}>
-          Información Laboral
-        </Typography>
+    <FormContainer component="form" onSubmit={handleSubmit}>
+      <TextGeneric variant="h6">Información Laboral</TextGeneric>
 
-        {/* Información del empleado (no editable) */}
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6}>
-            <TextField
+      <InputSection>
+        {/* Información básica laboral */}
+        <SectionLabel variant="overline">Información Básica</SectionLabel>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="ID del Empleado"
-              value={employee.id}
+              label="Cédula"
+              value={employee.identification}
               InputProps={{ readOnly: true }}
-              sx={{
-                '& .MuiInputBase-input': { color: '#94a3b8' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' }
-                }
-              }}
+              readonly
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Nombre del Empleado"
+              label="Nombre completo"
               value={employee.name}
               InputProps={{ readOnly: true }}
-              sx={{
-                '& .MuiInputBase-input': { color: '#94a3b8' },
-                '& .MuiInputLabel-root': { color: '#94a3b8' },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#475569' }
-                }
-              }}
+              readonly
             />
-          </Grid>
-        </Grid>
-
-        {/* Campos editables */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
               label="Cargo"
               name="position"
@@ -190,26 +155,24 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.position)}
               helperText={errors.position}
-              sx={editableFieldSx}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Código de Nómina (Cod)"
+              label="Código de Nómina"
               name="payrollCode"
               value={formData.payrollCode}
               onChange={handleChange}
               required
-              sx={mutedFieldSx}
               error={Boolean(errors.payrollCode)}
               helperText={errors.payrollCode}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Salario Base"
+              label="$ Salario Base"
               name="baseSalary"
               type="number"
               value={formData.baseSalary}
@@ -217,12 +180,10 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.baseSalary)}
               helperText={errors.baseSalary}
-              InputProps={{ startAdornment: '$' }}
-              sx={editableFieldSx}
             />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
               select
               label="Tipo de Contrato"
@@ -232,234 +193,220 @@ export const LaborInfoView: React.FC<LaborInfoViewProps> = ({
               required
               error={Boolean(errors.contractType)}
               helperText={errors.contractType}
-              sx={editableFieldSx}
             >
               {contractTypes.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
               ))}
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
+            </TextFieldGeneric>
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
               select
               label="Departamento"
-              name="department"
-              value={formData.department}
+              name="area"
+              value={formData.area}
               onChange={handleChange}
               required
-              error={Boolean(errors.department)}
-              helperText={errors.department}
-              sx={editableFieldSx}
+              error={Boolean(errors.area)}
+              helperText={errors.area}
             >
               {departments.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
               ))}
-            </TextField>
-          </Grid>
-
-          {/* Campos de nómina / comprobantes */}
-          <Grid item xs={12} sm={6}>
-            <TextField
+            </TextFieldGeneric>
+          </GridItem>
+        </Grid>
+        {/* Información de nómina */}
+        <SectionLabel variant="overline" sx={{ mt: 4 }}>
+          Información de Nómina
+        </SectionLabel>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Salario Bruto"
+              label="$ Salario Bruto"
               name="salaryGross"
               type="number"
               value={formData.salaryGross}
               onChange={handleChange}
+              error={Boolean(errors.salaryGross)}
+              helperText={errors.salaryGross}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Rebajas CCSS"
+              label="$ Rebajas CCSS"
               name="ccssDeduction"
               type="number"
               value={formData.ccssDeduction}
               onChange={handleChange}
+              error={Boolean(errors.ccssDeduction)}
+              helperText={errors.ccssDeduction}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Otras Rebajas"
+              label="$ Otras Rebajas"
               name="otherDeductions"
               type="number"
               value={formData.otherDeductions}
               onChange={handleChange}
+              error={Boolean(errors.otherDeductions)}
+              helperText={errors.otherDeductions}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
-              label="Salario por Hora"
+              label="$ Salario por Hora"
               name="salaryPerHour"
               type="number"
               value={formData.salaryPerHour}
               onChange={handleChange}
+              error={Boolean(errors.salaryPerHour)}
+              helperText={errors.salaryPerHour}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+        </Grid>
+        {/* Horas */}
+        <SectionLabel variant="overline" sx={{ mt: 4 }}>
+          Horas
+        </SectionLabel>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
-              label="Horas Ordinarias (HN)"
+              label="Horas Ordinarias"
               name="ordinaryHours"
               type="number"
               value={formData.ordinaryHours}
               onChange={handleChange}
+              error={Boolean(errors.ordinaryHours)}
+              helperText={errors.ordinaryHours}
               required
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
-              label="Horas Extras (HE)"
+              label="Horas Extras"
               name="extraHours"
               type="number"
               value={formData.extraHours}
               onChange={handleChange}
+              error={Boolean(errors.extraHours)}
+              helperText={errors.extraHours}
               required
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
               label="Horas Otras"
               name="otherHours"
               type="number"
               value={formData.otherHours}
               onChange={handleChange}
+              error={Boolean(errors.otherHours)}
+              helperText={errors.otherHours}
               required
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+        </Grid>
+        {/* Beneficios */}
+        <SectionLabel variant="overline" sx={{ mt: 4 }}>
+          Beneficios
+        </SectionLabel>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
-              label="Vacaciones (monto)"
+              label="$ Vacaciones"
               name="vacationAmount"
               type="number"
               value={formData.vacationAmount}
               onChange={handleChange}
+              error={Boolean(errors.vacationAmount)}
+              helperText={errors.vacationAmount}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
-              label="Incapacidad (monto)"
+              label="$ Incapacidad"
               name="incapacityAmount"
               type="number"
               value={formData.incapacityAmount}
               onChange={handleChange}
+              error={Boolean(errors.incapacityAmount)}
+              helperText={errors.incapacityAmount}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={4}>
+            <TextFieldGeneric
               fullWidth
-              label="Lactancia (monto)"
+              label="$ Lactancia"
               name="lactationAmount"
               type="number"
               value={formData.lactationAmount}
               onChange={handleChange}
+              error={Boolean(errors.lactationAmount)}
+              helperText={errors.lactationAmount}
               required
-              InputProps={{ startAdornment: '$' }}
-              sx={mutedFieldSx}
             />
-          </Grid>
-
-          {/* Mostrar cálculos rápidos */}
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+        </Grid>
+        {/* Cálculos */}
+        <SectionLabel variant="overline" sx={{ mt: 4 }}>
+          Cálculos
+        </SectionLabel>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
               label="Salario Neto (estimado)"
-              value={
-                ((formData.salaryGross || formData.baseSalary) - (formData.ccssDeduction || 0) - (formData.otherDeductions || 0)).toFixed(2)
-              }
+              value={`${netSalary.toFixed(2)}`}
               InputProps={{ readOnly: true }}
-              sx={mutedFieldSx}
+              readonly
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
               fullWidth
               label="Salario por Hora (estimado)"
-              value={
-                ((formData.salaryPerHour && formData.salaryPerHour > 0)
-                  ? formData.salaryPerHour
-                  : (formData.salaryGross || formData.baseSalary) && (formData.salaryGross || formData.baseSalary) / (30 * 8)
-                )
-              }
+              value={`${hourlySalary.toFixed(2)}`}
               InputProps={{ readOnly: true }}
-              sx={mutedFieldSx}
+              readonly
             />
-          </Grid>
+          </GridItem>
         </Grid>
+      </InputSection>
 
-        {/* Botones */}
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 4 }}>
-          <Button
-            onClick={onCancel}
-            startIcon={<ArrowBackIcon />}
-            sx={{
-              color: '#94a3b8',
-              borderColor: '#475569',
-              '&:hover': {
-                color: '#ffffff',
-                borderColor: '#64748b',
-                backgroundColor: '#334155'
-              }
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{
-              backgroundColor: '#10b981',
-              '&:hover': { backgroundColor: '#059669' },
-              '&:disabled': { backgroundColor: '#475569' }
-            }}
-          >
-            {loading ? 'Guardando...' : 'Guardar Información Laboral'}
-          </Button>
-        </Box>
-      </Box>
-    </Paper>
+      {/* Botones */}
+      <ButtonContainer>
+        <BackButtonGeneric
+          onClick={onCancel}
+          startIcon={<StyledArrowBackIcon />}
+        >
+          Volver
+        </BackButtonGeneric>
+        <ButtonGeneric type="submit" disabled={loading}>
+          {loading ? "Guardando..." : "Guardar"}
+        </ButtonGeneric>
+      </ButtonContainer>
+    </FormContainer>
   );
 };

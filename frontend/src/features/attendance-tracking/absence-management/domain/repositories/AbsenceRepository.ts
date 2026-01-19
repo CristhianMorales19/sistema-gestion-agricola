@@ -60,7 +60,7 @@ export interface AbsenceRepository {
   /**
    * Verificar si existe una ausencia para un trabajador en una fecha específica
    */
-  existsForDate(trabajadorId: string, fecha: string): Promise<boolean>;
+  existsForDate(trabajadorId: number, fecha: string): Promise<boolean>;
 
   /**
    * Subir documentación de respaldo

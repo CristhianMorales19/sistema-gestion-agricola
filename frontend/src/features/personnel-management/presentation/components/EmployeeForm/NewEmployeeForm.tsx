@@ -1,350 +1,175 @@
 // src/employee-management/presentation/components/NewEmployeeForm/NewEmployeeForm.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
+import { Grid } from "@mui/material";
+import { CreateEmployeeData } from "@features/personnel-management/domain/entities/employee";
 import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Paper,
-  Grid,
-  InputAdornment,
-} from '@mui/material';
+  hasErrors,
+  validateCreateEmployee,
+  CreateEmployeeErrors,
+} from "./new-emploplee.validation";
 import {
-  Person as PersonIcon,
-  Badge as BadgeIcon,
-  Event as EventIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Cake as CakeIcon,
-  ArrowBack as ArrowBackIcon
-} from '@mui/icons-material';
-import { CreateEmployeeData } from '@features/personnel-management/domain/entities/Employee';
+  ButtonContainer,
+  FormContainer,
+  GridItem,
+  InputSection,
+  StyledArrowBackIcon,
+} from "../../../../../shared/presentation/styles/Form.styles";
+import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.styles";
+import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
+import { BackButtonGeneric } from "../../../../../shared/presentation/styles/BackButton.styles";
+import { TextGeneric } from "../../../../../shared/presentation/styles/Text.styles";
+import { INITIAL_CREATE_EMPLOYEE } from "./employee.constants";
 
 interface NewEmployeeFormProps {
   onSubmit: (data: CreateEmployeeData) => Promise<boolean>;
   onCancel: () => void;
 }
 
-export const NewEmployeeForm: React.FC<NewEmployeeFormProps> = ({
+export const NewEmployeeForm = ({
   onSubmit,
   onCancel,
-}) => {
-  const [formData, setFormData] = useState<CreateEmployeeData>({
-    documento_identidad: '',
-    nombre_completo: '',
-    fecha_nacimiento: '',
-    fecha_registro_at: new Date().toISOString().split('T')[0],
-    telefono: '',
-    email: '',
-    created_by: 1
-  });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof CreateEmployeeData, string>>>({});
+}: NewEmployeeFormProps) => {
+  const [formData, setFormData] = useState<CreateEmployeeData>(
+    INITIAL_CREATE_EMPLOYEE,
+  );
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<CreateEmployeeErrors>({});
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    // Limpiar espacios en blanco al escribir
-    let cleanedValue = value;
-    if (name === 'documento_identidad' || name === 'telefono') {
-      cleanedValue = value.replace(/\s/g, '');
-    } else if (name === 'nombre_completo') {
-      // Permitir solo un espacio entre palabras
-      cleanedValue = value.replace(/\s+/g, ' ').trimStart();
-    } else if (name === 'email') {
-      cleanedValue = value.trim();
-    }
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: cleanedValue,
+      [name]: value,
     }));
 
     // Limpiar error del campo al escribir
-    setErrors(prev => {
-      if (prev[name as keyof CreateEmployeeData]) {
-        return {
-          ...prev,
-          [name]: '',
-        };
-      }
-      return prev;
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[name as keyof CreateEmployeeData];
+      return copy;
     });
   }, []);
 
   const validateForm = useCallback((): boolean => {
-    const newErrors: Partial<Record<keyof CreateEmployeeData, string>> = {};
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'El formato del email no es válido';
-    }
-
-    if (formData.telefono && !/^[0-9]+$/.test(formData.telefono)) {
-      newErrors.telefono = 'El teléfono debe contener solo números';
-    }
-
+    const newErrors = validateCreateEmployee(formData);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData.documento_identidad, formData.email, formData.telefono]);
+    return !hasErrors(newErrors);
+  }, [formData]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    // Limpiar espacios finales antes de enviar
-    const cleanedData: CreateEmployeeData = {
-      ...formData,
-      documento_identidad: formData.documento_identidad.trim(),
-      nombre_completo: formData.nombre_completo.trim(),
-      telefono: formData.telefono?.trim(),
-      email: formData.email?.trim(),
-      created_by: 1
-    };
-    const result = await onSubmit(cleanedData);
-    if (result) {
-      setFormData({
-        documento_identidad: '',
-        nombre_completo: '',
-        fecha_nacimiento: '',
-        fecha_registro_at: '',
-        telefono: '',
-        email: '',
-        created_by: 0
-      });
-    }
-  }, [validateForm, formData, onSubmit]);
+      if (!validateForm()) return;
+      setLoading(true);
+      const result = await onSubmit(formData);
+      if (result) {
+        setFormData(INITIAL_CREATE_EMPLOYEE);
+      }
+      setLoading(false);
+    },
+    [validateForm, formData, onSubmit],
+  );
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
-      <Paper sx={{ p: 4, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
-            Nuevo Empleado
-          </Typography>
-        </Box>
+    <FormContainer component="form" onSubmit={handleSubmit}>
+      <TextGeneric variant="h6">Crear Empleado</TextGeneric>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {/* Cédula */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Cédula"
-                name="documento_identidad"
-                value={formData.documento_identidad}
-                onChange={handleChange}
-                error={Boolean(errors.documento_identidad)}
-                helperText={errors.documento_identidad}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <BadgeIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
+      <InputSection>
+        <Grid container spacing={3}>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Cédula"
+              name="identification"
+              value={formData.identification}
+              onChange={handleChange}
+              error={Boolean(errors.identification)}
+              helperText={errors.identification}
+              required
+            />
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Nombre completo"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              error={Boolean(errors.name)}
+              helperText={errors.name}
+              required
+            />
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Fecha de nacimiento"
+              name="birthDate"
+              type="date"
+              value={formData.birthDate}
+              onChange={handleChange}
+              error={Boolean(errors.birthDate)}
+              helperText={errors.birthDate}
+              required
+              InputLabelProps={{ shrink: true }}
+            />
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Fecha de ingreso"
+              name="hireDate"
+              type="date"
+              value={formData.hireDate}
+              onChange={handleChange}
+              error={Boolean(errors.hireDate)}
+              helperText={errors.hireDate}
+              required
+              InputLabelProps={{ shrink: true }}
+            />
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Teléfono"
+              name="phone"
+              value={formData.phone}
+              required
+              onChange={handleChange}
+              error={Boolean(errors.phone)}
+              helperText={errors.phone}
+            />
+          </GridItem>
+          <GridItem item xs={12} sm={6}>
+            <TextFieldGeneric
+              fullWidth
+              label="Correo electrónico"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+            />
+          </GridItem>
+        </Grid>
+      </InputSection>
 
-            {/* Nombre completo */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Nombre completo"
-                name="nombre_completo"
-                value={formData.nombre_completo}
-                onChange={handleChange}
-                error={Boolean(errors.nombre_completo)}
-                helperText={errors.nombre_completo}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-
-            {/* Fecha de nacimiento */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Fecha de nacimiento"
-                name="fecha_nacimiento"
-                type="date"
-                value={formData.fecha_nacimiento}
-                onChange={handleChange}
-                error={Boolean(errors.fecha_nacimiento)}
-                helperText={errors.fecha_nacimiento}
-                required
-                InputLabelProps={{ shrink: true }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <CakeIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-
-            {/* Fecha de ingreso */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Fecha de ingreso"
-                name="fecha_registro_at"
-                type="date"
-                value={formData.fecha_registro_at}
-                onChange={handleChange}
-                error={Boolean(errors.fecha_registro_at)}
-                helperText={errors.fecha_registro_at}
-                required
-                InputLabelProps={{ shrink: true }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EventIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-
-            {/* Teléfono */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Teléfono"
-                name="telefono"
-                value={formData.telefono}
-                required
-                onChange={handleChange}
-                error={Boolean(errors.telefono)}
-                helperText={errors.telefono}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-
-            {/* Correo electrónico */}
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Correo electrónico"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: '#94a3b8' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiInputLabel-root': { color: '#94a3b8' },
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#475569' },
-                    '&:hover fieldset': { borderColor: '#64748b' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                    color: '#ffffff',
-                  },
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          {/* Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
-            <Button
-              variant="outlined"
-              onClick={onCancel}
-              startIcon={<ArrowBackIcon />}
-              sx={{
-                color: '#94a3b8',
-                borderColor: '#475569',
-                '&:hover': {
-                  color: '#ffffff',
-                  borderColor: '#64748b',
-                  backgroundColor: '#334155'
-                }
-              }}
-            >
-              Volver
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                backgroundColor: '#10b981',
-                '&:hover': { backgroundColor: '#059669' }
-              }}
-            >
-              Crear
-            </Button>
-          </Box>
-        </form>
-      </Paper>
-    </Box>
+      {/* Botones */}
+      <ButtonContainer>
+        <BackButtonGeneric
+          onClick={onCancel}
+          startIcon={<StyledArrowBackIcon />}
+        >
+          Volver
+        </BackButtonGeneric>
+        <ButtonGeneric type="submit" disabled={loading}>
+          {loading ? "Guardando..." : "Crear"}
+        </ButtonGeneric>
+      </ButtonContainer>
+    </FormContainer>
   );
 };

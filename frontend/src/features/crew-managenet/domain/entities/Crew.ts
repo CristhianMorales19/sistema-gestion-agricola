@@ -1,22 +1,20 @@
-export interface CrewMember {
-    id: string;
-    name: string;
-    identification: string;
-}
+import { Employee } from "@features/personnel-management";
 
 export interface CreateCrewData {
-    code: string;
-    description: string;
-    workArea: string;
-    workers: string[];
-    [key: string]: unknown;
+  id: number;
+  description: string;
+  workArea: string;
+  active: boolean;
+  code: string;
+  workers: Employee[];
+  [key: string]: unknown;
 }
 
 export interface Crew {
-    id: string;
-    description: string;
-    workArea: string;
-    active: boolean;
-    code: string;
-    workers: CrewMember[];
+  id: number;
+  description: string;
+  workArea: string;
+  active: boolean;
+  code: string;
+  workers: Employee[];
 }
