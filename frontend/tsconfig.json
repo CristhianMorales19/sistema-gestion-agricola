@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6"
-    ],
+    "target": "es2017",
+    "lib": ["dom", "dom.iterable", "es2017"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,9 +9,9 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-  "module": "esnext",
-  "moduleResolution": "node",
-  "resolveJsonModule": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
@@ -26,13 +22,11 @@
       "@app/*": ["src/app/*"],
       "@pages/*": ["src/pages/*"],
       "@authentication/*": ["src/features/authentication/*"],
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+      "@personnel/*": ["src/features/personnel-management/*"],
+      "@attendance/*": ["src/features/attendance-tracking/*"],
       "@user-management/*": ["src/features/user-management/*"],
       "@payroll/*": ["src/features/payroll-processing/*"]
     }
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
