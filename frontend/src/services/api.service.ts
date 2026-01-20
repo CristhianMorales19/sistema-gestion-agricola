@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
-import { apiConfig } from '../config/auth0.config';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import { apiConfig } from "../config/auth0.config";
 
 // Tipos para las respuestas de la API
 export interface ApiResponse<T = unknown> {
@@ -29,7 +29,7 @@ class ApiService {
       baseURL: apiConfig.baseURL,
       timeout: apiConfig.timeout,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -50,7 +50,7 @@ class ApiService {
             const token = await this.getAccessToken();
             config.headers.Authorization = `Bearer ${token}`;
           } catch (error) {
-            console.error('Error al obtener el token:', error);
+            console.error("Error al obtener el token:", error);
             // No agregar el token si hay error
           }
         }
@@ -58,7 +58,7 @@ class ApiService {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // Interceptor de response para manejar errores globalmente
@@ -69,7 +69,7 @@ class ApiService {
       (error: AxiosError) => {
         this.handleError(error);
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -77,64 +77,92 @@ class ApiService {
     const response = error.response;
 
     if (!response) {
-      console.error('Error de conexión. Verifique su conexión a internet.');
+      console.error("Error de conexión. Verifique su conexión a internet.");
       return;
     }
 
     switch (response.status) {
       case 401:
-        console.error('Sesión expirada. Por favor, inicie sesión nuevamente.');
+        console.error("Sesión expirada. Por favor, inicie sesión nuevamente.");
         // Aquí podrías disparar un evento para hacer logout
         break;
       case 403:
-        console.error('No tiene permisos para realizar esta acción.');
+        console.error("No tiene permisos para realizar esta acción.");
         break;
       case 404:
-        console.error('Recurso no encontrado.');
+        console.error("Recurso no encontrado.");
         break;
       case 422:
-        const validationErrors = response.data && typeof response.data === 'object' && 'errors' in response.data ? response.data.errors : null;
+        const validationErrors =
+          response.data &&
+          typeof response.data === "object" &&
+          "errors" in response.data
+            ? response.data.errors
+            : null;
         if (validationErrors && Array.isArray(validationErrors)) {
           validationErrors.forEach((err: string) => console.error(err));
         } else {
-          console.error('Datos inválidos. Verifique la información ingresada.');
+          console.error("Datos inválidos. Verifique la información ingresada.");
         }
         break;
       case 500:
-        console.error('Error interno del servidor. Intente nuevamente más tarde.');
+        console.error(
+          "Error interno del servidor. Intente nuevamente más tarde.",
+        );
         break;
       default:
-        const message = response.data && typeof response.data === 'object' && 'message' in response.data && typeof response.data.message === 'string' ? response.data.message : 'Error desconocido.';
+        const message =
+          response.data &&
+          typeof response.data === "object" &&
+          "message" in response.data &&
+          typeof response.data.message === "string"
+            ? response.data.message
+            : "Error desconocido.";
         console.error(message);
     }
   }
 
   // Métodos HTTP básicos
-  async get<T = unknown>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
+  async get<T = unknown>(
+    url: string,
+    params?: Record<string, unknown>,
+  ): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.get(url, { params });
     return response.data;
   }
 
-  async post<T = unknown>(url: string, data?: Record<string, unknown> | FormData): Promise<ApiResponse<T>> {
+  async post<T = unknown>(
+    url: string,
+    data?: Record<string, unknown> | FormData,
+  ): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.post(url, data);
     return response.data;
   }
 
-  async postFormData<T = unknown>(url: string, formData: FormData): Promise<ApiResponse<T>> {
+  async postFormData<T = unknown>(
+    url: string,
+    formData: FormData,
+  ): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.post(url, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
   }
 
-  async put<T = unknown>(url: string, data?: Record<string, unknown>): Promise<ApiResponse<T>> {
+  async put<T = unknown>(
+    url: string,
+    data?: Record<string, unknown>,
+  ): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.put(url, data);
     return response.data;
   }
 
-  async patch<T = unknown, D = any>(url: string, data?: D): Promise<ApiResponse<T>> {
+  async patch<T = unknown, D = any>(
+    url: string,
+    data?: D,
+  ): Promise<ApiResponse<T>> {
     const response = await this.axiosInstance.patch<ApiResponse<T>>(url, data);
     return response.data;
   }
@@ -148,11 +176,11 @@ class ApiService {
 
   // Autenticación
   async getProfile() {
-    return this.get('/auth/profile');
+    return this.get("/auth/profile");
   }
 
   async updateProfile(data: Record<string, unknown>) {
-    return this.put('/auth/profile', data);
+    return this.put("/auth/profile", data);
   }
 
   // async updateLaborInfoEmployee(id: number, data: Record<string, unknown>) {
@@ -186,13 +214,15 @@ class ApiService {
   // }
 
   // Asistencias
-  async getAsistencias(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
-    const response = await this.axiosInstance.get('/asistencias', { params });
+  async getAsistencias(
+    params?: Record<string, unknown>,
+  ): Promise<PaginatedResponse<unknown>> {
+    const response = await this.axiosInstance.get("/asistencias", { params });
     return response.data;
   }
 
   async createAsistencia(data: Record<string, unknown>) {
-    return this.post('/asistencias', data);
+    return this.post("/asistencias", data);
   }
 
   async updateAsistencia(id: number, data: Record<string, unknown>) {
@@ -200,8 +230,10 @@ class ApiService {
   }
 
   // Nóminas
-  async getNominas(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
-    const response = await this.axiosInstance.get('/nominas', { params });
+  async getNominas(
+    params?: Record<string, unknown>,
+  ): Promise<PaginatedResponse<unknown>> {
+    const response = await this.axiosInstance.get("/nominas", { params });
     return response.data;
   }
 
@@ -210,7 +242,7 @@ class ApiService {
   }
 
   async procesarNomina(data: Record<string, unknown>) {
-    return this.post('/nominas/procesar', data);
+    return this.post("/nominas/procesar", data);
   }
 
   async aprobarNomina(id: number) {
@@ -218,13 +250,17 @@ class ApiService {
   }
 
   // Productividad
-  async getTareasProductividad(params?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
-    const response = await this.axiosInstance.get('/productividad/tareas', { params });
+  async getTareasProductividad(
+    params?: Record<string, unknown>,
+  ): Promise<PaginatedResponse<unknown>> {
+    const response = await this.axiosInstance.get("/productividad/tareas", {
+      params,
+    });
     return response.data;
   }
 
   async createTareaProductividad(data: Record<string, unknown>) {
-    return this.post('/productividad/tareas', data);
+    return this.post("/productividad/tareas", data);
   }
 
   async updateTareaProductividad(id: number, data: Record<string, unknown>) {
@@ -242,31 +278,31 @@ class ApiService {
 
   // Configuración
   async getConfiguracion() {
-    return this.get('/configuracion');
+    return this.get("/configuracion");
   }
 
   async updateConfiguracion(data: Record<string, unknown>) {
-    return this.put('/configuracion', data);
+    return this.put("/configuracion", data);
   }
 
   // Departamentos y Cargos
   async getDepartamentos() {
-    return this.get('/departamentos');
+    return this.get("/departamentos");
   }
 
   async getCargos(departamentoId?: number) {
     const params = departamentoId ? { departamentoId } : undefined;
-    return this.get('/cargos', params);
+    return this.get("/cargos", params);
   }
 
   // Dashboard
   async getDashboardData() {
-    return this.get('/dashboard');
+    return this.get("/dashboard");
   }
 
   async getEstadisticas(periodo?: string) {
     const params = periodo ? { periodo } : undefined;
-    return this.get('/dashboard/estadisticas', params);
+    return this.get("/dashboard/estadisticas", params);
   }
 }
 

@@ -1,0 +1,1 @@
+export { ParcelManagementPage } from './ParcelManagementPage';

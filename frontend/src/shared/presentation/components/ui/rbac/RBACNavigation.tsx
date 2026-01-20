@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Drawer,
   List,
@@ -8,8 +8,8 @@ import {
   Divider,
   Box,
   Typography,
-  Avatar
-} from '@mui/material';
+  Avatar,
+} from "@mui/material";
 import {
   Dashboard,
   People,
@@ -18,103 +18,117 @@ import {
   Payment,
   TrendingUp,
   Assessment,
-  Settings
-} from '@mui/icons-material';
-import { usePermissions } from './ProtectedComponent';
-import { ProtectedComponent } from './ProtectedComponent';
+  Settings,
+  Cloud,
+  Terrain,
+} from "@mui/icons-material";
+import { usePermissions } from "./ProtectedComponent";
+import { ProtectedComponent } from "./ProtectedComponent";
 
 interface MenuItem {
   label: string;
   icon: React.ReactNode;
   path: string;
-  permission?: keyof import('../../../../../auth/types').UserPermissions;
+  permission?: keyof import("../../../../../auth/types").UserPermissions;
   role?: string;
 }
 
 const menuItems: MenuItem[] = [
   {
-    label: 'Dashboard',
+    label: "Dashboard",
     icon: <Dashboard />,
-    path: '/dashboard'
+    path: "/dashboard",
   },
   {
-    label: 'Gestión de Usuarios',
+    label: "Gestión de Usuarios",
     icon: <People />,
-    path: '/usuarios',
-    permission: 'gestionar_usuarios'
+    path: "/usuarios",
+    permission: "gestionar_usuarios",
   },
   {
-    label: 'Consultar Usuarios',
+    label: "Consultar Usuarios",
     icon: <People />,
-    path: '/usuarios/consultar',
-    permission: 'consultar_usuarios'
+    path: "/usuarios/consultar",
+    permission: "consultar_usuarios",
   },
   {
-    label: 'Gestión de Personal',
+    label: "Gestión de Personal",
     icon: <PersonAdd />,
-    path: '/personal',
-    permission: 'gestionar_personal'
+    path: "/personal",
+    permission: "gestionar_personal",
   },
   {
-    label: 'Consultar Personal',
+    label: "Consultar Personal",
     icon: <PersonAdd />,
-    path: '/personal/consultar',
-    permission: 'consultar_personal'
+    path: "/personal/consultar",
+    permission: "consultar_personal",
   },
   {
-    label: 'Gestión de Asistencia',
+    label: "Gestión de Asistencia",
     icon: <AccessTime />,
-    path: '/asistencia',
-    permission: 'gestionar_asistencia'
+    path: "/asistencia",
+    permission: "gestionar_asistencia",
   },
   {
-    label: 'Consultar Asistencia',
+    label: "Consultar Asistencia",
     icon: <AccessTime />,
-    path: '/asistencia/consultar',
-    permission: 'consultar_asistencia'
+    path: "/asistencia/consultar",
+    permission: "consultar_asistencia",
   },
   {
-    label: 'Gestión de Nómina',
+    label: "Condiciones de Trabajo",
+    icon: <Cloud />,
+    path: "/condiciones-trabajo",
+    permission: "gestionar_condiciones_trabajo",
+  },
+  {
+    label: "Gestión de Parcelas",
+    icon: <Terrain />,
+    path: "/parcelas",
+    permission: "parcelas:read",
+  },
+  {
+    label: "Gestión de Nómina",
     icon: <Payment />,
-    path: '/nomina',
-    permission: 'gestionar_nomina'
+    path: "/nomina",
+    permission: "gestionar_nomina",
   },
   {
-    label: 'Consultar Nómina',
+    label: "Consultar Nómina",
     icon: <Payment />,
-    path: '/nomina/consultar',
-    permission: 'consultar_nomina'
+    path: "/nomina/consultar",
+    permission: "consultar_nomina",
   },
   {
-    label: 'Gestión de Productividad',
+    label: "Gestión de Productividad",
     icon: <TrendingUp />,
-    path: '/productividad',
-    permission: 'gestionar_productividad'
+    path: "/productividad",
+    permission: "gestionar_productividad",
   },
   {
-    label: 'Consultar Productividad',
+    label: "Consultar Productividad",
     icon: <TrendingUp />,
-    path: '/productividad/consultar',
-    permission: 'consultar_productividad'
+    path: "/productividad/consultar",
+    permission: "consultar_productividad",
   },
   {
-    label: 'Gestión de Reportes',
+    label: "Gestión de Reportes",
     icon: <Assessment />,
-    path: '/reportes',
-    permission: 'gestionar_reportes'
+    path: "/reportes",
+    permission: "gestionar_reportes",
   },
   {
-    label: 'Consultar Reportes',
+    label: "Consultar Reportes",
     icon: <Assessment />,
-    path: '/reportes/consultar',
-    permission: 'consultar_reportes'
+    path: "/reportes/consultar",
+    permission: "consultar_reportes",
   },
   {
-    label: 'Configuración',
+    label: "Configuración",
     icon: <Settings />,
-    path: '/configuracion',
-    permission: 'gestionar_configuracion'
-  }
+    path: "/configuracion",
+    permission: "gestionar_configuracion",
+  },
 ];
 
 // Componente memoizado para items de navegación
@@ -131,34 +145,32 @@ const NavigationMenuItem = React.memo<{
       requiredPermission={item.permission}
       requiredRole={item.role}
     >
-      <ListItem 
-        button 
+      <ListItem
+        button
         onClick={handleClick}
         sx={{
-          '&:hover': {
-            backgroundColor: 'action.hover',
+          "&:hover": {
+            backgroundColor: "action.hover",
           },
         }}
       >
-        <ListItemIcon>
-          {item.icon}
-        </ListItemIcon>
+        <ListItemIcon>{item.icon}</ListItemIcon>
         <ListItemText primary={item.label} />
       </ListItem>
     </ProtectedComponent>
   );
 });
 
-NavigationMenuItem.displayName = 'NavigationMenuItem';
+NavigationMenuItem.displayName = "NavigationMenuItem";
 
 interface RBACNavigationProps {
   open: boolean;
   onItemClick: (path: string) => void;
 }
 
-export const RBACNavigation: React.FC<RBACNavigationProps> = ({ 
-  open, 
-  onItemClick 
+export const RBACNavigation: React.FC<RBACNavigationProps> = ({
+  open,
+  onItemClick,
 }) => {
   const { user } = usePermissions();
 
@@ -170,17 +182,17 @@ export const RBACNavigation: React.FC<RBACNavigationProps> = ({
       sx={{
         width: 240,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: 240,
-          boxSizing: 'border-box',
+          boxSizing: "border-box",
         },
       }}
     >
       {/* Header con información del usuario */}
-      <Box sx={{ p: 2, backgroundColor: 'primary.main', color: 'white' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Avatar 
-            src={user?.picture} 
+      <Box sx={{ p: 2, backgroundColor: "primary.main", color: "white" }}>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          <Avatar
+            src={user?.picture}
             alt={user?.name}
             sx={{ width: 40, height: 40, mr: 2 }}
           />
@@ -189,7 +201,7 @@ export const RBACNavigation: React.FC<RBACNavigationProps> = ({
               {user?.name}
             </Typography>
             <Typography variant="caption" noWrap>
-              {user?.roles?.[0]?.nombre || 'Sin rol'}
+              {user?.roles?.[0]?.nombre || "Sin rol"}
             </Typography>
           </Box>
         </Box>

@@ -1,5 +1,5 @@
 // src/absence-management/presentation/components/AbsenceManagementView/AbsenceManagementView.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -15,20 +15,23 @@ import {
   Snackbar,
   Grid,
   Card,
-  CardContent
-} from '@mui/material';
+  CardContent,
+  CardMedia,
+} from "@mui/material";
 import {
   Search as SearchIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
-  Assessment as StatsIcon
-} from '@mui/icons-material';
-import { RegistrarAusencia } from '../RegistrarAusencia';
-import { AbsenceTable } from '../AbsenceTable';
-import { useAbsenceManagement } from '../../../application/hooks/useAbsenceManagement';
-import { CreateAbsenceData, Absence } from '../../../domain/entities/Absence';
+  Assessment as StatsIcon,
+  Download as DownloadIcon,
+} from "@mui/icons-material";
+import { RegistrarAusencia } from "../RegistrarAusencia";
+import { AbsenceTable } from "../AbsenceTable";
+import { DocumentViewer } from "../DocumentViewer";
+import { useAbsenceManagement } from "../../../application/hooks/useAbsenceManagement";
+import { CreateAbsenceData, Absence } from "../../../domain/entities/Absence";
 
-type ViewMode = 'list' | 'register';
+type ViewMode = "list" | "register";
 
 export const AbsenceManagementView: React.FC = () => {
   const {
@@ -43,11 +46,11 @@ export const AbsenceManagementView: React.FC = () => {
     rejectAbsence,
     uploadDocument,
     refreshAbsences,
-    clearMessages
+    clearMessages,
   } = useAbsenceManagement();
 
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -56,23 +59,26 @@ export const AbsenceManagementView: React.FC = () => {
   /**
    * Manejar registro de nueva ausencia
    */
-  const handleRegisterAbsence = useCallback(async (data: CreateAbsenceData, documento?: File) => {
-    try {
-      const newAbsence = await registerAbsence(data);
-      
-      // Si hay documento, subirlo (verificación estricta)
-      if (documento && documento instanceof File && newAbsence.id) {
-        console.log('📎 Subiendo documento:', documento.name, documento.size);
-        await uploadDocument(newAbsence.id, documento);
-      } else {
-        console.log('📝 No hay documento para subir o ausencia sin ID');
+  const handleRegisterAbsence = useCallback(
+    async (data: CreateAbsenceData, documento?: File) => {
+      try {
+        const newAbsence = await registerAbsence(data);
+
+        // Si hay documento, subirlo (verificación estricta)
+        if (documento && documento instanceof File && newAbsence.id) {
+          console.log("📎 Subiendo documento:", documento.name, documento.size);
+          await uploadDocument(newAbsence.id, documento);
+        } else {
+          console.log("📝 No hay documento para subir o ausencia sin ID");
+        }
+
+        setViewMode("list");
+      } catch (error) {
+        console.error("Error al registrar ausencia:", error);
       }
-      
-      setViewMode('list');
-    } catch (error) {
-      console.error('Error al registrar ausencia:', error);
-    }
-  }, [registerAbsence, uploadDocument]);
+    },
+    [registerAbsence, uploadDocument],
+  );
 
   /**
    * Manejar búsqueda
@@ -86,28 +92,34 @@ export const AbsenceManagementView: React.FC = () => {
   /**
    * Manejar aprobación
    */
-  const handleApprove = useCallback(async (id: string) => {
-    try {
-      // TODO: Obtener supervisor_id del contexto de autenticación
-      const supervisorId = 1; // Temporal
-      await approveAbsence(id, supervisorId, 'Aprobado');
-    } catch (error) {
-      console.error('Error al aprobar ausencia:', error);
-    }
-  }, [approveAbsence]);
+  const handleApprove = useCallback(
+    async (id: string) => {
+      try {
+        // TODO: Obtener supervisor_id del contexto de autenticación
+        const supervisorId = 1; // Temporal
+        await approveAbsence(id, supervisorId, "Aprobado");
+      } catch (error) {
+        console.error("Error al aprobar ausencia:", error);
+      }
+    },
+    [approveAbsence],
+  );
 
   /**
    * Manejar rechazo
    */
-  const handleReject = useCallback(async (id: string) => {
-    try {
-      // TODO: Obtener supervisor_id del contexto de autenticación
-      const supervisorId = 1; // Temporal
-      await rejectAbsence(id, supervisorId, 'Rechazado');
-    } catch (error) {
-      console.error('Error al rechazar ausencia:', error);
-    }
-  }, [rejectAbsence]);
+  const handleReject = useCallback(
+    async (id: string) => {
+      try {
+        // TODO: Obtener supervisor_id del contexto de autenticación
+        const supervisorId = 1; // Temporal
+        await rejectAbsence(id, supervisorId, "Rechazado");
+      } catch (error) {
+        console.error("Error al rechazar ausencia:", error);
+      }
+    },
+    [rejectAbsence],
+  );
 
   /**
    * Manejar eliminación
@@ -124,7 +136,7 @@ export const AbsenceManagementView: React.FC = () => {
         setShowDeleteConfirm(false);
         setAbsenceToDelete(null);
       } catch (error) {
-        console.error('Error al eliminar ausencia:', error);
+        console.error("Error al eliminar ausencia:", error);
       }
     }
   }, [absenceToDelete, deleteAbsence]);
@@ -140,18 +152,21 @@ export const AbsenceManagementView: React.FC = () => {
   /**
    * Manejar vista de documento
    */
-  const handleViewDocument = useCallback((documentUrl: string) => {
-    window.open(documentUrl, '_blank');
+  const handleViewDocument = useCallback((absence: Absence) => {
+    // Ya no se usa - el documento se ve en detalles
   }, []);
 
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold', mb: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{ color: "#ffffff", fontWeight: "bold", mb: 2 }}
+        >
           Gestión de Ausencias Justificadas
         </Typography>
-        <Typography variant="body1" sx={{ color: '#94a3b8' }}>
+        <Typography variant="body1" sx={{ color: "#94a3b8" }}>
           Registra y administra las ausencias justificadas del personal
         </Typography>
       </Box>
@@ -160,31 +175,53 @@ export const AbsenceManagementView: React.FC = () => {
       {stats && (
         <Grid container spacing={2} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
+            <Card
+              sx={{ backgroundColor: "#1e293b", border: "1px solid #334155" }}
+            >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Box>
-                    <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
+                    <Typography
+                      variant="h4"
+                      sx={{ color: "#ffffff", fontWeight: "bold" }}
+                    >
                       {stats.total}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                    <Typography variant="body2" sx={{ color: "#94a3b8" }}>
                       Total Ausencias
                     </Typography>
                   </Box>
-                  <StatsIcon sx={{ fontSize: 40, color: '#3b82f6' }} />
+                  <StatsIcon sx={{ fontSize: 40, color: "#3b82f6" }} />
                 </Box>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
+            <Card
+              sx={{ backgroundColor: "#1e293b", border: "1px solid #334155" }}
+            >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Box>
-                    <Typography variant="h4" sx={{ color: '#fbbf24', fontWeight: 'bold' }}>
+                    <Typography
+                      variant="h4"
+                      sx={{ color: "#fbbf24", fontWeight: "bold" }}
+                    >
                       {stats.pendientes}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                    <Typography variant="body2" sx={{ color: "#94a3b8" }}>
                       Pendientes
                     </Typography>
                   </Box>
@@ -193,14 +230,25 @@ export const AbsenceManagementView: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
+            <Card
+              sx={{ backgroundColor: "#1e293b", border: "1px solid #334155" }}
+            >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Box>
-                    <Typography variant="h4" sx={{ color: '#10b981', fontWeight: 'bold' }}>
+                    <Typography
+                      variant="h4"
+                      sx={{ color: "#10b981", fontWeight: "bold" }}
+                    >
                       {stats.aprobadas}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                    <Typography variant="body2" sx={{ color: "#94a3b8" }}>
                       Aprobadas
                     </Typography>
                   </Box>
@@ -209,14 +257,25 @@ export const AbsenceManagementView: React.FC = () => {
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}>
+            <Card
+              sx={{ backgroundColor: "#1e293b", border: "1px solid #334155" }}
+            >
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Box>
-                    <Typography variant="h4" sx={{ color: '#ef4444', fontWeight: 'bold' }}>
+                    <Typography
+                      variant="h4"
+                      sx={{ color: "#ef4444", fontWeight: "bold" }}
+                    >
                       {stats.rechazadas}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#94a3b8' }}>
+                    <Typography variant="body2" sx={{ color: "#94a3b8" }}>
                       Rechazadas
                     </Typography>
                   </Box>
@@ -232,9 +291,13 @@ export const AbsenceManagementView: React.FC = () => {
         open={!!successMessage}
         autoHideDuration={4000}
         onClose={clearMessages}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={clearMessages} severity="success" sx={{ width: '100%' }}>
+        <Alert
+          onClose={clearMessages}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           {successMessage}
         </Alert>
       </Snackbar>
@@ -243,48 +306,62 @@ export const AbsenceManagementView: React.FC = () => {
         open={!!error}
         autoHideDuration={6000}
         onClose={clearMessages}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={clearMessages} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={clearMessages} severity="error" sx={{ width: "100%" }}>
           {error}
         </Alert>
       </Snackbar>
 
       {/* Vista Principal */}
-      {viewMode === 'list' ? (
+      {viewMode === "list" ? (
         <>
           {/* Barra de Acciones */}
-          <Paper sx={{ p: 2, mb: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Paper
+            sx={{
+              p: 2,
+              mb: 3,
+              backgroundColor: "#1e293b",
+              border: "1px solid #334155",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
               <TextField
                 placeholder="Buscar ausencias..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#94a3b8' }} />
+                      <SearchIcon sx={{ color: "#94a3b8" }} />
                     </InputAdornment>
-                  )
+                  ),
                 }}
                 sx={{
                   flexGrow: 1,
                   minWidth: 250,
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#334155',
-                    color: '#ffffff',
-                    '& fieldset': { borderColor: '#475569' }
-                  }
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "#334155",
+                    color: "#ffffff",
+                    "& fieldset": { borderColor: "#475569" },
+                  },
                 }}
               />
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => setViewMode('register')}
+                onClick={() => setViewMode("register")}
                 sx={{
-                  backgroundColor: '#3b82f6',
-                  '&:hover': { backgroundColor: '#2563eb' }
+                  backgroundColor: "#3b82f6",
+                  "&:hover": { backgroundColor: "#2563eb" },
                 }}
               >
                 Nueva Ausencia
@@ -294,9 +371,9 @@ export const AbsenceManagementView: React.FC = () => {
                 startIcon={<RefreshIcon />}
                 onClick={refreshAbsences}
                 sx={{
-                  color: '#94a3b8',
-                  borderColor: '#475569',
-                  '&:hover': { borderColor: '#64748b' }
+                  color: "#94a3b8",
+                  borderColor: "#475569",
+                  "&:hover": { borderColor: "#64748b" },
                 }}
               >
                 Actualizar
@@ -312,14 +389,13 @@ export const AbsenceManagementView: React.FC = () => {
             onReject={handleReject}
             onDelete={handleDeleteClick}
             onView={handleViewDetails}
-            onViewDocument={handleViewDocument}
             showActions
           />
         </>
       ) : (
         <RegistrarAusencia
           onSubmit={handleRegisterAbsence}
-          onCancel={() => setViewMode('list')}
+          onCancel={() => setViewMode("list")}
           loading={loading}
         />
       )}
@@ -331,43 +407,86 @@ export const AbsenceManagementView: React.FC = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
+        <DialogTitle sx={{ backgroundColor: "#1e293b", color: "#ffffff" }}>
           Detalles de la Ausencia
         </DialogTitle>
-        <DialogContent sx={{ backgroundColor: '#1e293b', color: '#ffffff', mt: 2 }}>
+        <DialogContent
+          sx={{ backgroundColor: "#1e293b", color: "#ffffff", mt: 2 }}
+        >
           {selectedAbsence && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Trabajador:</Typography>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                  Trabajador:
+                </Typography>
                 <Typography>{selectedAbsence.trabajador_nombre}</Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Documento:</Typography>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                  Documento:
+                </Typography>
                 <Typography>{selectedAbsence.trabajador_documento}</Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Fecha de Ausencia:</Typography>
-                <Typography>{new Date(selectedAbsence.fecha_ausencia).toLocaleDateString()}</Typography>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                  Fecha de Ausencia:
+                </Typography>
+                <Typography>
+                  {new Date(
+                    selectedAbsence.fecha_ausencia,
+                  ).toLocaleDateString()}
+                </Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Motivo:</Typography>
-                <Typography>{selectedAbsence.motivo_personalizado || selectedAbsence.motivo}</Typography>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                  Motivo:
+                </Typography>
+                <Typography>
+                  {selectedAbsence.motivo_personalizado ||
+                    selectedAbsence.motivo}
+                </Typography>
               </Box>
               {selectedAbsence.comentarios && (
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Comentarios:</Typography>
+                  <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                    Comentarios:
+                  </Typography>
                   <Typography>{selectedAbsence.comentarios}</Typography>
                 </Box>
               )}
               <Box>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>Estado:</Typography>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
+                  Estado:
+                </Typography>
                 <Typography>{selectedAbsence.estado}</Typography>
               </Box>
+
+              {/* Documentación de Respaldo */}
+              {selectedAbsence.documentacion_respaldo && (
+                <Box sx={{ borderTop: "1px solid #475569", pt: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: "#94a3b8", mb: 2 }}
+                  >
+                    Documentación de Respaldo:
+                  </Typography>
+                  <DocumentViewer
+                    absenceId={selectedAbsence.id}
+                    documentPath={selectedAbsence.documentacion_respaldo}
+                    onError={(error) => {
+                      console.error("Error loading document:", error);
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ backgroundColor: '#1e293b' }}>
-          <Button onClick={() => setShowDetailsDialog(false)} sx={{ color: '#94a3b8' }}>
+        <DialogActions sx={{ backgroundColor: "#1e293b" }}>
+          <Button
+            onClick={() => setShowDetailsDialog(false)}
+            sx={{ color: "#94a3b8" }}
+          >
             Cerrar
           </Button>
         </DialogActions>
@@ -378,27 +497,25 @@ export const AbsenceManagementView: React.FC = () => {
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
       >
-        <DialogTitle sx={{ backgroundColor: '#1e293b', color: '#ffffff' }}>
+        <DialogTitle sx={{ backgroundColor: "#1e293b", color: "#ffffff" }}>
           Confirmar Eliminación
         </DialogTitle>
-        <DialogContent sx={{ backgroundColor: '#1e293b', color: '#ffffff', mt: 2 }}>
+        <DialogContent
+          sx={{ backgroundColor: "#1e293b", color: "#ffffff", mt: 2 }}
+        >
           <Typography>
-            ¿Está seguro que desea eliminar este registro de ausencia?
-            Esta acción no se puede deshacer.
+            ¿Está seguro que desea eliminar este registro de ausencia? Esta
+            acción no se puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ backgroundColor: '#1e293b' }}>
+        <DialogActions sx={{ backgroundColor: "#1e293b" }}>
           <Button
             onClick={() => setShowDeleteConfirm(false)}
-            sx={{ color: '#94a3b8' }}
+            sx={{ color: "#94a3b8" }}
           >
             Cancelar
           </Button>
-          <Button
-            onClick={confirmDelete}
-            sx={{ color: '#ef4444' }}
-            autoFocus
-          >
+          <Button onClick={confirmDelete} sx={{ color: "#ef4444" }} autoFocus>
             Eliminar
           </Button>
         </DialogActions>

@@ -1,15 +1,11 @@
-import React, { useState, useCallback } from "react";
-import { Box, Grid } from "@mui/material";
-import { DashboardLayout } from "../AdminDashboard/components/SideBar/DashboardLayout";
-import { PermissionsPanel } from "../AdminDashboard/components/PermissionsPanel/PermissionsPanel";
-import { StatsCards } from "../../../../../app/layout/presentation/components/StatsCards/StatsCards";
-import { ActivityFeed } from "../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed";
-import { ConditionsPanel } from "../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel";
-import {
-  DashboardStatistic,
-  DashboardActivity,
-  DashboardCondition,
-} from "../../../../../app/layout/domain/entities/Dashboard";
+import React, {useState, useCallback} from 'react';
+import { Box, Grid } from '@mui/material';
+import { DashboardLayout, PermissionsPanel } from '../AdminDashboard/components';
+import { StatsCards } from '../../../../../app/layout/presentation/components/StatsCards/StatsCards';
+import { ActivityFeed } from '../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed';
+import { ConditionsPanel } from '../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel';
+import { WorkConditionsPage } from '../../../../../work-conditions/pages';
+import { DashboardStatistic, DashboardActivity, DashboardCondition } from '../../../../../app/layout/domain/entities/Dashboard';
 
 interface SoloLecturaDashboardProps {
   user: {
@@ -24,11 +20,10 @@ interface SoloLecturaDashboardProps {
   };
 }
 
-export const SoloLecturaDashboard: React.FC<SoloLecturaDashboardProps> = ({
-  user,
-  dashboardData,
-}) => {
-  const [currentView, setCurrentView] = useState("dashboard"); // Estado para la vista actual
+
+
+export const SoloLecturaDashboard: React.FC<SoloLecturaDashboardProps> = ({ user, dashboardData }) => {
+  const [currentView, setCurrentView] = useState('dashboard'); // Estado para la vista actual
 
   const handleNavigationChange = useCallback((view: string) => {
     setCurrentView(view);
@@ -37,37 +32,47 @@ export const SoloLecturaDashboard: React.FC<SoloLecturaDashboardProps> = ({
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);
   };
+
+  const renderContent = () => {
+    if (currentView === 'work-conditions') {
+      return <WorkConditionsPage />;
+    }
+
+    return (
+      <Grid container spacing={3}>
+        {hasPermission('dashboard:view:advanced') && (
+          <Grid item xs={12}>
+            <StatsCards stats={dashboardData.stats || []} />
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <PermissionsPanel user={user} />
+        </Grid>
+        <Grid container spacing={3} item xs={12}>
+          {hasPermission('reportes:read:advanced') && (
+            <Grid item xs={12} md={6}>
+              <ActivityFeed activities={dashboardData.activities || []} />
+            </Grid>
+          )}
+          {hasPermission('dashboard:view:advanced') && (
+            <Grid item xs={12} md={6}>
+              <ConditionsPanel conditions={dashboardData.conditions || []} />
+            </Grid>
+          )}
+        </Grid>
+      </Grid>
+    );
+  };
+
   return (
     <DashboardLayout
       user={user}
       onNavigationChange={handleNavigationChange}
       currentView={currentView}
     >
-      <Box sx={{ flex: 1, p: 4, backgroundColor: "#0f172a" }}>
-        <Grid container spacing={3}>
-          {hasPermission("dashboard:view:advanced") && (
-            <Grid item xs={12}>
-              <StatsCards stats={dashboardData.stats || []} />
-            </Grid>
-          )}
-          <Grid item xs={12}>
-            <PermissionsPanel user={user} />
-          </Grid>
-          <Grid container spacing={3} item xs={12}>
-            {hasPermission("reportes:read:advanced") && (
-              <Grid item xs={12} md={6}>
-                <ActivityFeed activities={dashboardData.activities || []} />
-              </Grid>
-            )}
-            {hasPermission("dashboard:view:advanced") && (
-              <Grid item xs={12} md={6}>
-                <ConditionsPanel conditions={dashboardData.conditions || []} />
-              </Grid>
-            )}
-          </Grid>
-        </Grid>
-      </Box>
+      <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a' }}>
+        {renderContent()}
     </DashboardLayout>
   );
-};
+}
 // Removed duplicate/erroneous code block after main component export
