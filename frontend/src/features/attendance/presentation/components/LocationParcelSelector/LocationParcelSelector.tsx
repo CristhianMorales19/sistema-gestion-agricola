@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, ChevronDown, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { MapPin, ChevronDown, AlertTriangle } from "lucide-react";
+import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
 
-/**
- * Representación simplificada de una parcela para el selector
- */
+import { styled } from "@mui/material/styles";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Typography,
+  Divider,
+} from "@mui/material";
+
+// Interfaz y tipos manteniendo los originales
 export interface ParcelOption {
   id: number;
   nombre: string;
   ubicacionDescripcion: string;
 }
 
-/**
- * Tipos de selección de ubicación disponibles
- */
-export type LocationType = 'parcel' | 'not-applicable' | 'other';
+export type LocationType = "parcel" | "not-applicable" | "other";
 
 export interface LocationValue {
   type: LocationType;
@@ -30,16 +37,46 @@ interface LocationParcelSelectorProps {
   error?: string;
   disabled?: boolean;
   required?: boolean;
+  fullWidth?: boolean;
 }
 
-/**
- * Selector híbrido de ubicación/parcela para el módulo de asistencia.
- * 
- * Permite:
- * - Seleccionar una parcela existente del catálogo
- * - Indicar "No aplica" para no especificar ubicación
- * - Seleccionar "Otro" para ingresar texto libre
- */
+// Contenedor estilizado para el dropdown
+const DropdownContainer = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: "100%",
+  left: 0,
+  right: 0,
+  marginTop: theme.spacing(1),
+  background: theme.palette.background.default,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: theme.shadows[8],
+  zIndex: 1300,
+  maxHeight: 300,
+  overflowY: "auto",
+}));
+
+const ParcelListItem = styled(ListItem)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  "&.selected": {
+    backgroundColor: theme.palette.action.selected,
+  },
+  cursor: "pointer",
+}));
+
+const SpecialOptionItem = styled(ListItem)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  "&.selected": {
+    backgroundColor: theme.palette.action.selected,
+  },
+  cursor: "pointer",
+  color: theme.palette.text.secondary,
+}));
+
 export const LocationParcelSelector: React.FC<LocationParcelSelectorProps> = ({
   parcels,
   loadingParcels = false,
@@ -48,48 +85,51 @@ export const LocationParcelSelector: React.FC<LocationParcelSelectorProps> = ({
   error,
   disabled = false,
   required = true,
+  fullWidth = true,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.location-selector-dropdown')) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
 
     if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
   const handleTypeSelect = (type: LocationType, parcel?: ParcelOption) => {
-    if (type === 'parcel' && parcel) {
+    if (type === "parcel" && parcel) {
       onChange({
-        type: 'parcel',
+        type: "parcel",
         parcelId: parcel.id,
         parcelName: parcel.nombre,
         customText: undefined,
       });
-    } else if (type === 'not-applicable') {
+    } else if (type === "not-applicable") {
       onChange({
-        type: 'not-applicable',
+        type: "not-applicable",
         parcelId: undefined,
         parcelName: undefined,
         customText: undefined,
       });
-    } else if (type === 'other') {
+    } else if (type === "other") {
       onChange({
-        type: 'other',
+        type: "other",
         parcelId: undefined,
         parcelName: undefined,
-        customText: value.customText || '',
+        customText: value.customText || "",
       });
     }
     setIsDropdownOpen(false);
@@ -98,234 +138,225 @@ export const LocationParcelSelector: React.FC<LocationParcelSelectorProps> = ({
   const handleCustomTextChange = (text: string) => {
     onChange({
       ...value,
-      type: 'other',
+      type: "other",
       customText: text,
     });
   };
 
-  /**
-   * Obtiene el texto a mostrar en el selector según el valor actual
-   */
   const getDisplayText = (): string => {
-    if (value.type === 'parcel' && value.parcelName) {
+    if (value.type === "parcel" && value.parcelName) {
       return value.parcelName;
     }
-    if (value.type === 'not-applicable') {
-      return 'No aplica';
+    if (value.type === "not-applicable") {
+      return "No aplica";
     }
-    if (value.type === 'other') {
-      return 'Otro (texto libre)';
+    if (value.type === "other") {
+      return "Otro (texto libre)";
     }
-    return 'Seleccionar ubicación...';
+    return "Seleccionar ubicación...";
   };
 
-  /**
-   * Obtiene el valor final para enviar al backend
-   */
-  const getFinalValue = (): string => {
-    if (value.type === 'parcel' && value.parcelName) {
-      return value.parcelName;
-    }
-    if (value.type === 'not-applicable') {
-      return 'N/A';
-    }
-    if (value.type === 'other' && value.customText) {
-      return value.customText.trim();
-    }
-    return '';
+  const getInputValue = (): string => {
+    if (loadingParcels) return "Cargando parcelas...";
+    return getDisplayText();
   };
 
   const isValid = (): boolean => {
     if (!required) return true;
-    
-    if (value.type === 'parcel') {
+
+    if (value.type === "parcel") {
       return !!value.parcelId;
     }
-    if (value.type === 'not-applicable') {
+    if (value.type === "not-applicable") {
       return true;
     }
-    if (value.type === 'other') {
+    if (value.type === "other") {
       return !!value.customText?.trim();
     }
     return false;
   };
 
   return (
-    <div className="space-y-3">
-      {/* Label */}
-      <label className="block text-sm font-medium text-gray-300">
-        Ubicación / Parcela {required && <span className="text-red-500">*</span>}
-      </label>
+    <Box ref={containerRef} sx={{ position: "relative" }}>
+      {/* Selector principal usando TextFieldGeneric */}
+      <TextFieldGeneric
+        fullWidth={fullWidth}
+        label={`Ubicación / Parcela`}
+        value={getInputValue()}
+        onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
+        disabled={disabled}
+        required={required}
+        error={!!error}
+        helperText={error}
+        InputProps={{
+          readOnly: true,
+          startAdornment: (
+            <MapPin
+              style={{
+                width: 16,
+                height: 16,
+                marginRight: 8,
+                color: "#9CA3AF",
+              }}
+            />
+          ),
+          endAdornment: (
+            <ChevronDown
+              style={{
+                width: 16,
+                height: 16,
+                color: "#9CA3AF",
+                transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s",
+              }}
+            />
+          ),
+        }}
+      />
 
-      {/* Selector principal */}
-      <div className="location-selector-dropdown relative">
-        <button
-          type="button"
-          onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
-          disabled={disabled}
-          className={`w-full px-4 py-2.5 bg-[#0f1419] border rounded-lg flex items-center justify-between transition-colors ${
-            error
-              ? 'border-red-500'
-              : isDropdownOpen
-              ? 'border-blue-500'
-              : 'border-gray-700 hover:border-gray-600'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-        >
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-gray-400" />
-            <span className={value.type ? 'text-white' : 'text-gray-500'}>
-              {loadingParcels ? 'Cargando parcelas...' : getDisplayText()}
-            </span>
-          </div>
-          <ChevronDown
-            className={`w-4 h-4 text-gray-400 transition-transform ${
-              isDropdownOpen ? 'rotate-180' : ''
-            }`}
-          />
-        </button>
-
-        {/* Dropdown */}
-        {isDropdownOpen && !disabled && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-[#1a1f2e] border border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
-            {/* Sección: Parcelas */}
-            {parcels.length > 0 && (
-              <>
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase border-b border-gray-700">
-                  Parcelas disponibles
-                </div>
+      {/* Dropdown */}
+      {isDropdownOpen && !disabled && (
+        <DropdownContainer>
+          {/* Sección: Parcelas */}
+          {parcels.length > 0 && (
+            <>
+              <Box
+                sx={{ px: 2, py: 1, borderBottom: 1, borderColor: "divider" }}
+              >
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  fontWeight="bold"
+                >
+                  PARCELAS DISPONIBLES
+                </Typography>
+              </Box>
+              <List disablePadding>
                 {parcels.map((parcel) => (
-                  <button
+                  <ParcelListItem
                     key={parcel.id}
-                    type="button"
-                    onClick={() => handleTypeSelect('parcel', parcel)}
-                    className={`w-full px-4 py-2.5 text-left hover:bg-[#252d3d] transition-colors flex items-center gap-2 ${
-                      value.type === 'parcel' && value.parcelId === parcel.id
-                        ? 'bg-blue-900/30 text-blue-300'
-                        : 'text-white'
-                    }`}
+                    onClick={() => handleTypeSelect("parcel", parcel)}
+                    className={
+                      value.type === "parcel" && value.parcelId === parcel.id
+                        ? "selected"
+                        : ""
+                    }
                   >
-                    <MapPin className="w-4 h-4 text-green-400 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{parcel.nombre}</div>
-                      {parcel.ubicacionDescripcion && (
-                        <div className="text-xs text-gray-400 truncate">
-                          {parcel.ubicacionDescripcion}
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <MapPin
+                        style={{ width: 16, height: 16, color: "#10B981" }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={parcel.nombre}
+                      secondary={parcel.ubicacionDescripcion}
+                      secondaryTypographyProps={{
+                        variant: "caption",
+                        color: "text.secondary",
+                      }}
+                    />
+                  </ParcelListItem>
                 ))}
-              </>
-            )}
+              </List>
+            </>
+          )}
 
-            {/* Separador si hay parcelas */}
-            {parcels.length > 0 && <div className="border-t border-gray-700" />}
+          {/* Separador si hay parcelas */}
+          {parcels.length > 0 && <Divider />}
 
-            {/* Opciones especiales */}
-            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase border-b border-gray-700">
-              Otras opciones
-            </div>
-
-            {/* No aplica */}
-            <button
-              type="button"
-              onClick={() => handleTypeSelect('not-applicable')}
-              className={`w-full px-4 py-2.5 text-left hover:bg-[#252d3d] transition-colors flex items-center gap-2 ${
-                value.type === 'not-applicable'
-                  ? 'bg-gray-900/50 text-gray-300'
-                  : 'text-gray-400'
-              }`}
+          {/* Opciones especiales */}
+          <Box sx={{ px: 2, py: 1, borderBottom: 1, borderColor: "divider" }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              fontWeight="bold"
             >
-              <span className="w-4 h-4 flex items-center justify-center text-gray-500">—</span>
-              <span>No aplica</span>
-            </button>
+              OTRAS OPCIONES
+            </Typography>
+          </Box>
+          <List disablePadding>
+            {/* No aplica */}
+            <SpecialOptionItem
+              onClick={() => handleTypeSelect("not-applicable")}
+              className={value.type === "not-applicable" ? "selected" : ""}
+            >
+              <ListItemIcon sx={{ minWidth: 32, justifyContent: "center" }}>
+                <span style={{ fontSize: 14, color: "#6B7280" }}>—</span>
+              </ListItemIcon>
+              <ListItemText primary="No aplica" />
+            </SpecialOptionItem>
 
             {/* Otro (texto libre) */}
-            <button
-              type="button"
-              onClick={() => handleTypeSelect('other')}
-              className={`w-full px-4 py-2.5 text-left hover:bg-[#252d3d] transition-colors flex items-center gap-2 ${
-                value.type === 'other'
-                  ? 'bg-yellow-900/30 text-yellow-300'
-                  : 'text-gray-400'
-              }`}
+            <SpecialOptionItem
+              onClick={() => handleTypeSelect("other")}
+              className={value.type === "other" ? "selected" : ""}
             >
-              <span className="w-4 h-4 flex items-center justify-center text-yellow-500">✎</span>
-              <span>Otro (texto libre)</span>
-            </button>
-          </div>
-        )}
-      </div>
+              <ListItemIcon sx={{ minWidth: 32, justifyContent: "center" }}>
+                <span style={{ fontSize: 14, color: "#F59E0B" }}>✎</span>
+              </ListItemIcon>
+              <ListItemText primary="Otro (texto libre)" />
+            </SpecialOptionItem>
+          </List>
+        </DropdownContainer>
+      )}
 
       {/* Campo de texto libre (solo si se selecciona "Otro") */}
-      {value.type === 'other' && (
-        <div className="mt-3">
-          <input
-            type="text"
-            value={value.customText || ''}
+      {value.type === "other" && (
+        <Box sx={{ mt: 2 }}>
+          <TextFieldGeneric
+            fullWidth={fullWidth}
+            value={value.customText || ""}
             onChange={(e) => handleCustomTextChange(e.target.value)}
             placeholder="Ej: Invernadero 3, Bodega principal..."
             disabled={disabled}
-            className={`w-full px-4 py-2 bg-[#0f1419] border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-colors ${
-              error && !value.customText?.trim()
-                ? 'border-red-500'
-                : 'border-gray-700 focus:border-yellow-500'
-            } ${disabled ? 'opacity-50' : ''}`}
+            helperText="Ingresa una ubicación personalizada"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Ingresa una ubicación personalizada
-          </p>
-        </div>
-      )}
-
-      {/* Mensaje de error */}
-      {error && (
-        <div className="flex items-center gap-1 text-red-400 text-xs">
-          <AlertTriangle className="w-3.5 h-3.5" />
-          <span>{error}</span>
-        </div>
+        </Box>
       )}
 
       {/* Mensaje informativo si no hay parcelas */}
       {!loadingParcels && parcels.length === 0 && (
-        <p className="text-xs text-yellow-400 flex items-center gap-1">
-          <AlertTriangle className="w-3.5 h-3.5" />
-          No hay parcelas registradas. Puede usar "Otro" para ingresar ubicación manual.
-        </p>
+        <Typography
+          variant="caption"
+          color="warning.main"
+          sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}
+        >
+          <AlertTriangle style={{ width: 14, height: 14 }} />
+          No hay parcelas registradas. Puede usar "Otro" para ingresar ubicación
+          manual.
+        </Typography>
       )}
-    </div>
+    </Box>
   );
 };
 
-/**
- * Función auxiliar para obtener el string final de ubicación
- */
+// Funciones auxiliares (manteniendo las originales)
 export const getLocationString = (value: LocationValue): string => {
-  if (value.type === 'parcel' && value.parcelName) {
+  if (value.type === "parcel" && value.parcelName) {
     return value.parcelName;
   }
-  if (value.type === 'not-applicable') {
-    return 'N/A';
+  if (value.type === "not-applicable") {
+    return "N/A";
   }
-  if (value.type === 'other' && value.customText) {
+  if (value.type === "other" && value.customText) {
     return value.customText.trim();
   }
-  return '';
+  return "";
 };
 
-/**
- * Función auxiliar para validar el valor de ubicación
- */
-export const isLocationValid = (value: LocationValue, required: boolean = true): boolean => {
+export const isLocationValid = (
+  value: LocationValue,
+  required: boolean = true,
+): boolean => {
   if (!required) return true;
 
-  if (value.type === 'parcel') {
+  if (value.type === "parcel") {
     return !!value.parcelId;
   }
-  if (value.type === 'not-applicable') {
+  if (value.type === "not-applicable") {
     return true;
   }
-  if (value.type === 'other') {
+  if (value.type === "other") {
     return !!value.customText?.trim();
   }
   return false;

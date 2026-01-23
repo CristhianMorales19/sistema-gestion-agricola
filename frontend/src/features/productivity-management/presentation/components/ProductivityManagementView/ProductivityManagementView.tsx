@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Box, Typography, FormControl, MenuItem } from "@mui/material";
-import { Assessment as AssessmentIcon } from "@mui/icons-material";
+import { Add as AddIcon } from "@mui/icons-material";
 
 import { ProductivityTable } from "../ProductivityTable/ProductivityTable";
 import { ProductivityForm } from "../ProductivityForm/NewProductivityForm";
@@ -155,7 +155,7 @@ export const ProductivityManagementView: React.FC = () => {
         <Box sx={{ display: "flex", g: 2 }}>
           <ButtonGeneric
             variant="contained"
-            startIcon={<AssessmentIcon />}
+            startIcon={<AddIcon />}
             onClick={handleAddRecordClick}
           >
             Nuevo Registro

@@ -35,7 +35,7 @@ export const StatsCard = styled(Card)(({ theme }) => ({
 
 // Contenido de la stats card
 export const StatsCardContent = styled(CardContent)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(1.5),
 }));
 
 // Contenedor interno de stats
@@ -55,7 +55,7 @@ export const StatsValue = styled(Typography, {
   shouldForwardProp: (prop) => prop !== "color",
 })<{ color?: string }>(({ theme, color = theme.palette.text.primary }) => ({
   color,
-  fontSize: "1.5rem",
+  fontSize: "1rem",
   fontWeight: 700,
   marginBottom: theme.spacing(0.5),
   lineHeight: 1.2,
@@ -64,6 +64,26 @@ export const StatsValue = styled(Typography, {
 // Etiqueta de la stats card
 export const StatsLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
-  fontSize: "0.875rem",
+  fontSize: "0.65rem",
   fontWeight: 500,
 }));
+
+// Icon Box para estadísticas
+export const StatsIconBox = styled(Box)<{ bgcolor: string }>(
+  ({ theme, bgcolor }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 33,
+    height: 33,
+    borderRadius: theme.shape.borderRadius * 2,
+    backgroundColor: bgcolor,
+    marginRight: theme.spacing(1),
+    color: "white",
+    flexShrink: 0,
+
+    "& svg": {
+      fontSize: "1.1rem",
+    },
+  }),
+);

@@ -212,7 +212,7 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
             onClick={onCancel}
             startIcon={<StyledArrowBackIcon />}
           >
-            Volver
+            Cancelar
           </BackButtonGeneric>
 
           <ButtonGeneric type="submit" disabled={loading}>

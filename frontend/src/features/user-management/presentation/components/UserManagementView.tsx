@@ -47,7 +47,7 @@ import {
   SlideTransition,
 } from "../../../../shared/presentation/styles/Dialog.styles";
 
-import { Refresh, PersonAdd } from "@mui/icons-material";
+import { Refresh, PersonAdd, Add as AddIcon } from "@mui/icons-material";
 import { useAuth0 } from "@auth0/auth0-react";
 import { UserManagementService } from "../../services/UserManagementService";
 import { UsuariosSistemaService } from "../../../../services/usuarios-sistema.service";
@@ -375,7 +375,7 @@ export const UserManagementView: React.FC = () => {
           <ButtonGeneric startIcon={<Refresh />} onClick={loadData}>
             Actualizar
           </ButtonGeneric>
-          <ButtonGeneric startIcon={<PersonAdd />} onClick={handleCrearUsuario}>
+          <ButtonGeneric startIcon={<AddIcon />} onClick={handleCrearUsuario}>
             Crear Usuario
           </ButtonGeneric>
 

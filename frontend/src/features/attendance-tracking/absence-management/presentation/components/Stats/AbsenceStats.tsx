@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import {
   StatsGrid,
@@ -8,7 +7,7 @@ import {
   StatsTextBox,
   StatsValue,
   StatsLabel,
-} from "./AbsenceStats.styles";
+} from "../../../../../../shared/presentation/styles/Stats.styles";
 
 interface AbsenceStatsProps {
   stats: {
@@ -19,7 +18,7 @@ interface AbsenceStatsProps {
   };
 }
 
-export const AbsenceStats: React.FC<AbsenceStatsProps> = ({ stats }) => {
+export const AbsenceStats = ({ stats }: AbsenceStatsProps) => {
   return (
     <StatsGrid container spacing={2}>
       <Grid item xs={12} sm={6} md={3}>

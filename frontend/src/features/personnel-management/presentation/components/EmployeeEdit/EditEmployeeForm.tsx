@@ -546,7 +546,7 @@ export const EditEmployeeForm = ({
           onClick={onCancel}
           startIcon={<StyledArrowBackIcon />}
         >
-          Volver
+          Cancelar
         </BackButtonGeneric>
         <ButtonGeneric type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Guardando..." : "Guardar"}

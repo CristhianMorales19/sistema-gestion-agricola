@@ -401,7 +401,7 @@ export const LaborInfoView = ({
           onClick={onCancel}
           startIcon={<StyledArrowBackIcon />}
         >
-          Volver
+          Cancelar
         </BackButtonGeneric>
         <ButtonGeneric type="submit" disabled={loading}>
           {loading ? "Guardando..." : "Guardar"}

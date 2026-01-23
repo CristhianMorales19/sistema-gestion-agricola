@@ -170,7 +170,7 @@ export const NewEditCrewForm = ({
           onClick={onCancel}
           startIcon={<StyledArrowBackIcon />}
         >
-          Volver
+          Cancelar
         </BackButtonGeneric>
 
         <ButtonGeneric type="submit">

@@ -1,4 +1,4 @@
-import { LaborInfoData } from "../entities/labor-info-employee";
+import { LaborInfoData } from "./labor-info-employee";
 
 // src/employee-management/domain/entities/Employee.ts
 export interface Employee {

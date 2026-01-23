@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { InputAdornment } from "@mui/material";
-import { GroupAdd as GroupAddIcon } from "@mui/icons-material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { CrewTable } from "./CrewTable/CrewTable";
 import { NewEditCrewForm } from "./CrewForm/NewEditCrewForm";
 import { useCrewManagement } from "../../application/hooks/use-crew-management";
@@ -233,10 +233,7 @@ export const CrewManagementView = () => {
       <HeaderGeneric>
         <TextGeneric variant="h4">Gestión de Cuadrillas</TextGeneric>
         {currentView === "list" && (
-          <ButtonGeneric
-            startIcon={<GroupAddIcon />}
-            onClick={handleAddCrewClick}
-          >
+          <ButtonGeneric startIcon={<AddIcon />} onClick={handleAddCrewClick}>
             Crear Cuadrilla
           </ButtonGeneric>
         )}

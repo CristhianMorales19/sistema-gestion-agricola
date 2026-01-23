@@ -270,7 +270,7 @@ export const NewParcelForm: React.FC<NewParcelFormProps> = ({
             onClick={onCancel}
             startIcon={<StyledArrowBackIcon />}
           >
-            Volver
+            Cancelar
           </BackButtonGeneric>
           <ButtonGeneric type="submit">
             {isEditing ? "Guardar Cambios" : "Crear Parcela"}

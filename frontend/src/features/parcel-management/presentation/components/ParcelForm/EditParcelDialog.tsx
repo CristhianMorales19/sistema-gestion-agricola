@@ -269,7 +269,7 @@ export const EditParcelDialog: React.FC<EditParcelDialogProps> = ({
             onClick={onClose}
             startIcon={<StyledArrowBackIcon />}
           >
-            Volver
+            Cancelar
           </BackButtonGeneric>
           <ButtonGeneric onClick={handleSubmit} disabled={loading}>
             {loading ? "Guardando..." : "Actualizar"}
