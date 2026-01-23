@@ -135,6 +135,7 @@ export const WorkConditionsForm: React.FC<WorkConditionsFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("handleSubmit");
 
     if (formData.fecha > maxDate) {
       setDateError("❌ No se pueden registrar días futuros");
@@ -184,7 +185,7 @@ export const WorkConditionsForm: React.FC<WorkConditionsFormProps> = ({
           <StyledAlert severity="success">{submissionMessage}</StyledAlert>
         )}
 
-        <FormContainer onSubmit={handleSubmit}>
+        <FormContainer component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <GridItem item xs={12}>
               <TextFieldGeneric
