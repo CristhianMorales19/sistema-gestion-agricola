@@ -20,8 +20,19 @@ export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       5px 5px 5px ${theme.palette.primary.main}30,
       inset 0 1px 0 ${theme.palette.surface.light}
     `,
-  overflow: "hidden",
   position: "relative",
+
+  // Scroll horizontal
+  overflowX: "auto",
+  WebkitOverflowScrolling: "touch",
+
+  "&::-webkit-scrollbar": {
+    height: 4,
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: theme.palette.primary.main,
+    borderRadius: 2,
+  },
 
   "&::before": {
     content: '""',
@@ -37,6 +48,10 @@ export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       transparent
     )`,
     zIndex: 1,
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: theme.shape.borderRadius * 2,
   },
 }));
 
@@ -80,6 +95,11 @@ export const HeaderCell = styled(TableCell)(({ theme }) => ({
 
   "&:last-of-type": {
     borderTopRightRadius: theme.shape.borderRadius * 2,
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+    padding: theme.spacing(0.5),
   },
 }));
 
@@ -136,6 +156,11 @@ export const BodyCell = styled(TableCell)(({ theme }) => ({
   "&:hover": {
     color: theme.palette.primary.light,
   },
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+    padding: theme.spacing(0.5),
+  },
 }));
 
 // Chip de estado
@@ -174,6 +199,11 @@ export const StatusChip = styled(Chip, {
       transform: "translateY(-1px)",
       boxShadow: `0 4px 12px -4px ${borderColor}30`,
     },
+
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.55rem",
+      padding: theme.spacing(0.1, 0.2),
+    },
   };
 });
 
@@ -182,21 +212,34 @@ export const ActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: theme.spacing(2),
   justifyContent: "center",
+
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(0.5),
+  },
+
+  "& svg": {
+    fontSize: "1.125rem",
+
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.8rem",
+    },
+  },
 }));
 
 // Botón de editar
+// Botón de editar (verde)
 export const EditButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.primary.light,
-  backgroundColor: `${theme.palette.primary.main}15`,
+  color: theme.palette.success.light,
+  backgroundColor: `${theme.palette.success.main}15`,
   borderRadius: theme.shape.borderRadius * 1.5,
   padding: theme.spacing(0.75),
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
 
   "&:hover": {
     color: theme.palette.text.primary,
-    backgroundColor: `${theme.palette.primary.main}40`,
+    backgroundColor: `${theme.palette.success.main}40`,
     transform: "translateY(-2px)",
-    boxShadow: `0 4px 12px -4px ${theme.palette.primary.main}40`,
+    boxShadow: `0 4px 12px -4px ${theme.palette.success.main}40`,
   },
 
   "&:active": {
@@ -224,7 +267,7 @@ export const DeleteButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-// Botón de editar
+// Botón de agregar
 export const AddButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.primary.light,
   backgroundColor: `${theme.palette.primary.main}15`,

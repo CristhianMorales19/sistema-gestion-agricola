@@ -1,14 +1,13 @@
 import { Box, Typography } from "@mui/material";
-import {
-  PersonAdd as PersonAddIcon,
-  Work as WorkIcon,
-} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 
 // Botón contenedor en header
 export const HeaderButtonContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(1),
+  },
 }));
 
 // Mensaje de empleado seleccionado
@@ -40,13 +39,4 @@ export const SearchMessage = styled(Typography)(({ theme }) => ({
   backgroundColor: `${theme.palette.surface.light}20`,
   borderRadius: theme.shape.borderRadius,
   borderLeft: `3px solid ${theme.palette.primary.main}80`,
-}));
-
-// Iconos
-export const StyledWorkIcon = styled(WorkIcon)(() => ({
-  fontSize: "1.25rem",
-}));
-
-export const StyledPersonAddIcon = styled(PersonAddIcon)(({ theme }) => ({
-  fontSize: "1.25rem",
 }));

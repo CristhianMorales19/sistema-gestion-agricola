@@ -62,5 +62,19 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
     "&:active": {
       transform: disabled ? "none" : "translateY(0)",
     },
+
+    "& .MuiButton-startIcon svg": {
+      fontSize: "1.25rem",
+
+      [theme.breakpoints.down("sm")]: {
+        fontSize: "0.9rem",
+      },
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(0.5, 1.5),
+      fontSize: "0.60rem",
+      minHeight: 32,
+    },
   }),
 );

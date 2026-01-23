@@ -21,7 +21,7 @@ interface MessageContextProps {
 }
 
 const MessageContext = createContext<MessageContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 export const MessageProvider = ({ children }: { children: ReactNode }) => {
@@ -40,7 +40,7 @@ export const MessageProvider = ({ children }: { children: ReactNode }) => {
       showMessage,
       clearMessage,
     }),
-    [showMessage, clearMessage]
+    [showMessage, clearMessage],
   );
 
   return (

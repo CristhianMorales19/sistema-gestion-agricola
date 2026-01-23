@@ -23,4 +23,10 @@ export const HeaderGeneric = styled(Box)(({ theme }) => ({
       transparent
     )`,
   },
+
+  // Pantallas pequeñas
+  [theme.breakpoints.down("sm")]: {
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(0.5),
+  },
 }));

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Box, Grid } from "@mui/material";
-import { DashboardLayout } from "../AdminDashboard/components/SideBar/DashboardLayout";
-import { PermissionsPanel } from "../AdminDashboard/components/PermissionsPanel/PermissionsPanel";
+import {
+  DashboardLayout,
+  PermissionsPanel,
+} from "../AdminDashboard/components";
 import { StatsCards } from "../../../../../app/layout/presentation/components/StatsCards/StatsCards";
 import { ActivityFeed } from "../../../../../app/layout/presentation/components/ActivityFeed/ActivityFeed";
 import { ConditionsPanel } from "../../../../../app/layout/presentation/components/ConditionsPanel/ConditionsPanel";
+import { WorkConditionsPage } from "../../../../work-conditions";
 
 // Permisos relevantes para Supervisor Campo según la matriz
 const PERMISOS_SUPERVISOR_CAMPO = [
@@ -62,6 +65,42 @@ export const SupervisorCampoDashboard: React.FC<
   const hasPermission = (permission: string) => {
     return user?.permisos?.includes(permission);
   };
+
+  const renderContent = () => {
+    if (currentView === "work-conditions") {
+      return <WorkConditionsPage />;
+    }
+
+    return (
+      <Grid container spacing={3}>
+        {/* Stats Cards solo si tiene permiso de ver KPIs */}
+        {hasPermission("kpis:view") && (
+          <Grid item xs={12}>
+            <StatsCards stats={dashboardData.stats} />
+          </Grid>
+        )}
+        {/* Panel de permisos siempre visible */}
+        <Grid item xs={12}>
+          <PermissionsPanel user={user} />
+        </Grid>
+        <Grid container spacing={3} item xs={12}>
+          {/* Activity Feed solo si tiene permiso de ver reportes avanzados */}
+          {hasPermission("reportes:read:advanced") && (
+            <Grid item xs={12} md={6}>
+              <ActivityFeed activities={dashboardData.activities} />
+            </Grid>
+          )}
+          {/* Panel de condiciones solo si tiene permiso de ver dashboard avanzado */}
+          {hasPermission("dashboard:view:advanced") && (
+            <Grid item xs={12} md={6}>
+              <ConditionsPanel conditions={dashboardData.conditions} />
+            </Grid>
+          )}
+        </Grid>
+      </Grid>
+    );
+  };
+
   return (
     <DashboardLayout
       user={user}
@@ -69,32 +108,7 @@ export const SupervisorCampoDashboard: React.FC<
       currentView={currentView}
     >
       <Box sx={{ flex: 1, p: 4, backgroundColor: "#0f172a" }}>
-        <Grid container spacing={3}>
-          {/* Stats Cards solo si tiene permiso de ver KPIs */}
-          {hasPermission("kpis:view") && (
-            <Grid item xs={12}>
-              <StatsCards stats={dashboardData.stats} />
-            </Grid>
-          )}
-          {/* Panel de permisos siempre visible */}
-          <Grid item xs={12}>
-            <PermissionsPanel user={user} />
-          </Grid>
-          <Grid container spacing={3} item xs={12}>
-            {/* Activity Feed solo si tiene permiso de ver reportes avanzados */}
-            {hasPermission("reportes:read:advanced") && (
-              <Grid item xs={12} md={6}>
-                <ActivityFeed activities={dashboardData.activities} />
-              </Grid>
-            )}
-            {/* Panel de condiciones solo si tiene permiso de ver dashboard avanzado */}
-            {hasPermission("dashboard:view:advanced") && (
-              <Grid item xs={12} md={6}>
-                <ConditionsPanel conditions={dashboardData.conditions} />
-              </Grid>
-            )}
-          </Grid>
-        </Grid>
+        {renderContent()}
       </Box>
     </DashboardLayout>
   );

@@ -8,6 +8,10 @@ export interface UserPermissions {
   consultar_personal: boolean;
   gestionar_asistencia: boolean;
   consultar_asistencia: boolean;
+  gestionar_condiciones_trabajo: boolean;
+  // Parcelas - usando formato Auth0
+  "parcelas:read": boolean;
+  "parcelas:update": boolean;
   gestionar_nomina: boolean;
   consultar_nomina: boolean;
   gestionar_productividad: boolean;
@@ -44,12 +48,12 @@ export interface AuthContextType {
 }
 
 export interface ApiResponse<T = any> {
-    success: boolean;
-    message: string;
-    data?: T;
+  success: boolean;
+  message: string;
+  data?: T;
 }
 
 export interface CreateEmployeeResponse {
-    trabajador: Employee;
-    permissions: string[];
+  trabajador: Employee;
+  permissions: string[];
 }

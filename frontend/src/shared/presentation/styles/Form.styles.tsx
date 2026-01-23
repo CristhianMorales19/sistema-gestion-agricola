@@ -3,14 +3,22 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 
 // Contenedor del formulario
 export const FormContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(2),
   "& .MuiGrid-container": {
     marginBottom: theme.spacing(1),
   },
 }));
 
-export const InputSection = styled(Box)(() => ({
-  maxWidth: 500, // ≈ 1/3 de pantalla desktop
-  margin: "0 auto", // centra horizontalmente
+export const InputSection = styled(Box)(({ theme }) => ({
+  margin: "0 auto",
+  width: "100%",
+  maxWidth: 500,
+
+  [theme.breakpoints.down("sm")]: {
+    maxWidth: "100%",
+  },
 }));
 
 // Grid item con efecto de elevación al hover
@@ -27,7 +35,6 @@ export const ButtonContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
   justifyContent: "flex-end",
   marginTop: theme.spacing(4),
-  paddingTop: theme.spacing(3),
   borderTop: `1px solid ${theme.palette.surface.light}40`,
 }));
 

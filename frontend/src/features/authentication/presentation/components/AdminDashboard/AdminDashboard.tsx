@@ -20,6 +20,7 @@ import { AbsenceManagementView } from "../../../../attendance-tracking";
 import { CrewManagementView } from "../../../../crew-managenet/presentation/components/CrewManagementView";
 import { ProductivityManagementView } from "../../../../productivity-management";
 import AsistenciaPage from "../../../../asistencia/AsistenciaPage";
+import AttendancePage from "../../../../attendance/pages/AttendancePage";
 import {
   StyledContainer,
   ContentContainer,
@@ -34,6 +35,8 @@ import {
   LoadingSpinner,
   LoadingContainer,
 } from "../../../../../shared/presentation/styles/LoadingSpinner.styles";
+import { WorkConditionsPage } from "../../../../work-conditions";
+import { ParcelManagementPage } from "../../../../parcel-management";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -171,7 +174,7 @@ export const AdminDashboard = () => {
       case "asistencia":
         return (
           <ContentContainer>
-            <AsistenciaPage />
+            <AttendancePage />
           </ContentContainer>
         );
 
@@ -186,6 +189,20 @@ export const AdminDashboard = () => {
         return (
           <ContentContainer>
             <CrewManagementView />
+          </ContentContainer>
+        );
+
+      case "work-conditions":
+        return (
+          <ContentContainer>
+            <WorkConditionsPage />
+          </ContentContainer>
+        );
+
+      case "parcelas":
+        return (
+          <ContentContainer>
+            <ParcelManagementPage />
           </ContentContainer>
         );
 

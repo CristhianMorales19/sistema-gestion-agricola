@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -19,11 +19,14 @@ const createAusenciaSchema = z.object({
  * Esquema de validación para actualizar ausencia
  */
 const updateAusenciaSchema = z.object({
-  fecha_ausencia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  fecha_ausencia: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   motivo: z.string().min(1).optional(),
   motivo_personalizado: z.string().optional(),
   comentarios: z.string().optional(),
-  estado_aprobacion: z.enum(['pendiente', 'aprobada', 'rechazada']).optional(),
+  estado_aprobacion: z.enum(["pendiente", "aprobada", "rechazada"]).optional(),
 });
 
 /**
@@ -35,14 +38,14 @@ export class AusenciasController {
    */
   static async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const { 
-        trabajador_id, 
-        fecha_inicio, 
-        fecha_fin, 
-        estado, 
+      const {
+        trabajador_id,
+        fecha_inicio,
+        fecha_fin,
+        estado,
         motivo,
-        page = '1',
-        limit = '10'
+        page = "1",
+        limit = "10",
       } = req.query;
 
       const pageNumber = parseInt(page as string);
@@ -51,7 +54,7 @@ export class AusenciasController {
 
       // Construir filtros dinámicos
       const where: any = {
-        deleted_at: null
+        deleted_at: null,
       };
 
       if (trabajador_id) {
@@ -74,7 +77,7 @@ export class AusenciasController {
 
       if (motivo) {
         where.motivo = {
-          contains: motivo as string
+          contains: motivo as string,
         };
       }
 
@@ -85,7 +88,7 @@ export class AusenciasController {
           skip,
           take: limitNumber,
           orderBy: {
-            fecha_at: 'desc'
+            fecha_at: "desc",
           },
           include: {
             mom_trabajador: {
@@ -93,22 +96,22 @@ export class AusenciasController {
                 trabajador_id: true,
                 documento_identidad: true,
                 nombre_completo: true,
-                email: true
-              }
-            }
-          }
+                email: true,
+              },
+            },
+          },
         }),
-        prisma.mot_ausencia_justificada.count({ where })
+        prisma.mot_ausencia_justificada.count({ where }),
       ]);
 
       // Mapear resultados al formato esperado
-      const ausenciasFormateadas = ausencias.map(ausencia => ({
+      const ausenciasFormateadas = ausencias.map((ausencia) => ({
         id: ausencia.ausencia_id,
         ausencia_id: ausencia.ausencia_id,
         trabajador_id: ausencia.trabajador_id,
         trabajador_nombre: ausencia.mom_trabajador.nombre_completo,
         trabajador_documento: ausencia.mom_trabajador.documento_identidad,
-        fecha_ausencia: ausencia.fecha_at.toISOString().split('T')[0],
+        fecha_ausencia: ausencia.fecha_at.toISOString().split("T")[0],
         motivo: ausencia.motivo,
         motivo_personalizado: ausencia.tipo_ausencia,
         documentacion_respaldo: ausencia.documento_respaldo_path,
@@ -116,7 +119,7 @@ export class AusenciasController {
         comentarios: null,
         fecha_registro: ausencia.created_at,
         created_at: ausencia.created_at,
-        updated_at: ausencia.updated_at
+        updated_at: ausencia.updated_at,
       }));
 
       res.json({
@@ -126,15 +129,15 @@ export class AusenciasController {
           total,
           page: pageNumber,
           limit: limitNumber,
-          totalPages: Math.ceil(total / limitNumber)
-        }
+          totalPages: Math.ceil(total / limitNumber),
+        },
       });
     } catch (error: any) {
-      console.error('Error al obtener ausencias:', error);
+      console.error("Error al obtener ausencias:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al obtener las ausencias',
-        error: error.message
+        message: "Error al obtener las ausencias",
+        error: error.message,
       });
     }
   }
@@ -149,7 +152,7 @@ export class AusenciasController {
       const ausencia = await prisma.mot_ausencia_justificada.findFirst({
         where: {
           ausencia_id: parseInt(id),
-          deleted_at: null
+          deleted_at: null,
         },
         include: {
           mom_trabajador: {
@@ -157,16 +160,16 @@ export class AusenciasController {
               trabajador_id: true,
               documento_identidad: true,
               nombre_completo: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       if (!ausencia) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -177,28 +180,28 @@ export class AusenciasController {
         trabajador_id: ausencia.trabajador_id,
         trabajador_nombre: ausencia.mom_trabajador.nombre_completo,
         trabajador_documento: ausencia.mom_trabajador.documento_identidad,
-        fecha_ausencia: ausencia.fecha_at.toISOString().split('T')[0],
+        fecha_ausencia: ausencia.fecha_at.toISOString().split("T")[0],
         motivo: ausencia.motivo,
         motivo_personalizado: ausencia.tipo_ausencia,
         documentacion_respaldo: ausencia.documento_respaldo_path,
         estado: ausencia.estado_aprobacion,
         fecha_registro: ausencia.created_at,
         created_at: ausencia.created_at,
-        updated_at: ausencia.updated_at
+        updated_at: ausencia.updated_at,
       };
 
       res.json({
         success: true,
         data: {
-          ausencia: ausenciaFormateada
-        }
+          ausencia: ausenciaFormateada,
+        },
       });
     } catch (error: any) {
-      console.error('Error al obtener ausencia:', error);
+      console.error("Error al obtener ausencia:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al obtener la ausencia',
-        error: error.message
+        message: "Error al obtener la ausencia",
+        error: error.message,
       });
     }
   }
@@ -216,31 +219,33 @@ export class AusenciasController {
         where: {
           trabajador_id: validatedData.trabajador_id,
           deleted_at: null,
-          is_activo: true
-        }
+          is_activo: true,
+        },
       });
 
       if (!trabajador) {
         res.status(404).json({
           success: false,
-          message: 'Trabajador no encontrado o inactivo'
+          message: "Trabajador no encontrado o inactivo",
         });
         return;
       }
 
       // Verificar si ya existe una ausencia para esa fecha
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          trabajador_id: validatedData.trabajador_id,
-          fecha_at: new Date(validatedData.fecha_ausencia),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            trabajador_id: validatedData.trabajador_id,
+            fecha_at: new Date(validatedData.fecha_ausencia),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (ausenciaExistente) {
         res.status(400).json({
           success: false,
-          message: 'Ya existe una ausencia registrada para esta fecha'
+          message: "Ya existe una ausencia registrada para esta fecha",
         });
         return;
       }
@@ -256,13 +261,13 @@ export class AusenciasController {
           motivo: validatedData.motivo,
           tipo_ausencia: validatedData.motivo_personalizado || null,
           documento_respaldo_path: null,
-          estado_aprobacion: 'pendiente',
+          estado_aprobacion: "pendiente",
           usuario_registro: userId,
           created_at: new Date(),
           created_by: userId,
           updated_at: null,
           updated_by: null,
-          deleted_at: null
+          deleted_at: null,
         },
         include: {
           mom_trabajador: {
@@ -270,10 +275,10 @@ export class AusenciasController {
               trabajador_id: true,
               documento_identidad: true,
               nombre_completo: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       const ausenciaFormateada = {
@@ -282,39 +287,39 @@ export class AusenciasController {
         trabajador_id: nuevaAusencia.trabajador_id,
         trabajador_nombre: nuevaAusencia.mom_trabajador.nombre_completo,
         trabajador_documento: nuevaAusencia.mom_trabajador.documento_identidad,
-        fecha_ausencia: nuevaAusencia.fecha_at.toISOString().split('T')[0],
+        fecha_ausencia: nuevaAusencia.fecha_at.toISOString().split("T")[0],
         motivo: nuevaAusencia.motivo,
         motivo_personalizado: nuevaAusencia.tipo_ausencia,
         documentacion_respaldo: nuevaAusencia.documento_respaldo_path,
         estado: nuevaAusencia.estado_aprobacion,
         fecha_registro: nuevaAusencia.created_at,
         created_at: nuevaAusencia.created_at,
-        updated_at: nuevaAusencia.updated_at
+        updated_at: nuevaAusencia.updated_at,
       };
 
       res.status(201).json({
         success: true,
-        message: 'Ausencia registrada exitosamente',
+        message: "Ausencia registrada exitosamente",
         data: {
-          ausencia: ausenciaFormateada
-        }
+          ausencia: ausenciaFormateada,
+        },
       });
     } catch (error: any) {
-      console.error('Error al crear ausencia:', error);
-      
+      console.error("Error al crear ausencia:", error);
+
       if (error instanceof z.ZodError) {
         res.status(400).json({
           success: false,
-          message: 'Datos de entrada inválidos',
-          errors: error.errors
+          message: "Datos de entrada inválidos",
+          errors: error.errors,
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        message: 'Error al registrar la ausencia',
-        error: error.message
+        message: "Error al registrar la ausencia",
+        error: error.message,
       });
     }
   }
@@ -328,17 +333,19 @@ export class AusenciasController {
       const validatedData = updateAusenciaSchema.parse(req.body);
 
       // Verificar que la ausencia existe
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          ausencia_id: parseInt(id),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            ausencia_id: parseInt(id),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (!ausenciaExistente) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -348,7 +355,7 @@ export class AusenciasController {
       // Construir objeto de actualización
       const dataToUpdate: any = {
         updated_at: new Date(),
-        updated_by: userId
+        updated_by: userId,
       };
 
       if (validatedData.fecha_ausencia) {
@@ -370,7 +377,7 @@ export class AusenciasController {
       // Actualizar ausencia
       const ausenciaActualizada = await prisma.mot_ausencia_justificada.update({
         where: {
-          ausencia_id: parseInt(id)
+          ausencia_id: parseInt(id),
         },
         data: dataToUpdate,
         include: {
@@ -379,10 +386,10 @@ export class AusenciasController {
               trabajador_id: true,
               documento_identidad: true,
               nombre_completo: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       const ausenciaFormateada = {
@@ -390,40 +397,43 @@ export class AusenciasController {
         ausencia_id: ausenciaActualizada.ausencia_id,
         trabajador_id: ausenciaActualizada.trabajador_id,
         trabajador_nombre: ausenciaActualizada.mom_trabajador.nombre_completo,
-        trabajador_documento: ausenciaActualizada.mom_trabajador.documento_identidad,
-        fecha_ausencia: ausenciaActualizada.fecha_at.toISOString().split('T')[0],
+        trabajador_documento:
+          ausenciaActualizada.mom_trabajador.documento_identidad,
+        fecha_ausencia: ausenciaActualizada.fecha_at
+          .toISOString()
+          .split("T")[0],
         motivo: ausenciaActualizada.motivo,
         motivo_personalizado: ausenciaActualizada.tipo_ausencia,
         documentacion_respaldo: ausenciaActualizada.documento_respaldo_path,
         estado: ausenciaActualizada.estado_aprobacion,
         fecha_registro: ausenciaActualizada.created_at,
         created_at: ausenciaActualizada.created_at,
-        updated_at: ausenciaActualizada.updated_at
+        updated_at: ausenciaActualizada.updated_at,
       };
 
       res.json({
         success: true,
-        message: 'Ausencia actualizada exitosamente',
+        message: "Ausencia actualizada exitosamente",
         data: {
-          ausencia: ausenciaFormateada
-        }
+          ausencia: ausenciaFormateada,
+        },
       });
     } catch (error: any) {
-      console.error('Error al actualizar ausencia:', error);
-      
+      console.error("Error al actualizar ausencia:", error);
+
       if (error instanceof z.ZodError) {
         res.status(400).json({
           success: false,
-          message: 'Datos de entrada inválidos',
-          errors: error.errors
+          message: "Datos de entrada inválidos",
+          errors: error.errors,
         });
         return;
       }
 
       res.status(500).json({
         success: false,
-        message: 'Error al actualizar la ausencia',
-        error: error.message
+        message: "Error al actualizar la ausencia",
+        error: error.message,
       });
     }
   }
@@ -435,17 +445,19 @@ export class AusenciasController {
     try {
       const { id } = req.params;
 
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          ausencia_id: parseInt(id),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            ausencia_id: parseInt(id),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (!ausenciaExistente) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -454,25 +466,25 @@ export class AusenciasController {
 
       await prisma.mot_ausencia_justificada.update({
         where: {
-          ausencia_id: parseInt(id)
+          ausencia_id: parseInt(id),
         },
         data: {
           deleted_at: new Date(),
           updated_by: userId,
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       });
 
       res.json({
         success: true,
-        message: 'Ausencia eliminada exitosamente'
+        message: "Ausencia eliminada exitosamente",
       });
     } catch (error: any) {
-      console.error('Error al eliminar ausencia:', error);
+      console.error("Error al eliminar ausencia:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al eliminar la ausencia',
-        error: error.message
+        message: "Error al eliminar la ausencia",
+        error: error.message,
       });
     }
   }
@@ -485,17 +497,19 @@ export class AusenciasController {
       const { id } = req.params;
       const { supervisor_id, comentarios } = req.body;
 
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          ausencia_id: parseInt(id),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            ausencia_id: parseInt(id),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (!ausenciaExistente) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -504,12 +518,12 @@ export class AusenciasController {
 
       const ausenciaActualizada = await prisma.mot_ausencia_justificada.update({
         where: {
-          ausencia_id: parseInt(id)
+          ausencia_id: parseInt(id),
         },
         data: {
-          estado_aprobacion: 'aprobada',
+          estado_aprobacion: "aprobada",
           updated_at: new Date(),
-          updated_by: userId
+          updated_by: userId,
         },
         include: {
           mom_trabajador: {
@@ -517,34 +531,36 @@ export class AusenciasController {
               trabajador_id: true,
               documento_identidad: true,
               nombre_completo: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       const ausenciaFormateada = {
         id: ausenciaActualizada.ausencia_id,
         trabajador_id: ausenciaActualizada.trabajador_id,
         trabajador_nombre: ausenciaActualizada.mom_trabajador.nombre_completo,
-        fecha_ausencia: ausenciaActualizada.fecha_at.toISOString().split('T')[0],
+        fecha_ausencia: ausenciaActualizada.fecha_at
+          .toISOString()
+          .split("T")[0],
         motivo: ausenciaActualizada.motivo,
-        estado: ausenciaActualizada.estado_aprobacion
+        estado: ausenciaActualizada.estado_aprobacion,
       };
 
       res.json({
         success: true,
-        message: 'Ausencia aprobada exitosamente',
+        message: "Ausencia aprobada exitosamente",
         data: {
-          ausencia: ausenciaFormateada
-        }
+          ausencia: ausenciaFormateada,
+        },
       });
     } catch (error: any) {
-      console.error('Error al aprobar ausencia:', error);
+      console.error("Error al aprobar ausencia:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al aprobar la ausencia',
-        error: error.message
+        message: "Error al aprobar la ausencia",
+        error: error.message,
       });
     }
   }
@@ -557,17 +573,19 @@ export class AusenciasController {
       const { id } = req.params;
       const { supervisor_id, comentarios } = req.body;
 
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          ausencia_id: parseInt(id),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            ausencia_id: parseInt(id),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (!ausenciaExistente) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -576,12 +594,12 @@ export class AusenciasController {
 
       const ausenciaActualizada = await prisma.mot_ausencia_justificada.update({
         where: {
-          ausencia_id: parseInt(id)
+          ausencia_id: parseInt(id),
         },
         data: {
-          estado_aprobacion: 'rechazada',
+          estado_aprobacion: "rechazada",
           updated_at: new Date(),
-          updated_by: userId
+          updated_by: userId,
         },
         include: {
           mom_trabajador: {
@@ -589,34 +607,36 @@ export class AusenciasController {
               trabajador_id: true,
               documento_identidad: true,
               nombre_completo: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       const ausenciaFormateada = {
         id: ausenciaActualizada.ausencia_id,
         trabajador_id: ausenciaActualizada.trabajador_id,
         trabajador_nombre: ausenciaActualizada.mom_trabajador.nombre_completo,
-        fecha_ausencia: ausenciaActualizada.fecha_at.toISOString().split('T')[0],
+        fecha_ausencia: ausenciaActualizada.fecha_at
+          .toISOString()
+          .split("T")[0],
         motivo: ausenciaActualizada.motivo,
-        estado: ausenciaActualizada.estado_aprobacion
+        estado: ausenciaActualizada.estado_aprobacion,
       };
 
       res.json({
         success: true,
-        message: 'Ausencia rechazada',
+        message: "Ausencia rechazada",
         data: {
-          ausencia: ausenciaFormateada
-        }
+          ausencia: ausenciaFormateada,
+        },
       });
     } catch (error: any) {
-      console.error('Error al rechazar ausencia:', error);
+      console.error("Error al rechazar ausencia:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al rechazar la ausencia',
-        error: error.message
+        message: "Error al rechazar la ausencia",
+        error: error.message,
       });
     }
   }
@@ -629,7 +649,7 @@ export class AusenciasController {
       const { trabajador_id, fecha_inicio, fecha_fin } = req.query;
 
       const where: any = {
-        deleted_at: null
+        deleted_at: null,
       };
 
       if (trabajador_id) {
@@ -649,14 +669,14 @@ export class AusenciasController {
       const [total, pendientes, aprobadas, rechazadas] = await Promise.all([
         prisma.mot_ausencia_justificada.count({ where }),
         prisma.mot_ausencia_justificada.count({
-          where: { ...where, estado_aprobacion: 'pendiente' }
+          where: { ...where, estado_aprobacion: "pendiente" },
         }),
         prisma.mot_ausencia_justificada.count({
-          where: { ...where, estado_aprobacion: 'aprobada' }
+          where: { ...where, estado_aprobacion: "aprobada" },
         }),
         prisma.mot_ausencia_justificada.count({
-          where: { ...where, estado_aprobacion: 'rechazada' }
-        })
+          where: { ...where, estado_aprobacion: "rechazada" },
+        }),
       ]);
 
       res.json({
@@ -666,16 +686,16 @@ export class AusenciasController {
             total,
             pendientes,
             aprobadas,
-            rechazadas
-          }
-        }
+            rechazadas,
+          },
+        },
       });
     } catch (error: any) {
-      console.error('Error al obtener estadísticas:', error);
+      console.error("Error al obtener estadísticas:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al obtener estadísticas',
-        error: error.message
+        message: "Error al obtener estadísticas",
+        error: error.message,
       });
     }
   }
@@ -686,26 +706,28 @@ export class AusenciasController {
   static async subirDocumento(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       if (!req.file) {
         res.status(400).json({
           success: false,
-          message: 'No se proporcionó ningún archivo'
+          message: "No se proporcionó ningún archivo",
         });
         return;
       }
 
-      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst({
-        where: {
-          ausencia_id: parseInt(id),
-          deleted_at: null
-        }
-      });
+      const ausenciaExistente = await prisma.mot_ausencia_justificada.findFirst(
+        {
+          where: {
+            ausencia_id: parseInt(id),
+            deleted_at: null,
+          },
+        },
+      );
 
       if (!ausenciaExistente) {
         res.status(404).json({
           success: false,
-          message: 'Ausencia no encontrada'
+          message: "Ausencia no encontrada",
         });
         return;
       }
@@ -715,29 +737,128 @@ export class AusenciasController {
 
       await prisma.mot_ausencia_justificada.update({
         where: {
-          ausencia_id: parseInt(id)
+          ausencia_id: parseInt(id),
         },
         data: {
           documento_respaldo_path: documentoPath,
           updated_at: new Date(),
-          updated_by: userId
-        }
+          updated_by: userId,
+        },
       });
 
       res.json({
         success: true,
-        message: 'Documento subido exitosamente',
+        message: "Documento subido exitosamente",
         data: {
           url: documentoPath,
-          documentacion_respaldo: documentoPath
-        }
+          documentacion_respaldo: documentoPath,
+        },
       });
     } catch (error: any) {
-      console.error('Error al subir documento:', error);
+      console.error("Error al subir documento:", error);
       res.status(500).json({
         success: false,
-        message: 'Error al subir el documento',
-        error: error.message
+        message: "Error al subir el documento",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * DEBUG: Verificar documentos en base de datos
+   */
+  static async debugDocumentos(req: Request, res: Response): Promise<void> {
+    try {
+      const documentos = await prisma.mot_ausencia_justificada.findMany({
+        where: {
+          deleted_at: null,
+          documento_respaldo_path: { not: null },
+        },
+        select: {
+          ausencia_id: true,
+          trabajador_id: true,
+          documento_respaldo_path: true,
+          fecha_at: true,
+        },
+        take: 10,
+      });
+
+      res.json({
+        success: true,
+        message: "Documentos encontrados",
+        count: documentos.length,
+        data: documentos,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Error al verificar documentos",
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Descargar documento de ausencia
+   */
+  static async descargarDocumento(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const ausencia = await prisma.mot_ausencia_justificada.findFirst({
+        where: {
+          ausencia_id: parseInt(id),
+          deleted_at: null,
+        },
+      });
+
+      if (!ausencia || !ausencia.documento_respaldo_path) {
+        res.status(404).json({
+          success: false,
+          message: "Documento no encontrado",
+        });
+        return;
+      }
+
+      const path = require("path");
+      const fs = require("fs");
+
+      // El documento_respaldo_path contiene el nombre del archivo
+      // Extraer solo el nombre del archivo
+      const filename = ausencia.documento_respaldo_path.split("/").pop();
+      const filePath = path.resolve(
+        __dirname,
+        "../../uploads/ausencias",
+        filename || "",
+      );
+
+      console.log("📁 Buscando archivo en:", filePath);
+      console.log(
+        "📄 documento_respaldo_path:",
+        ausencia.documento_respaldo_path,
+      );
+
+      // Verificar que el archivo existe
+      if (!fs.existsSync(filePath)) {
+        console.error("❌ Archivo no encontrado:", filePath);
+        res.status(404).json({
+          success: false,
+          message: "Archivo no encontrado en el servidor",
+          debug: { filePath, filename },
+        });
+        return;
+      }
+
+      console.log("✅ Archivo encontrado, descargando...");
+
+      // Descargar el archivo
+      res.download(filePath);
+    } catch (error: any) {
+      console.error("Error al descargar documento:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error al descargar el documento",
+        error: error.message,
       });
     }
   }

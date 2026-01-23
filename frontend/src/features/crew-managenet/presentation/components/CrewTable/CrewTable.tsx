@@ -1,7 +1,5 @@
 import React from "react";
 import { TableBody, TableHead } from "@mui/material";
-import { Crew } from "../../../domain/entities/crew";
-
 import {
   StyledTableContainer,
   StyledTable,
@@ -19,6 +17,7 @@ import {
   StatusChip,
 } from "../../../../../shared/presentation/styles/Table.styles";
 import { memo, useCallback } from "react";
+import { Crew } from "@features/crew-managenet/domain/entities/crew";
 
 interface CrewTableProps {
   crews: Crew[];

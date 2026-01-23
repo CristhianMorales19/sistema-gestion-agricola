@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Box, Grid } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAuth } from "../../../application/hooks/useAuth";

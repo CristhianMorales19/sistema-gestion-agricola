@@ -160,6 +160,7 @@ model mom_parcela {
   area_hectareas                 Decimal?                         @db.Decimal(10, 2)
   tipo_terreno                   String?                          @db.VarChar(80)
   descripcion                    String?                          @db.Text
+  observaciones                  String?                          @db.Text
   estado                         String                           @default("disponible") @db.VarChar(50)
   is_activa                      Boolean                          @default(true)
   created_at                     DateTime                         @db.DateTime(0)
@@ -461,7 +462,6 @@ model mot_info_laboral {
   cargo                         String         @db.VarChar(100)
   fecha_ingreso_at              DateTime       @db.DateTime(0)
   tipo_contrato                 String         @db.VarChar(50)
-  // Campos añadidos para soportar reportes y comprobantes
   codigo_nomina                 String?        @db.VarChar(50)
   salario_bruto                 Decimal?       @db.Decimal(13, 2)
   rebajas_ccss                  Decimal?       @db.Decimal(13, 2)
@@ -595,8 +595,6 @@ model mot_usuario {
   email_verified             Boolean?        @default(false)
   last_login_at              DateTime?       @db.DateTime(0)
   fecha_ultimo_cambio_rol_at DateTime?       @db.DateTime(0)
-  
-  // 🔐 Sistema de Fallback de Autenticación Local
   auth0_enabled              Boolean?        @default(true)
   local_auth_enabled         Boolean?        @default(true)
   last_auth_method           String?         @db.VarChar(20)
@@ -605,7 +603,6 @@ model mot_usuario {
   password_changed_at        DateTime?       @db.DateTime(0)
   password_expires_at        DateTime?       @db.DateTime(0)
   require_password_change    Boolean?        @default(false)
-  
   created_at                 DateTime        @db.DateTime(0)
   updated_at                 DateTime?       @db.DateTime(0)
   created_by                 Int

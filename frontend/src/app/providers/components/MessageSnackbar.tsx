@@ -31,7 +31,7 @@ export const MessageSnackbar = React.memo(
 
     const handleClose = (
       event?: React.SyntheticEvent | Event,
-      reason?: string
+      reason?: string,
     ) => {
       if (reason === "clickaway") {
         return;
@@ -83,7 +83,7 @@ export const MessageSnackbar = React.memo(
         </AccentBorderContainer>
       </StyledSnackbar>
     );
-  }
+  },
 );
 
 MessageSnackbar.displayName = "MessageSnackbar";

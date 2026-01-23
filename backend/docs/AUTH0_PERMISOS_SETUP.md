@@ -3,6 +3,7 @@
 ## Permisos/Scopes a crear en Auth0 Dashboard
 
 ### Personal/Trabajadores
+
 - `trabajadores:create` - Crear nuevos trabajadores
 - `trabajadores:read:all` - Ver todos los trabajadores
 - `trabajadores:read:own` - Ver solo propio perfil
@@ -13,6 +14,7 @@
 - `trabajadores:export` - Exportar datos de trabajadores
 
 ### Asistencia
+
 - `asistencia:register` - Registrar entrada/salida
 - `asistencia:read:all` - Ver asistencia de todos
 - `asistencia:read:own` - Ver solo propia asistencia
@@ -26,6 +28,7 @@
 - `horarios:manage` - Gestionar horarios
 
 ### Nómina
+
 - `nomina:process` - Procesar nómina
 - `nomina:read:all` - Ver nóminas de todos
 - `nomina:approve` - Aprobar nóminas
@@ -37,6 +40,7 @@
 - `deducciones:manage` - Gestionar deducciones
 
 ### Productividad
+
 - `productividad:register` - Registrar productividad propia
 - `productividad:read:all` - Ver productividad de todos
 - `productividad:read:own` - Ver solo productividad propia
@@ -51,6 +55,7 @@
 - `metas:track` - Seguimiento de metas
 
 ### Cultivos/Parcelas
+
 - `parcelas:read` - Ver información de parcelas
 - `parcelas:update` - Actualizar parcelas
 - `cultivos:read` - Ver información de cultivos
@@ -59,7 +64,18 @@
 - `cosechas:register` - Registrar cosechas
 - `cosechas:read` - Ver datos de cosechas
 
+### Clima/Condiciones Climáticas
+
+- `clima:read` - Ver datos de clima y condiciones climáticas
+- `clima:create` - Registrar nuevas condiciones climáticas
+- `clima:update` - Actualizar registros de clima
+- `clima:delete` - Eliminar registros de clima
+- `clima:reports` - Generar reportes de clima
+- `clima:dashboard` - Ver dashboard de condiciones climáticas
+- `clima:export` - Exportar datos de clima
+
 ### Reportes y Dashboard
+
 - `reportes:read` - Ver reportes básicos
 - `reportes:read:advanced` - Ver reportes avanzados
 - `reportes:export` - Exportar reportes
@@ -68,6 +84,7 @@
 - `kpis:view` - Ver indicadores clave
 
 ### Móvil
+
 - `mobile:access` - Acceso desde móvil
 - `mobile:sync` - Sincronización móvil
 - `gps:track` - Seguimiento GPS
@@ -76,29 +93,35 @@
 ## Pasos para configurar en Auth0:
 
 ### 1. Crear API en Auth0
+
 - Ve a **APIs** en Auth0 Dashboard
 - Nombre: `AgroMano API`
 - Identifier: `https://agromano-api.com`
 
 ### 2. Agregar Scopes
+
 - En la API creada, ve a **Scopes**
 - Agrega TODOS los permisos listados arriba
 
 ### 3. Crear Roles
+
 - Ve a **User Management > Roles**
 - Crea los roles: `ADMIN_AGROMANO`, `SUPERVISOR_CAMPO`, `GERENTE_RRHH`, `SUPERVISOR_RRHH`, `EMPLEADO_CAMPO`, `VISUAL_SOLO_LECTURA`
 
 ### 4. Asignar Permisos a Roles
+
 Según la matriz de permisos definida en `MATRIZ_ROLES_PERMISOS.md`
 
 ### 5. Autorizar Aplicación Machine to Machine
+
 - Ve a **APIs > AgroMano API > Machine To Machine Applications**
 - Autoriza la aplicación `AgroMano`
 - Asigna TODOS los scopes creados
 
 ### 6. Crear Usuarios de Prueba
+
 - `admin@agromano.com` → Rol: `ADMIN_AGROMANO`
-- `supervisor@agromano.com` → Rol: `SUPERVISOR_CAMPO`  
+- `supervisor@agromano.com` → Rol: `SUPERVISOR_CAMPO`
 - `gerente@agromano.com` → Rol: `GERENTE_RRHH`
 - `empleado@agromano.com` → Rol: `EMPLEADO_CAMPO`
 - `viewer@agromano.com` → Rol: `VISUAL_SOLO_LECTURA`
@@ -106,6 +129,7 @@ Según la matriz de permisos definida en `MATRIZ_ROLES_PERMISOS.md`
 ## Endpoints de Prueba Disponibles:
 
 ### Trabajadores
+
 - `GET /api/agromano/trabajadores` - Lista trabajadores
 - `POST /api/agromano/trabajadores` - Crear trabajador
 - `PUT /api/agromano/trabajadores/:id` - Actualizar trabajador
@@ -114,6 +138,7 @@ Según la matriz de permisos definida en `MATRIZ_ROLES_PERMISOS.md`
 - `POST /api/agromano/trabajadores/import` - Importar trabajadores
 
 ### Asistencia
+
 - `POST /api/agromano/asistencia/marcar` - Marcar asistencia
 - `GET /api/agromano/asistencia` - Ver asistencias
 - `PUT /api/agromano/asistencia/:id/aprobar` - Aprobar asistencia

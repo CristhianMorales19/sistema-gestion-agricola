@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { MenuItem, Autocomplete, Grid } from "@mui/material";
+import { ProductivityRecord } from "../../../domain/entities/Productivity";
+import { useTrabajadores } from "../../../application/hooks/useTrabajadores";
+
 import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  MenuItem,
-  CircularProgress,
-  Alert,
-  Autocomplete,
-} from '@mui/material';
-import { ProductivityRecord } from '../../../domain/entities/Productivity';
-import { useTrabajadores } from '../../../application/hooks/useTrabajadores';
+  ButtonContainer,
+  FormContainer,
+  GridItem,
+  InputSection,
+  StyledArrowBackIcon,
+} from "../../../../../shared/presentation/styles/Form.styles";
+import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.styles";
+import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
+import { BackButtonGeneric } from "../../../../../shared/presentation/styles/BackButton.styles";
+import { TextGeneric } from "../../../../../shared/presentation/styles/Text.styles";
+
+import {
+  GlassDialog,
+  SlideTransition,
+} from "../../../../../shared/presentation/styles/Dialog.styles";
 
 export interface NewProductivityFormData {
   workerId: string;
@@ -21,6 +28,7 @@ export interface NewProductivityFormData {
 }
 
 interface ProductivityFormProps {
+  open: boolean;
   records: ProductivityRecord[];
   onSubmit: (data: NewProductivityFormData) => Promise<void>;
   onCancel: () => void;
@@ -35,16 +43,21 @@ interface TaskOption {
 }
 
 export const ProductivityForm: React.FC<ProductivityFormProps> = ({
+  open,
   records,
   onSubmit,
   onCancel,
   initialData,
 }) => {
   // Hook para cargar trabajadores desde la API
-  const { trabajadores, loading: loadingTrabajadores, error: errorTrabajadores } = useTrabajadores();
-  
+  const {
+    trabajadores,
+    loading: loadingTrabajadores,
+    error: errorTrabajadores,
+  } = useTrabajadores();
+
   const [formData, setFormData] = useState<NewProductivityFormData>(
-    initialData || { workerId: '', taskId: '', producedQuantity: 0, date: '' }
+    initialData || { workerId: "", taskId: "", producedQuantity: 0, date: "" },
   );
   const [tasks, setTasks] = useState<TaskOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,8 +65,8 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
   // Obtener tareas únicas de los registros existentes
   useEffect(() => {
     const uniqueTasks: TaskOption[] = Array.from(
-      new Map(records.map(r => [r.task.id, r.task])).values()
-    ).map(t => ({
+      new Map(records.map((r) => [r.task.id, r.task])).values(),
+    ).map((t) => ({
       id: t.id,
       name: t.name,
       unit: t.unit,
@@ -62,22 +75,37 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
     setTasks(uniqueTasks);
   }, [records]);
 
-  const handleChange = (field: keyof NewProductivityFormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: field === 'producedQuantity' ? Number(e.target.value) : e.target.value,
-    }));
-  };
+  const handleChange =
+    (field: keyof NewProductivityFormData) =>
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]:
+          field === "producedQuantity"
+            ? Number(e.target.value)
+            : e.target.value,
+      }));
+    };
+
+  const handleAutocompleteChange =
+    (field: keyof NewProductivityFormData) => (_: any, value: any | null) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value ? value.trabajador_id.toString() : "",
+      }));
+    };
 
   const getTaskUnit = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    return task?.unit || '';
+    const task = tasks.find((t) => t.id === taskId);
+    return task?.unit || "";
   };
 
   const getTaskLimit = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task || task.standardPerformance === undefined) return Infinity;
     return task.standardPerformance * 10;
   };
@@ -90,7 +118,7 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
       return;
     }
     if (new Date(formData.date) > new Date()) {
-      alert('La fecha no puede ser futura');
+      alert("La fecha no puede ser futura");
       return;
     }
     setLoading(true);
@@ -102,130 +130,96 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
   };
 
   return (
-    <Paper sx={{ p: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
-      <Typography variant="h5" sx={{ color: '#ffffff', mb: 3 }}>
-        {initialData ? 'Editar Registro de Productividad' : 'Nuevo Registro de Productividad'}
-      </Typography>
+    <GlassDialog
+      TransitionComponent={SlideTransition}
+      open={open}
+      onClose={onCancel}
+    >
+      <FormContainer component="form" onSubmit={handleSubmit}>
+        <TextGeneric variant="h6">
+          {initialData
+            ? "Editar Registro de Productividad"
+            : "Nuevo Registro de Productividad"}
+        </TextGeneric>
 
-      <form onSubmit={handleSubmit}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Mostrar error si no se pueden cargar trabajadores */}
-          {errorTrabajadores && (
-            <Alert severity="error">
-              Error al cargar trabajadores: {errorTrabajadores}
-            </Alert>
-          )}
-
-          {/* Worker */}
-          <Autocomplete
-            options={trabajadores}
-            getOptionLabel={(option) => `${option.nombre_completo} (${option.documento_identidad})`}
-            value={trabajadores.find(t => t.trabajador_id.toString() === formData.workerId) || null}
-            onChange={(_, newValue) => {
-              setFormData(prev => ({
-                ...prev,
-                workerId: newValue ? newValue.trabajador_id.toString() : ''
-              }));
-            }}
-            loading={loadingTrabajadores}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Trabajador"
-                required
-                InputLabelProps={{ sx: { color: '#94a3b8' } }}
-                InputProps={{
-                  ...params.InputProps,
-                  sx: { color: '#ffffff' },
-                  endAdornment: (
-                    <>
-                      {loadingTrabajadores ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
+        <InputSection>
+          <Grid container spacing={3}>
+            <GridItem item xs={12} sm={6}>
+              <Autocomplete
+                options={trabajadores}
+                getOptionLabel={(option) =>
+                  `${option.nombre_completo} (${option.documento_identidad})`
+                }
+                value={
+                  trabajadores.find(
+                    (t) => t.trabajador_id.toString() === formData.workerId,
+                  ) || null
+                }
+                onChange={handleAutocompleteChange("workerId")}
+                loading={loadingTrabajadores}
+                renderInput={(params) => (
+                  <TextFieldGeneric {...params} label="Empleado" required />
+                )}
               />
-            )}
-            sx={{
-              '& .MuiAutocomplete-option': {
-                color: '#ffffff',
-                backgroundColor: '#1e293b',
-              },
-            }}
-          />
+            </GridItem>
 
-          {/* Task */}
-          <TextField
-            select
-            label="Tarea / Producto"
-            value={formData.taskId}
-            onChange={handleChange('taskId')}
-            fullWidth
-            required
-            InputLabelProps={{ sx: { color: '#94a3b8' } }}
-            InputProps={{ sx: { color: '#ffffff' } }}
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                select
+                label="Tarea / Producto"
+                value={formData.taskId}
+                onChange={handleChange("taskId")}
+                fullWidth
+                required
+              >
+                {tasks.map((task) => (
+                  <MenuItem key={task.id} value={task.id}>
+                    {task.name} ({task.unit})
+                  </MenuItem>
+                ))}
+              </TextFieldGeneric>
+            </GridItem>
+
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                type="number"
+                label="Cantidad Producida"
+                value={formData.producedQuantity}
+                onChange={handleChange("producedQuantity")}
+                fullWidth
+                required
+              />
+            </GridItem>
+
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                type="date"
+                label="Fecha"
+                value={formData.date}
+                onChange={handleChange("date")}
+                fullWidth
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </GridItem>
+
+            <GridItem item xs={12} sm={6}></GridItem>
+          </Grid>
+        </InputSection>
+
+        <ButtonContainer>
+          <BackButtonGeneric
+            onClick={onCancel}
+            startIcon={<StyledArrowBackIcon />}
           >
-            {tasks.map(task => (
-              <MenuItem key={task.id} value={task.id}>
-                {task.name} ({task.unit})
-              </MenuItem>
-            ))}
-          </TextField>
+            Cancelar
+          </BackButtonGeneric>
 
-          {/* Produced Quantity */}
-          <TextField
-            type="number"
-            label={`Cantidad Producida (${getTaskUnit(formData.taskId)})`}
-            value={formData.producedQuantity}
-            onChange={handleChange('producedQuantity')}
-            fullWidth
-            required
-            InputLabelProps={{ sx: { color: '#94a3b8' } }}
-            InputProps={{ sx: { color: '#ffffff' } }}
-          />
-
-          {/* Date */}
-          <TextField
-            type="date"
-            label="Fecha"
-            value={formData.date}
-            onChange={handleChange('date')}
-            fullWidth
-            required
-            InputLabelProps={{ shrink: true, sx: { color: '#94a3b8' } }}
-            InputProps={{ sx: { color: '#ffffff' } }}
-            inputProps={{ max: new Date().toISOString().split('T')[0] }}
-          />
-
-          {/* Buttons */}
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-            <Button
-              type="button"
-              onClick={onCancel}
-              variant="outlined"
-              sx={{
-                color: '#94a3b8',
-                borderColor: '#475569',
-                '&:hover': { borderColor: '#64748b', backgroundColor: '#334155' },
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={loading}
-              sx={{
-                backgroundColor: '#10b981',
-                '&:hover': { backgroundColor: '#059669' },
-                '&:disabled': { backgroundColor: '#475569' },
-              }}
-            >
-              {loading ? 'Guardando...' : initialData ? 'Guardar' : 'Registrar'}
-            </Button>
-          </Box>
-        </Box>
-      </form>
-    </Paper>
+          <ButtonGeneric type="submit" disabled={loading}>
+            {loading ? "Guardando..." : initialData ? "Guardar" : "Registrar"}
+          </ButtonGeneric>
+        </ButtonContainer>
+      </FormContainer>
+    </GlassDialog>
   );
 };

@@ -15,4 +15,8 @@ export const TextGeneric = styled(Typography)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.surface.light}40`,
 
   textAlign: "center",
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "1.1rem",
+  },
 }));

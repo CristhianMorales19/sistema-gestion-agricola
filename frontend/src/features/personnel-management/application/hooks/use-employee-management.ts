@@ -5,7 +5,7 @@ import {
   CreateEmployeeData,
   EditEmployeeData,
 } from "../../domain/entities/employee";
-import { LaborInfoData } from "@features/personnel-management/domain/entities/laborInfoEmployee";
+import { LaborInfoData } from "@features/personnel-management/domain/entities/labor-info-employee";
 import { EmployeeService } from "../services/employee.service";
 import { useMessage } from "../../../../app/providers/MessageProvider";
 

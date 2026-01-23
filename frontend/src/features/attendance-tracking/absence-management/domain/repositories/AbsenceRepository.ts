@@ -1,11 +1,11 @@
 // src/absence-management/domain/repositories/AbsenceRepository.ts
-import { 
-  Absence, 
-  CreateAbsenceData, 
-  UpdateAbsenceData, 
+import {
+  Absence,
+  CreateAbsenceData,
+  UpdateAbsenceData,
   AbsenceFilters,
-  AbsenceStats 
-} from '../entities/Absence';
+  AbsenceStats,
+} from "../entities/Absence";
 
 /**
  * Contrato del repositorio de ausencias
@@ -45,12 +45,20 @@ export interface AbsenceRepository {
   /**
    * Aprobar una ausencia
    */
-  approve(id: string, supervisorId: number, comentarios?: string): Promise<Absence>;
+  approve(
+    id: string,
+    supervisorId: number,
+    comentarios?: string,
+  ): Promise<Absence>;
 
   /**
    * Rechazar una ausencia
    */
-  reject(id: string, supervisorId: number, comentarios?: string): Promise<Absence>;
+  reject(
+    id: string,
+    supervisorId: number,
+    comentarios?: string,
+  ): Promise<Absence>;
 
   /**
    * Obtener estadísticas de ausencias
@@ -60,7 +68,7 @@ export interface AbsenceRepository {
   /**
    * Verificar si existe una ausencia para un trabajador en una fecha específica
    */
-  existsForDate(trabajadorId: number, fecha: string): Promise<boolean>;
+  existsForDate(trabajadorId: string, fecha: string): Promise<boolean>;
 
   /**
    * Subir documentación de respaldo

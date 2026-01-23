@@ -57,7 +57,7 @@ export const ThemeToggleProvider = ({ children }: ThemeToggleProviderProps) => {
           },
           text: {
             primary: mode === "dark" ? "#FFFFFF" : "#1A202C",
-            secondary: mode === "dark" ? "#94A3B8" : "#64748B",
+            secondary: mode === "dark" ? "#94A3B8" : "#546275",
           },
         },
         spacing: 8,
@@ -87,6 +87,88 @@ export const ThemeToggleProvider = ({ children }: ThemeToggleProviderProps) => {
               track: {
                 backgroundColor: mode === "dark" ? "#1E263C" : "#CBD5E0",
               },
+            },
+          },
+          MuiMenu: {
+            styleOverrides: {
+              paper: ({ theme }) => ({
+                marginTop: theme.spacing(1),
+                background: theme.palette.background.default,
+                borderRadius: theme.shape.borderRadius * 2,
+                border: `1px solid ${theme.palette.primary.dark}`,
+                boxShadow: `
+                  0 20px 50px ${theme.palette.primary.dark}30,
+                  inset 0 1px 0 ${theme.palette.surface.light}30
+                `,
+              }),
+            },
+          },
+
+          MuiMenuItem: {
+            styleOverrides: {
+              root: ({ theme }) => ({
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                borderRadius: theme.shape.borderRadius,
+
+                "&:hover": {
+                  backgroundColor: `${theme.palette.primary.main}20`,
+                },
+
+                "&.Mui-selected": {
+                  backgroundColor: `${theme.palette.primary.main}30`,
+                  color: theme.palette.primary.light,
+
+                  "&:hover": {
+                    backgroundColor: `${theme.palette.primary.main}40`,
+                  },
+                },
+              }),
+            },
+          },
+          MuiAutocomplete: {
+            styleOverrides: {
+              popper: {
+                zIndex: 1300,
+              },
+
+              paper: ({ theme }) => ({
+                marginTop: theme.spacing(1),
+                background: theme.palette.background.default,
+                borderRadius: theme.shape.borderRadius * 2,
+                border: `1px solid ${theme.palette.primary.dark}`,
+                boxShadow: `
+        0 20px 50px ${theme.palette.primary.dark}30,
+        inset 0 1px 0 ${theme.palette.surface.light}30
+      `,
+              }),
+
+              listbox: {
+                padding: 4,
+              },
+
+              option: ({ theme }) => ({
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                borderRadius: theme.shape.borderRadius,
+                padding: "10px 12px",
+                margin: "2px 0",
+
+                "&:hover": {
+                  backgroundColor: `${theme.palette.primary.main}20`,
+                },
+
+                '&[aria-selected="true"]': {
+                  backgroundColor: `${theme.palette.primary.main}30`,
+                  color: theme.palette.primary.light,
+                },
+
+                '&[aria-selected="true"]:hover': {
+                  backgroundColor: `${theme.palette.primary.main}40`,
+                },
+              }),
             },
           },
         },

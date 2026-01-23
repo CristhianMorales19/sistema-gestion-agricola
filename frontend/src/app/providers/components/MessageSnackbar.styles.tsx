@@ -8,8 +8,7 @@ export const SlideTransition = (props: SlideProps) => {
 // Contenedor del snackbar con efecto glass
 export const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
   "& .MuiPaper-root": {
-    backgroundColor: `${theme.palette.surface.main}EE`,
-    backdropFilter: "blur(20px)",
+    background: `${theme.palette.background.default}`,
     borderRadius: theme.shape.borderRadius * 3,
     border: `1px solid ${theme.palette.surface.light}80`,
     boxShadow: `
@@ -193,94 +192,97 @@ export const SnackbarStack = styled("div")(({ theme }) => ({
 // Indicador de progreso para auto-hide
 export const ProgressIndicator = styled("div", {
   shouldForwardProp: (prop) => prop !== "severity" && prop !== "duration",
-})<{ severity?: "success" | "error" | "warning" | "info"; duration: number }>(
-  ({ theme, severity, duration }) => {
-    const getColor = () => {
-      switch (severity) {
-        case "success":
-          return theme.palette.success.light;
-        case "error":
-          return theme.palette.error.light;
-        case "warning":
-          return theme.palette.warning.light;
-        case "info":
-        default:
-          return theme.palette.primary.light;
-      }
-    };
+})<{ severity?: "success" | "error" | "warning" | "info"; duration: number }>(({
+  theme,
+  severity,
+  duration,
+}) => {
+  const getColor = () => {
+    switch (severity) {
+      case "success":
+        return theme.palette.success.light;
+      case "error":
+        return theme.palette.error.light;
+      case "warning":
+        return theme.palette.warning.light;
+      case "info":
+      default:
+        return theme.palette.primary.light;
+    }
+  };
 
-    return {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      height: "2px",
-      background: `linear-gradient(90deg, ${getColor()}, transparent)`,
-      animation: `shrink ${duration}ms linear forwards`,
-      borderRadius: "0 0 0 4px",
+  return {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    height: "2px",
+    background: `linear-gradient(90deg, ${getColor()}, transparent)`,
+    animation: `shrink ${duration}ms linear forwards`,
+    borderRadius: "0 0 0 4px",
 
-      "@keyframes shrink": {
-        "0%": {
-          width: "100%",
-          opacity: 1,
-        },
-        "100%": {
-          width: "0%",
-          opacity: 0,
-        },
+    "@keyframes shrink": {
+      "0%": {
+        width: "100%",
+        opacity: 1,
       },
-    };
-  }
-);
+      "100%": {
+        width: "0%",
+        opacity: 0,
+      },
+    },
+  };
+});
 
 // Contenedor con efecto de borde acentuado
 export const AccentBorderContainer = styled("div", {
   shouldForwardProp: (prop) => prop !== "severity",
-})<{ severity?: "success" | "error" | "warning" | "info" }>(
-  ({ theme, severity }) => {
-    const getColor = () => {
-      switch (severity) {
-        case "success":
-          return theme.palette.success.main;
-        case "error":
-          return theme.palette.error.main;
-        case "warning":
-          return theme.palette.warning.main;
-        case "info":
-        default:
-          return theme.palette.primary.main;
-      }
-    };
+})<{ severity?: "success" | "error" | "warning" | "info" }>(({
+  theme,
+  severity,
+}) => {
+  const getColor = () => {
+    switch (severity) {
+      case "success":
+        return theme.palette.success.main;
+      case "error":
+        return theme.palette.error.main;
+      case "warning":
+        return theme.palette.warning.main;
+      case "info":
+      default:
+        return theme.palette.primary.main;
+    }
+  };
 
-    return {
-      position: "relative",
-      borderRadius: theme.shape.borderRadius * 3,
-      overflow: "hidden",
+  return {
+    position: "relative",
+    borderRadius: theme.shape.borderRadius * 3,
+    overflow: "hidden",
 
-      "&::before": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        padding: "2px",
-        background: `linear-gradient(135deg, ${getColor()}, transparent 50%)`,
-        WebkitMask:
-          "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-        WebkitMaskComposite: "xor",
-        maskComposite: "exclude",
-        borderRadius: "inherit",
-        animation: "borderGlow 2s infinite",
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      padding: "2px",
+      background: `linear-gradient(135deg, ${getColor()}, transparent 50%)`,
+      WebkitMask:
+        "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+      WebkitMaskComposite: "xor",
+      maskComposite: "exclude",
+      borderRadius: "inherit",
+      animation: "borderGlow 2s infinite",
+    },
+
+    "@keyframes borderGlow": {
+      "0%, 100%": {
+        opacity: 0.7,
       },
-
-      "@keyframes borderGlow": {
-        "0%, 100%": {
-          opacity: 0.7,
-        },
-        "50%": {
-          opacity: 1,
-        },
+      "50%": {
+        opacity: 1,
       },
-    };
-  }
-);
+    },
+  };
+});

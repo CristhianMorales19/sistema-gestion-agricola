@@ -10,6 +10,8 @@ import {
   Grass,
   Groups,
   Person,
+  Cloud,
+  Terrain,
 } from "@mui/icons-material";
 
 import { useAuth } from "../../../../../application/hooks/useAuth";
@@ -113,6 +115,18 @@ export const DashboardLayout = ({
         icon: <Assessment />,
         text: "Reportes",
         active: currentView === "reports",
+      },
+      {
+        id: "work-conditions",
+        icon: <Cloud />,
+        text: "Condiciones Climáticas",
+        active: currentView === "work-conditions",
+      },
+      {
+        id: "parcelas",
+        icon: <Terrain />,
+        text: "Gestión de Parcelas",
+        active: currentView === "parcelas",
       },
     ],
     [currentView],

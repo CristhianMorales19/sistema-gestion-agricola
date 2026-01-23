@@ -1,4 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
+import {
+  Add as AddIcon,
+  PersonAdd as PersonAddIcon,
+} from "@mui/icons-material";
 import { EmployeeTable } from "./EmployeeTable/EmployeeTable";
 import { NewEmployeeForm } from "./EmployeeForm/NewEmployeeForm";
 import { LaborInfoView } from "./EmployeeLaborInfoForm/LaborInfoView";
@@ -12,8 +16,6 @@ import {
   HeaderButtonContainer,
   SearchMessage,
   SelectedEmployeeMessage,
-  StyledWorkIcon,
-  StyledPersonAddIcon,
 } from "./EmployeeManagementView.styles";
 import { InputAdornment } from "@mui/material";
 import { ButtonGeneric } from "../../../../shared/presentation/styles/Button.styles";
@@ -31,10 +33,10 @@ import {
   LoadingSpinner,
   LoadingContainer,
 } from "../../../../shared/presentation/styles/LoadingSpinner.styles";
-import { LaborInfoData } from "@features/personnel-management/domain/entities/laborInfoEmployee";
+import { LaborInfoData } from "@features/personnel-management/domain/entities/labor-info-employee";
 import { EditEmployeeForm } from "./EmployeeEdit/EditEmployeeForm";
 
-type EmployeeView = "list" | "new-employee" | "labor-info" | "edit";
+type EmployeeView = "list" | "labor-info" | "edit";
 
 const DEFAULT_EMPLOYEE = {
   id: 0,
@@ -63,6 +65,7 @@ export const EmployeeManagementView = () => {
   } = useEmployeeManagement();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [currentView, setCurrentView] = useState<EmployeeView>("list");
@@ -107,14 +110,15 @@ export const EmployeeManagementView = () => {
   }, [selectedEmployee]);
 
   const handleAddEmployeeClick = useCallback(() => {
-    setCurrentView("new-employee");
+    setShowCreateDialog(true);
     setSelectedEmployee(DEFAULT_EMPLOYEE);
   }, []);
 
   const handleBackToList = useCallback(() => {
+    if (showCreateDialog) setShowCreateDialog(false);
     setCurrentView("list");
     setSelectedEmployee(DEFAULT_EMPLOYEE);
-  }, []);
+  }, [showCreateDialog]);
 
   const handleCreateEmployee = async (data: CreateEmployeeData) => {
     return await createEmployee(data);
@@ -175,14 +179,6 @@ export const EmployeeManagementView = () => {
   // Renderizar contenido basado en la vista actual
   const renderContent = () => {
     switch (currentView) {
-      case "new-employee":
-        return (
-          <NewEmployeeForm
-            onSubmit={handleCreateEmployee}
-            onCancel={handleBackToList}
-          />
-        );
-
       case "labor-info":
         return (
           <LaborInfoView
@@ -205,7 +201,6 @@ export const EmployeeManagementView = () => {
       default:
         return (
           <>
-            {/* Barra de búsqueda */}
             <SearchContainerGeneric>
               <SearchInputContainer>
                 <TextFieldGeneric
@@ -278,20 +273,26 @@ export const EmployeeManagementView = () => {
         loading={loading}
       />
 
+      <NewEmployeeForm
+        open={showCreateDialog}
+        onSubmit={handleCreateEmployee}
+        onCancel={handleBackToList}
+      />
+
       <HeaderGeneric>
         <TextGeneric variant="h4">Gestión de Personal</TextGeneric>
 
         {currentView === "list" && (
           <HeaderButtonContainer>
-            <ButtonGeneric
-              startIcon={<StyledWorkIcon />}
+            {/* <ButtonGeneric
+              startIcon={<PersonAddIcon />}
               onClick={handleAddLaborInfo}
               disabled={selectedEmployee.id === 0}
             >
               Agregar Info Laboral
-            </ButtonGeneric>
+            </ButtonGeneric> */}
             <ButtonGeneric
-              startIcon={<StyledPersonAddIcon />}
+              startIcon={<AddIcon />}
               onClick={handleAddEmployeeClick}
             >
               Crear Empleado
