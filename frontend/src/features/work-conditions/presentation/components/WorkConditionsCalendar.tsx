@@ -1,19 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { Box, Tooltip, Typography } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+  GlassCard,
+  CardContentStyled,
+  CalendarHeader,
+  CalendarTitle,
+  NavigationButtons,
+  NavButton,
+  MonthYearTitle,
+  DaysGrid,
+  CalendarGrid,
+  DayItem,
+  DayBox,
+  DayContent,
+  DayNumber,
+  ConditionIcon,
+  DifficultyIndicator,
+  LegendContainer,
+  LegendTitle,
+  LegendItems,
+  LegendItem,
+  LegendDot,
+  LegendText,
+} from "./WorkConditionsCalendar.styles";
+import { TextGeneric } from "../../../../shared/presentation/styles/Text.styles";
 
 interface CalendarDay {
   date: number;
-  condition?: 'despejado' | 'lluvioso' | 'muy_caluroso' | 'nublado';
-  difficulty?: 'normal' | 'dificil' | 'muy_dificil';
+  condition?: "despejado" | "lluvioso" | "muy_caluroso" | "nublado";
+  difficulty?: "normal" | "dificil" | "muy_dificil";
   observaciones?: string;
   isCurrentMonth: boolean;
 }
@@ -32,24 +49,34 @@ interface WorkConditionsCalendarProps {
 }
 
 const CONDITION_COLORS = {
-  despejado: { bg: '#fbbf24', icon: '☀️', label: 'Despejado' },
-  lluvioso: { bg: '#3b82f6', icon: '🌧️', label: 'Lluvioso' },
-  muy_caluroso: { bg: '#ef4444', icon: '🔥', label: 'Muy Caluroso' },
-  nublado: { bg: '#6b7280', icon: '☁️', label: 'Nublado' },
+  despejado: { bg: "#fbbf24", icon: "☀️", label: "Despejado" },
+  lluvioso: { bg: "#3b82f6", icon: "🌧️", label: "Lluvioso" },
+  muy_caluroso: { bg: "#ef4444", icon: "🔥", label: "Muy Caluroso" },
+  nublado: { bg: "#6b7280", icon: "☁️", label: "Nublado" },
 };
 
 const DIFFICULTY_COLORS = {
-  normal: '#10b981',
-  dificil: '#f97316',
-  muy_dificil: '#ef4444',
+  normal: "#10b981",
+  dificil: "#f97316",
+  muy_dificil: "#ef4444",
 };
 
 const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
 ];
 
-const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export const WorkConditionsCalendar: React.FC<WorkConditionsCalendarProps> = ({
   month = new Date().getMonth(),
@@ -86,7 +113,7 @@ export const WorkConditionsCalendar: React.FC<WorkConditionsCalendarProps> = ({
 
     // Días del mes actual
     for (let i = 1; i <= daysInMonth; i++) {
-      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
       const conditionData = conditions.find((c) => c.fecha === dateStr);
 
       days.push({
@@ -131,121 +158,78 @@ export const WorkConditionsCalendar: React.FC<WorkConditionsCalendarProps> = ({
   const days = getCalendarDays();
 
   return (
-    <Card
-      sx={{
-        backgroundColor: '#0f172a',
-        border: '1px solid #334155',
-        borderRadius: 2,
-        height: '100%',
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        {/* Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3,
-          }}
-        >
-          <Box>
-            <Typography
-              variant="h5"
-              sx={{ color: '#ffffff', fontWeight: 'bold', mb: 0.5 }}
-            >
-              Calendario de Trabajo
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-              Vista de condiciones legendarias
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+    <GlassCard>
+      <CardContentStyled>
+        <CalendarHeader>
+          <CalendarTitle>
+            <TextGeneric variant="h6">Calendario de Trabajo</TextGeneric>
+          </CalendarTitle>
+          <NavigationButtons sx={{ marginLeft: "auto" }}>
             <Tooltip title="Mes anterior">
-              <IconButton
-                onClick={handlePrevMonth}
-                sx={{
-                  color: '#e2e8f0',
-                  border: '1px solid #334155',
-                  borderRadius: 1,
-                  '&:hover': { backgroundColor: '#1e293b' },
-                }}
-              >
+              <NavButton onClick={handlePrevMonth}>
                 <ChevronLeft size={20} />
-              </IconButton>
+              </NavButton>
             </Tooltip>
             <Tooltip title="Próximo mes">
-              <IconButton
-                onClick={handleNextMonth}
-                sx={{
-                  color: '#e2e8f0',
-                  border: '1px solid #334155',
-                  borderRadius: 1,
-                  '&:hover': { backgroundColor: '#1e293b' },
-                }}
-              >
+              <NavButton onClick={handleNextMonth}>
                 <ChevronRight size={20} />
-              </IconButton>
+              </NavButton>
             </Tooltip>
-          </Box>
-        </Box>
+          </NavigationButtons>
+        </CalendarHeader>
 
         {/* Month and Year */}
-        <Typography
-          variant="h6"
-          sx={{
-            color: '#ffffff',
-            textAlign: 'center',
-            fontWeight: 'bold',
-            mb: 2,
-          }}
-        >
+        <MonthYearTitle>
           {MONTH_NAMES[currentMonth]} De {currentYear}
-        </Typography>
+        </MonthYearTitle>
 
         {/* Day names */}
-        <Grid container spacing={1} sx={{ mb: 2 }}>
+        <DaysGrid container spacing={1}>
           {DAY_NAMES.map((day) => (
-            <Grid item xs={12 / 7} key={day}>
+            <DayItem item xs={12 / 7} key={day}>
               <Typography
                 variant="caption"
                 sx={{
-                  color: '#64748b',
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  display: 'block',
+                  color: "#64748b",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  display: "block",
                 }}
               >
                 {day}
               </Typography>
-            </Grid>
+            </DayItem>
           ))}
-        </Grid>
+        </DaysGrid>
 
         {/* Calendar days */}
-        <Grid container spacing={1} sx={{ mb: 3 }}>
+        <CalendarGrid container spacing={1}>
           {days.map((day, index) => {
             const conditionColor = day.condition
               ? CONDITION_COLORS[day.condition as keyof typeof CONDITION_COLORS]
               : null;
             const difficultyColor = day.difficulty
-              ? DIFFICULTY_COLORS[day.difficulty as keyof typeof DIFFICULTY_COLORS]
-              : null;
-            
-            // Solo construir dateStr para días del mes actual
-            let dateStr = '';
+              ? DIFFICULTY_COLORS[
+                  day.difficulty as keyof typeof DIFFICULTY_COLORS
+                ]
+              : "";
+
+            let dateStr = "";
             if (day.isCurrentMonth) {
-              dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day.date).padStart(2, '0')}`;
+              dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
             }
             const isSelected = day.isCurrentMonth && selectedDate === dateStr;
 
             return (
-              <Grid item xs={12 / 7} key={index}>
+              <DayItem item xs={12 / 7} key={index}>
                 <Tooltip
                   title={
                     day.condition ? (
-                      <Box sx={{ textAlign: 'left' }}>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                      <Box sx={{ textAlign: "left" }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: "bold", mb: 0.5 }}
+                        >
                           {conditionColor?.label}
                         </Typography>
                         <Typography variant="caption">
@@ -253,160 +237,79 @@ export const WorkConditionsCalendar: React.FC<WorkConditionsCalendarProps> = ({
                         </Typography>
                         {day.observaciones && (
                           <>
-                            <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                display: "block",
+                                mt: 0.5,
+                                fontStyle: "italic",
+                              }}
+                            >
                               💬 {day.observaciones}
                             </Typography>
                           </>
                         )}
                       </Box>
                     ) : (
-                      'Sin registro'
+                      "Sin registro"
                     )
                   }
                   arrow
                   enterDelay={200}
                 >
-                  <Box
+                  <DayBox
                     onClick={() => {
                       if (day.isCurrentMonth) {
                         onDayClick?.(dateStr);
                       }
                     }}
-                    sx={{
-                      aspect: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: 1,
-                      backgroundColor: isSelected ? '#1e3a2a' : (day.isCurrentMonth ? '#1e293b' : 'transparent'),
-                      border: isSelected 
-                        ? '2px solid #10b981'
-                        : (day.isCurrentMonth
-                          ? '1px solid #334155'
-                          : '1px solid transparent'),
-                      cursor: day.isCurrentMonth ? 'pointer' : 'default',
-                      transition: 'all 0.2s',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&:hover': day.isCurrentMonth
-                        ? {
-                            backgroundColor: '#0f172a',
-                            borderColor: '#475569',
-                          }
-                        : {},
-                    }}
+                    isCurrentMonth={day.isCurrentMonth}
+                    isSelected={isSelected}
+                    hasCondition={!!day.condition}
+                    conditionColor={conditionColor?.bg}
                   >
-                    {/* Background color for condition */}
-                    {day.condition && (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: conditionColor?.bg,
-                          opacity: 0.15,
-                        }}
-                      />
-                    )}
-
-                    <Box sx={{ position: 'relative', zIndex: 1 }}>
+                    <DayContent>
                       {/* Date number */}
-                      <Typography
-                        sx={{
-                          color: day.isCurrentMonth ? '#e2e8f0' : '#64748b',
-                          fontWeight: 'bold',
-                          fontSize: 12,
-                        }}
-                      >
+                      <DayNumber isCurrentMonth={day.isCurrentMonth}>
                         {day.date}
-                      </Typography>
+                      </DayNumber>
 
                       {/* Condition icon */}
                       {day.condition && (
-                        <Typography
-                          sx={{
-                            fontSize: 14,
-                            lineHeight: 1,
-                          }}
-                        >
-                          {conditionColor?.icon}
-                        </Typography>
+                        <ConditionIcon>{conditionColor?.icon}</ConditionIcon>
                       )}
 
                       {/* Difficulty indicator */}
                       {day.difficulty && (
-                        <Box
-                          sx={{
-                            width: 4,
-                            height: 4,
-                            borderRadius: '50%',
-                            backgroundColor: difficultyColor,
-                            mt: 0.5,
-                          }}
-                        />
+                        <DifficultyIndicator color={difficultyColor} />
                       )}
-                    </Box>
-                  </Box>
+                    </DayContent>
+                  </DayBox>
                 </Tooltip>
-              </Grid>
+              </DayItem>
             );
           })}
-        </Grid>
+        </CalendarGrid>
 
         {/* Legend */}
-        <Box sx={{ borderTop: '1px solid #334155', pt: 2 }}>
-          <Typography
-            variant="body2"
-            sx={{ color: '#e2e8f0', fontWeight: 'bold', mb: 1 }}
-          >
-            Nivel de Dificultad:
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#10b981',
-                }}
-              />
-              <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                Normal
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#f97316',
-                }}
-              />
-              <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                Difícil
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: '#ef4444',
-                }}
-              />
-              <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                Muy Difícil
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+        <LegendContainer>
+          <LegendTitle>Nivel de Dificultad:</LegendTitle>
+          <LegendItems>
+            <LegendItem>
+              <LegendDot color="#10b981" />
+              <LegendText>Normal</LegendText>
+            </LegendItem>
+            <LegendItem>
+              <LegendDot color="#f97316" />
+              <LegendText>Difícil</LegendText>
+            </LegendItem>
+            <LegendItem>
+              <LegendDot color="#ef4444" />
+              <LegendText>Muy Difícil</LegendText>
+            </LegendItem>
+          </LegendItems>
+        </LegendContainer>
+      </CardContentStyled>
+    </GlassCard>
   );
 };

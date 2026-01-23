@@ -4,7 +4,7 @@ import {
   CreateEmployeeData,
   EditEmployeeData,
 } from "../domain/entities/employee";
-import { LaborInfoData } from "../domain/entities/laborInfoEmployee";
+import { LaborInfoData } from "../domain/entities/labor-info-employee";
 import { EmployeeRepository } from "../domain/repositories/employee.repository";
 import { apiService } from "../../../services/api.service";
 import { safeCall, SafeResult } from "../../../shared/utils/safeCall";

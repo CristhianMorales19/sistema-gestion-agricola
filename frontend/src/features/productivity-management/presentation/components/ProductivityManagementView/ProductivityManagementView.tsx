@@ -1,165 +1,169 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
+import { Box, Typography, FormControl, MenuItem } from "@mui/material";
+import { Assessment as AssessmentIcon } from "@mui/icons-material";
+
+import { ProductivityTable } from "../ProductivityTable/ProductivityTable";
+import { ProductivityForm } from "../ProductivityForm/NewProductivityForm";
+import { UseProductivityManagement } from "../../../application/hooks/UseProductivityManagement";
+import { ProductivityRecord } from "../../../domain/entities/Productivity";
+
+import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.styles";
+import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
+import { HeaderGeneric } from "../../../../../shared/presentation/styles/Header.styles";
+import { TextGeneric } from "../../../../../shared/presentation/styles/Text.styles";
 import {
-  Box,
-  Typography,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper,
-} from '@mui/material';
-import { Assessment as AssessmentIcon } from '@mui/icons-material';
+  LoadingSpinner,
+  LoadingContainer,
+} from "../../../../../shared/presentation/styles/LoadingSpinner.styles";
 
-import { ProductivityTable } from '../ProductivityTable/ProductivityTable';
-import { ProductivityForm } from '../ProductivityForm/NewProductivityForm';
-import { UseProductivityManagement } from '../../../application/hooks/UseProductivityManagement';
-import { ProductivityRecord } from '../../../domain/entities/Productivity';
-import { SelectChangeEvent } from '@mui/material';
-
-type ProductivityView = 'list' | 'new-record' | 'edit-record';
+type ProductivityView = "list" | "new-record" | "edit-record";
 
 export const ProductivityManagementView: React.FC = () => {
-  const { productivityRecords, loading, error, fetchProductivity } = UseProductivityManagement();
+  const { productivityRecords, loading, error, fetchProductivity } =
+    UseProductivityManagement();
 
-  const [currentView, setCurrentView] = useState<ProductivityView>('list');
-  const [selectedRecord, setSelectedRecord] = useState<ProductivityRecord | null>(null);
-  const [taskFilter, setTaskFilter] = useState<string>('');
+  const [currentView, setCurrentView] = useState<ProductivityView>("list");
+  const [selectedRecord, setSelectedRecord] =
+    useState<ProductivityRecord | null>(null);
+  const [taskFilter, setTaskFilter] = useState<string>("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     fetchProductivity();
   }, [fetchProductivity]);
 
-  const handleTaskFilterChange = useCallback((e: SelectChangeEvent<string>) => {
-    setTaskFilter(e.target.value);
-  }, []);
+  const handleTaskFilterChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTaskFilter(e.target.value);
+    },
+    [],
+  );
 
   const handleAddRecordClick = () => {
-    setCurrentView('new-record');
+    setShowCreateDialog(true);
     setSelectedRecord(null);
   };
 
   const handleEditRecord = (record: ProductivityRecord) => {
     setSelectedRecord(record);
-    setCurrentView('edit-record');
+    setCurrentView("edit-record");
   };
 
   const handleBackToList = () => {
-    setCurrentView('list');
+    if (showCreateDialog) setShowCreateDialog(false);
+    setCurrentView("list");
     setSelectedRecord(null);
     fetchProductivity();
   };
 
   const handleCreateRecord = async (data: any) => {
     await fetchProductivity();
-    setCurrentView('list');
+    setCurrentView("list");
   };
 
   const handleUpdateRecord = async (data: any) => {
     if (!selectedRecord) return;
     await fetchProductivity();
-    setCurrentView('list');
+    setCurrentView("list");
     setSelectedRecord(null);
   };
 
   const filteredRecords = taskFilter
-    ? productivityRecords.filter(r => r.task.id === taskFilter)
+    ? productivityRecords.filter((r) => r.task.id === taskFilter)
     : productivityRecords;
 
   const renderContent = () => {
     switch (currentView) {
-      case 'new-record':
+      case "edit-record":
         return (
           <ProductivityForm
-            records={productivityRecords}
-            onSubmit={handleCreateRecord}
-            onCancel={handleBackToList}
-          />
-        );
-
-      case 'edit-record':
-        return (
-          <ProductivityForm
+            open={showCreateDialog}
             records={productivityRecords}
             onSubmit={handleUpdateRecord}
             onCancel={handleBackToList}
-            initialData={selectedRecord ? {
-              workerId: selectedRecord.worker.id,
-              taskId: selectedRecord.task.id,
-              producedQuantity: selectedRecord.producedQuantity,
-              date: selectedRecord.date,
-            } : undefined}
+            initialData={
+              selectedRecord
+                ? {
+                    workerId: selectedRecord.worker.id,
+                    taskId: selectedRecord.task.id,
+                    producedQuantity: selectedRecord.producedQuantity,
+                    date: selectedRecord.date,
+                  }
+                : undefined
+            }
           />
         );
 
-      case 'list':
+      case "list":
       default:
         return (
           <>
             {/* Filtros */}
-            <Paper sx={{ p: 2, mb: 3, backgroundColor: '#1e293b', border: '1px solid #334155' }}>
+            <Box sx={{ maxWidth: 500, pb: 5, margin: "0 auto" }}>
               <FormControl fullWidth size="small">
-                <InputLabel sx={{ color: '#94a3b8' }}>Filtrar por tareas</InputLabel>
-                <Select
+                <TextFieldGeneric
+                  select
                   value={taskFilter}
                   onChange={handleTaskFilterChange}
-                  sx={{
-                    color: '#ffffff',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
-                    '& .MuiSvgIcon-root': { color: '#ffffff' }
-                  }}
+                  label="Filtrar por tareas"
                 >
                   <MenuItem value="">Todas las tareas</MenuItem>
-                  {Array.from(new Map(productivityRecords.map(r => [r.task.id, r.task])).values()).map(task => (
-                    <MenuItem key={task.id} value={task.id}>{task.name}</MenuItem>
+                  {Array.from(
+                    new Map(
+                      productivityRecords.map((r) => [r.task.id, r.task]),
+                    ).values(),
+                  ).map((task) => (
+                    <MenuItem key={task.id} value={task.id}>
+                      {task.name}
+                    </MenuItem>
                   ))}
-                </Select>
+                </TextFieldGeneric>
               </FormControl>
-            </Paper>
+            </Box>
 
-            {/* Tabla de Productividad */}
-            <ProductivityTable
-              records={filteredRecords}
-              onEdit={handleEditRecord}
-            />
+            {loading ? (
+              <LoadingContainer>
+                <LoadingSpinner />
+              </LoadingContainer>
+            ) : (
+              <ProductivityTable
+                records={filteredRecords}
+                onEdit={handleEditRecord}
+              />
+            )}
           </>
         );
     }
   };
 
-  if (loading && currentView === 'list') {
-    return <Typography sx={{ color: '#ffffff' }}>Cargando registros de productividad...</Typography>;
-  }
-
-  if (error && currentView === 'list') {
+  if (error && currentView === "list") {
     return <Typography color="error">{error}</Typography>;
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
-          Gestión de Productividad
-        </Typography>
+    <>
+      <ProductivityForm
+        open={showCreateDialog}
+        records={productivityRecords}
+        onSubmit={handleCreateRecord}
+        onCancel={handleBackToList}
+      />
 
-        {currentView === 'list' && (
-          <Button
+      <HeaderGeneric>
+        <TextGeneric variant="h4">Gestión de Productividad</TextGeneric>
+
+        <Box sx={{ display: "flex", g: 2 }}>
+          <ButtonGeneric
             variant="contained"
             startIcon={<AssessmentIcon />}
             onClick={handleAddRecordClick}
-            sx={{
-              backgroundColor: '#10b981',
-              '&:hover': { backgroundColor: '#059669' },
-            }}
           >
             Nuevo Registro
-          </Button>
-        )}
-      </Box>
+          </ButtonGeneric>
+        </Box>
+      </HeaderGeneric>
 
       {renderContent()}
-    </Box>
+    </>
   );
 };

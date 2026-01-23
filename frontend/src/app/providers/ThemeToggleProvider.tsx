@@ -57,7 +57,7 @@ export const ThemeToggleProvider = ({ children }: ThemeToggleProviderProps) => {
           },
           text: {
             primary: mode === "dark" ? "#FFFFFF" : "#1A202C",
-            secondary: mode === "dark" ? "#94A3B8" : "#64748B",
+            secondary: mode === "dark" ? "#94A3B8" : "#546275",
           },
         },
         spacing: 8,

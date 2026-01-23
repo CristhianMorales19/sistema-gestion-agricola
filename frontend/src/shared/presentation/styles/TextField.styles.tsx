@@ -41,7 +41,7 @@ export const TextFieldGeneric = styled(TextField, {
     "& .MuiOutlinedInput-root": {
       backgroundColor: baseBackground,
       borderRadius: theme.shape.borderRadius * 2,
-      border: `1px solid ${theme.palette.surface.light}80`,
+      border: `1px solid ${theme.palette.primary.dark}`,
       transition: "all 0.25s ease",
 
       "&:hover": {

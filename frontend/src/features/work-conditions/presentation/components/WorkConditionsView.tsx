@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Grid, Box } from '@mui/material';
-import { WorkConditionsForm } from './WorkConditionsForm';
-import { WorkConditionsCalendar } from './WorkConditionsCalendar';
+import React, { useState } from "react";
+import { Grid, Box } from "@mui/material";
+import { WorkConditionsForm } from "./WorkConditionsForm";
+import { WorkConditionsCalendar } from "./WorkConditionsCalendar";
+import { TextGeneric } from "../../../../shared/presentation/styles/Text.styles";
 
 interface WorkCondition {
   fecha: string;
-  condicionGeneral: 'despejado' | 'lluvioso' | 'muy_caluroso' | 'nublado';
-  nivelDificultad: 'normal' | 'dificil' | 'muy_dificil';
+  condicionGeneral: "despejado" | "lluvioso" | "muy_caluroso" | "nublado";
+  nivelDificultad: "normal" | "dificil" | "muy_dificil";
   observaciones?: string;
 }
 
@@ -23,20 +24,25 @@ export const WorkConditionsView: React.FC<WorkConditionsViewProps> = ({
   conditions = [],
 }) => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedCondition, setSelectedCondition] = useState<WorkCondition | null>(null);
+  const [selectedCondition, setSelectedCondition] =
+    useState<WorkCondition | null>(null);
 
   const handleDayClick = (fecha: string) => {
-    const found = conditions.find(c => c.fecha === fecha);
+    const found = conditions.find((c) => c.fecha === fecha);
     setSelectedDate(fecha);
     setSelectedCondition(found || null);
   };
 
   return (
-    <Box sx={{ flex: 1, p: 4, backgroundColor: '#0f172a', minHeight: '100vh' }}>
+    <>
+      <Box sx={{ display: "flex", p: 2, mb: 2 }}>
+        <TextGeneric variant="h4">Condiciones Climáticas</TextGeneric>
+      </Box>
+
       <Grid container spacing={3}>
         {/* Form */}
         <Grid item xs={12} md={6}>
-          <WorkConditionsForm 
+          <WorkConditionsForm
             onSubmit={onSubmit}
             selectedCondition={selectedCondition}
             selectedDate={selectedDate}
@@ -46,13 +52,13 @@ export const WorkConditionsView: React.FC<WorkConditionsViewProps> = ({
 
         {/* Calendar */}
         <Grid item xs={12} md={6}>
-          <WorkConditionsCalendar 
+          <WorkConditionsCalendar
             conditions={conditions}
             onDayClick={handleDayClick}
             selectedDate={selectedDate}
           />
         </Grid>
       </Grid>
-    </Box>
+    </>
   );
 };

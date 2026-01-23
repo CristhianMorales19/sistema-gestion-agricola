@@ -32,4 +32,18 @@ export const BackButtonGeneric = styled(Button)(({ theme }) => ({
   "&:hover .MuiButton-startIcon": {
     transform: "translateX(-2px)",
   },
+
+  "& .MuiButton-startIcon svg": {
+    fontSize: "1.25rem",
+
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.9rem",
+    },
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.5, 1.5),
+    fontSize: "0.60rem",
+    minHeight: 32,
+  },
 }));

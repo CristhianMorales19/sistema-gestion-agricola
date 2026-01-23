@@ -4,7 +4,7 @@ import {
   CreateEmployeeData,
   EditEmployeeData,
 } from "../entities/employee";
-import { LaborInfoData } from "../entities/laborInfoEmployee";
+import { LaborInfoData } from "../entities/labor-info-employee";
 import { SafeResult } from "@shared/utils/safeCall";
 
 export class EmployeeUseCases {

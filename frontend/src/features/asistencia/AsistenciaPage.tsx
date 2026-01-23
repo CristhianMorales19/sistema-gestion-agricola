@@ -7,7 +7,10 @@ import { DirectFetchWorkerSearchService } from "./core/WorkerSearchService";
 import { useEntradasHoy } from "./hooks/useEntradasHoy";
 import ActionLogEntradas from "./components/ActionLogEntradas";
 import RegistrarSalidaForm from "./components/RegistrarSalidaForm";
-import { colors } from "./theme/asistenciaStyles";
+
+import { HeaderGeneric } from "../../shared/presentation/styles/Header.styles";
+import { TextGeneric } from "../../shared/presentation/styles/Text.styles";
+import { Grid } from "@mui/material";
 
 const AsistenciaPage: React.FC = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -22,7 +25,7 @@ const AsistenciaPage: React.FC = () => {
   const servicio = useMemo(
     () =>
       createAsistenciaService(() => getAccessTokenSilently().catch(() => null)),
-    [getAccessTokenSilently]
+    [getAccessTokenSilently],
   );
 
   const {
@@ -34,53 +37,27 @@ const AsistenciaPage: React.FC = () => {
   const workerService = useMemo(() => {
     return new DirectFetchWorkerSearchService(
       () => getAccessTokenSilently().catch(() => null),
-      window.location.origin.replace(":3001", ":3000") // heurística: frontend 3001 -> backend 3000
+      window.location.origin.replace(":3001", ":3000"), // heurística: frontend 3001 -> backend 3000
     );
   }, [getAccessTokenSilently]);
 
   return (
-    <div
-      style={{
-        backgroundColor: colors.bgPage,
-        minHeight: "100vh",
-        padding: "32px 32px 48px",
-      }}
-    >
-      <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-        <h1
-          style={{
-            fontSize: 26,
-            fontWeight: 600,
-            marginBottom: 8,
-            color: colors.textPrimary,
-          }}
-        >
-          Registro de Asistencia
-        </h1>
-        <p
-          style={{
-            margin: "0 0 24px",
-            color: colors.textSecondary,
-            fontSize: 14,
-          }}
-        >
-          Registra entradas. Si no hay conexión, se guardará offline y se
-          sincronizará más tarde.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            gap: 24,
-            flexWrap: "wrap",
-            alignItems: "flex-start",
-          }}
-        >
+    <>
+      <HeaderGeneric>
+        <TextGeneric variant="h4">Registro de Asistencia</TextGeneric>
+      </HeaderGeneric>
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
           <RegistrarEntradaForm
             service={servicio}
             workerService={workerService}
             useStaticWorkerList
             onAddEntradaLocal={(ctx) => agregarLocal(ctx)}
           />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
           <RegistrarSalidaForm
             service={servicio}
             onSalidaRegistrada={({
@@ -91,10 +68,11 @@ const AsistenciaPage: React.FC = () => {
               actualizarSalida(trabajadorId, horaSalida, horasTrabajadas);
             }}
           />
-        </div>
-        <ActionLogEntradas items={entradasHoy} />
-      </div>
-    </div>
+        </Grid>
+      </Grid>
+
+      <ActionLogEntradas items={entradasHoy} />
+    </>
   );
 };
 

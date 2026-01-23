@@ -14,7 +14,7 @@ import {
   StyledArrowBackIcon,
   InputSection,
 } from "../../../../../shared/presentation/styles/Form.styles";
-import { LaborInfoData } from "@features/personnel-management/domain/entities/laborInfoEmployee";
+import { LaborInfoData } from "@features/personnel-management/domain/entities/labor-info-employee";
 import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.styles";
 import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
 import { BackButtonGeneric } from "../../../../../shared/presentation/styles/BackButton.styles";

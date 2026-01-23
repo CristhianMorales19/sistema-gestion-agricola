@@ -34,6 +34,8 @@ import {
   LoadingSpinner,
   LoadingContainer,
 } from "../../../../../shared/presentation/styles/LoadingSpinner.styles";
+import { WorkConditionsPage } from "../../../../work-conditions";
+import { ParcelManagementPage } from "../../../../parcel-management";
 
 export const AdminDashboard = () => {
   const { user } = useAuth();
@@ -186,6 +188,20 @@ export const AdminDashboard = () => {
         return (
           <ContentContainer>
             <CrewManagementView />
+          </ContentContainer>
+        );
+
+      case "work-conditions":
+        return (
+          <ContentContainer>
+            <WorkConditionsPage />
+          </ContentContainer>
+        );
+
+      case "parcelas":
+        return (
+          <ContentContainer>
+            <ParcelManagementPage />
           </ContentContainer>
         );
 

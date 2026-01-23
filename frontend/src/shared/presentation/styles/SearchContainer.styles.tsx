@@ -8,9 +8,6 @@ export const SearchContainerGeneric = styled(Box)(({ theme }) => ({
   margin: "0 auto", // centra horizontalmente
   padding: theme.spacing(2),
   marginBottom: theme.spacing(4),
-  background: `${theme.palette.background.default}`,
-  borderRadius: theme.shape.borderRadius * 4,
-  border: `1px solid ${theme.palette.surface.light}80`,
 }));
 
 // Icono de búsqueda
@@ -23,5 +20,4 @@ export const SearchInputContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: theme.spacing(2),
   alignItems: "center",
-  // marginBottom: theme.spacing(2),
 }));

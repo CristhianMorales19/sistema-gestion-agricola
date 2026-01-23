@@ -1,24 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
-  Button,
   Typography,
   CircularProgress,
   Alert,
   Card,
   CardContent,
   IconButton,
-  Tooltip
-} from '@mui/material';
+  Tooltip,
+} from "@mui/material";
 import {
   Download as DownloadIcon,
   Description as DocumentIcon,
   Image as ImageIcon,
   Error as ErrorIcon,
-  OpenInFull as OpenInFullIcon
-} from '@mui/icons-material';
-import { useAuth0 } from '@auth0/auth0-react';
-import { ImagePreviewer } from '../ImagePreviewer';
+  OpenInFull as OpenInFullIcon,
+} from "@mui/icons-material";
+import { useAuth0 } from "@auth0/auth0-react";
+import { ImagePreviewer } from "../ImagePreviewer";
+
+import { ButtonGeneric } from "../../../../../../shared/presentation/styles/Button.styles";
 
 interface DocumentViewerProps {
   absenceId: string;
@@ -31,7 +32,7 @@ interface DocumentViewerProps {
 /**
  * Componente para visualizar y descargar documentos de ausencias
  * Soporta imágenes, PDFs y otros tipos de archivos
- * 
+ *
  * El componente maneja:
  * - Visualización previa de imágenes
  * - Preview de PDFs
@@ -43,7 +44,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   documentPath,
   fileName,
   onDownload,
-  onError
+  onError,
 }) => {
   const { getAccessTokenSilently } = useAuth0();
   const [loading, setLoading] = useState(false);
@@ -53,11 +54,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   // Extraer nombre del archivo y extensión
   const extractFileName = (path: string): { name: string; ext: string } => {
-    const parts = path.split('/');
+    const parts = path.split("/");
     const fullName = parts[parts.length - 1];
-    const nameParts = fullName.split('.');
+    const nameParts = fullName.split(".");
     const ext = nameParts[nameParts.length - 1].toLowerCase();
-    const name = nameParts.slice(0, -1).join('.');
+    const name = nameParts.slice(0, -1).join(".");
     return { name, ext };
   };
 
@@ -67,7 +68,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(documentPath);
 
   // Verificar si es PDF
-  const isPdf = ext === 'pdf';
+  const isPdf = ext === "pdf";
 
   // Obtener icono según el tipo de archivo
   const getFileIcon = () => {
@@ -78,17 +79,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   // Construir URL para cargar el documento
   const getDocumentUrl = (): string => {
     // Si ya es una URL completa, usarla directamente
-    if (documentPath.startsWith('http')) {
+    if (documentPath.startsWith("http")) {
       return documentPath;
     }
-    
+
     // Si es una ruta relativa, construir la URL completa
     // El backend retorna rutas como /uploads/ausencias/filename
     // y sirve los archivos estáticos desde /uploads directamente (sin /api)
-    if (documentPath.startsWith('/uploads')) {
+    if (documentPath.startsWith("/uploads")) {
       return documentPath;
     }
-    
+
     // Fallback
     return documentPath;
   };
@@ -100,11 +101,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       setError(null);
 
       // Obtener token de autenticación
-      let token = '';
+      let token = "";
       try {
         token = await getAccessTokenSilently();
       } catch (tokenError) {
-        console.warn('No se pudo obtener token Auth0, intentando sin autenticación');
+        console.warn(
+          "No se pudo obtener token Auth0, intentando sin autenticación",
+        );
       }
 
       // Usar el endpoint específico de descarga
@@ -112,17 +115,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
       // Usar fetch para mantener autenticación
       const headers: HeadersInit = {
-        'Accept': 'application/octet-stream'
+        Accept: "application/octet-stream",
       };
 
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(downloadUrl, {
-        method: 'GET',
-        credentials: 'include', // Incluir cookies
-        headers
+        method: "GET",
+        credentials: "include", // Incluir cookies
+        headers,
       });
 
       if (!response.ok) {
@@ -130,11 +133,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       }
 
       // Obtener el nombre del archivo del header Content-Disposition si está disponible
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers.get("Content-Disposition");
       let filename = fileName || `ausencia-${absenceId}`;
-      
+
       if (contentDisposition) {
-        const match = contentDisposition.match(/filename[^;=\n]*=(["\']?)([^"\';]*)\1/);
+        const match = contentDisposition.match(
+          /filename[^;=\n]*=(["\']?)([^"\';]*)\1/,
+        );
         if (match) {
           filename = match[2];
         }
@@ -143,7 +148,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       // Crear blob y descargar
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
@@ -155,12 +160,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         onDownload();
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Error al descargar el documento';
+      const errorMsg =
+        err instanceof Error ? err.message : "Error al descargar el documento";
       setError(errorMsg);
       if (onError) {
         onError(err instanceof Error ? err : new Error(errorMsg));
       }
-      console.error('Error descargando documento:', err);
+      console.error("Error descargando documento:", err);
     } finally {
       setLoading(false);
     }
@@ -169,7 +175,9 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   // Manejar error al cargar imagen
   const handleImageError = () => {
     setImageError(true);
-    const err = new Error('No se pudo cargar la imagen. El archivo podría estar corrupto o no estar disponible. Puedes descargarla para verla en tu dispositivo.');
+    const err = new Error(
+      "No se pudo cargar la imagen. El archivo podría estar corrupto o no estar disponible. Puedes descargarla para verla en tu dispositivo.",
+    );
     setError(err.message);
     if (onError) {
       onError(err);
@@ -178,7 +186,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   if (!documentPath) {
     return (
-      <Alert severity="info" sx={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
+      <Alert severity="info">
         No hay documentación de respaldo asociada a esta ausencia
       </Alert>
     );
@@ -188,20 +196,38 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {/* Información del archivo */}
-        <Card sx={{ backgroundColor: '#0f172a', border: '1px solid #334155' }}>
-          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
+        <Card>
+          <CardContent
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box
+              sx={{ display: "flex", alignItems: "center", flex: 1, gap: 1 }}
+            >
               {getFileIcon()}
               <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" sx={{ color: '#94a3b8' }}>
+                <Typography variant="subtitle2" sx={{ color: "#94a3b8" }}>
                   Archivo
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#ffffff', wordBreak: 'break-word', fontSize: '0.875rem' }}>
-                  {fileName || name || 'documento'}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "#ffffff",
+                    wordBreak: "break-word",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {fileName || name || "documento"}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#64748b', display: 'block', mt: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "#64748b", display: "block", mt: 0.5 }}
+                >
                   Tipo: {ext.toUpperCase()}
                 </Typography>
               </Box>
@@ -212,8 +238,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                   size="small"
                   onClick={() => setShowFullscreenPreview(true)}
                   sx={{
-                    color: '#3b82f6',
-                    '&:hover': { color: '#2563eb' }
+                    color: "#3b82f6",
+                    "&:hover": { color: "#2563eb" },
                   }}
                 >
                   <OpenInFullIcon />
@@ -227,22 +253,22 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         {isImage && !imageError && (
           <Box
             sx={{
-              backgroundColor: '#0f172a',
-              border: '1px solid #334155',
+              backgroundColor: "#0f172a",
+              border: "1px solid #334155",
               borderRadius: 1,
               p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               gap: 2,
               minHeight: 200,
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                borderColor: '#475569',
-                backgroundColor: '#1e293b'
-              }
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                borderColor: "#475569",
+                backgroundColor: "#1e293b",
+              },
             }}
             onClick={() => setShowFullscreenPreview(true)}
           >
@@ -251,11 +277,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               src={documentUrl}
               alt={`Documento: ${name}`}
               sx={{
-                maxWidth: '100%',
+                maxWidth: "100%",
                 maxHeight: 350,
                 borderRadius: 1,
-                border: '1px solid #475569',
-                objectFit: 'contain'
+                border: "1px solid #475569",
+                objectFit: "contain",
               }}
               onError={handleImageError}
             />
@@ -266,23 +292,28 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         {isPdf && !imageError && (
           <Box
             sx={{
-              backgroundColor: '#0f172a',
-              border: '1px solid #334155',
+              backgroundColor: "#0f172a",
+              border: "1px solid #334155",
               borderRadius: 1,
               p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               gap: 2,
               minHeight: 200,
-              justifyContent: 'center'
+              justifyContent: "center",
             }}
           >
-            <DocumentIcon sx={{ fontSize: 64, color: '#64748b' }} />
-            <Typography sx={{ color: '#94a3b8', textAlign: 'center', fontWeight: 500 }}>
+            <DocumentIcon sx={{ fontSize: 64, color: "#64748b" }} />
+            <Typography
+              sx={{ color: "#94a3b8", textAlign: "center", fontWeight: 500 }}
+            >
               Documento PDF
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', textAlign: 'center' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#64748b", textAlign: "center" }}
+            >
               Haz clic en "Descargar Documento" para ver el contenido
             </Typography>
           </Box>
@@ -292,23 +323,28 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         {!isImage && !isPdf && !imageError && (
           <Box
             sx={{
-              backgroundColor: '#0f172a',
-              border: '1px solid #334155',
+              backgroundColor: "#0f172a",
+              border: "1px solid #334155",
               borderRadius: 1,
               p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               gap: 2,
               minHeight: 200,
-              justifyContent: 'center'
+              justifyContent: "center",
             }}
           >
-            <DocumentIcon sx={{ fontSize: 64, color: '#64748b' }} />
-            <Typography sx={{ color: '#94a3b8', textAlign: 'center', fontWeight: 500 }}>
+            <DocumentIcon sx={{ fontSize: 64, color: "#64748b" }} />
+            <Typography
+              sx={{ color: "#94a3b8", textAlign: "center", fontWeight: 500 }}
+            >
               Archivo: {ext.toUpperCase()}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b', textAlign: 'center' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#64748b", textAlign: "center" }}
+            >
               Descarga el archivo para verlo en tu aplicación
             </Typography>
           </Box>
@@ -320,9 +356,9 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             severity="error"
             icon={<ErrorIcon />}
             sx={{
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              color: '#fca5a5',
-              '& .MuiAlert-icon': { color: '#ef4444' }
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              color: "#fca5a5",
+              "& .MuiAlert-icon": { color: "#ef4444" },
             }}
           >
             {error}
@@ -330,33 +366,15 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         )}
 
         {/* Botón de descarga */}
-        <Button
+        <ButtonGeneric
           variant="contained"
-          startIcon={loading ? <CircularProgress size={20} sx={{ color: '#ffffff' }} /> : <DownloadIcon />}
+          startIcon={loading ? <CircularProgress /> : <DownloadIcon />}
           onClick={handleDownload}
           disabled={loading}
           fullWidth
-          sx={{
-            backgroundColor: '#3b82f6',
-            color: '#ffffff',
-            fontWeight: 600,
-            padding: '10px',
-            '&:hover': {
-              backgroundColor: '#2563eb'
-            },
-            '&:disabled': {
-              backgroundColor: '#475569',
-              color: '#9ca3af'
-            }
-          }}
         >
-          {loading ? 'Descargando...' : 'Descargar Documento'}
-        </Button>
-
-        {/* Información adicional */}
-        <Typography variant="caption" sx={{ color: '#64748b', textAlign: 'center', fontSize: '0.75rem' }}>
-          El documento se descargará a tu carpeta de descargas
-        </Typography>
+          {loading ? "Descargando..." : "Descargar Documento"}
+        </ButtonGeneric>
       </Box>
 
       {/* Preview en pantalla completa para imágenes */}

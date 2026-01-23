@@ -18,14 +18,21 @@ import { ButtonGeneric } from "../../../../../shared/presentation/styles/Button.
 import { TextFieldGeneric } from "../../../../../shared/presentation/styles/TextField.styles";
 import { BackButtonGeneric } from "../../../../../shared/presentation/styles/BackButton.styles";
 import { TextGeneric } from "../../../../../shared/presentation/styles/Text.styles";
+import {
+  GlassDialog,
+  SlideTransition,
+} from "../../../../../shared/presentation/styles/Dialog.styles";
+
 import { INITIAL_CREATE_EMPLOYEE } from "./employee.constants";
 
 interface NewEmployeeFormProps {
+  open: boolean;
   onSubmit: (data: CreateEmployeeData) => Promise<boolean>;
   onCancel: () => void;
 }
 
 export const NewEmployeeForm = ({
+  open,
   onSubmit,
   onCancel,
 }: NewEmployeeFormProps) => {
@@ -73,103 +80,109 @@ export const NewEmployeeForm = ({
   );
 
   return (
-    <FormContainer component="form" onSubmit={handleSubmit}>
-      <TextGeneric variant="h6">Crear Empleado</TextGeneric>
+    <GlassDialog
+      TransitionComponent={SlideTransition}
+      open={open}
+      onClose={onCancel}
+    >
+      <FormContainer component="form" onSubmit={handleSubmit}>
+        <TextGeneric variant="h6">Crear Empleado</TextGeneric>
 
-      <InputSection>
-        <Grid container spacing={3}>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Cédula"
-              name="identification"
-              value={formData.identification}
-              onChange={handleChange}
-              error={Boolean(errors.identification)}
-              helperText={errors.identification}
-              required
-            />
-          </GridItem>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Nombre completo"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              error={Boolean(errors.name)}
-              helperText={errors.name}
-              required
-            />
-          </GridItem>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Fecha de nacimiento"
-              name="birthDate"
-              type="date"
-              value={formData.birthDate}
-              onChange={handleChange}
-              error={Boolean(errors.birthDate)}
-              helperText={errors.birthDate}
-              required
-              InputLabelProps={{ shrink: true }}
-            />
-          </GridItem>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Fecha de ingreso"
-              name="hireDate"
-              type="date"
-              value={formData.hireDate}
-              onChange={handleChange}
-              error={Boolean(errors.hireDate)}
-              helperText={errors.hireDate}
-              required
-              InputLabelProps={{ shrink: true }}
-            />
-          </GridItem>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Teléfono"
-              name="phone"
-              value={formData.phone}
-              required
-              onChange={handleChange}
-              error={Boolean(errors.phone)}
-              helperText={errors.phone}
-            />
-          </GridItem>
-          <GridItem item xs={12} sm={6}>
-            <TextFieldGeneric
-              fullWidth
-              label="Correo electrónico"
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              error={Boolean(errors.email)}
-              helperText={errors.email}
-            />
-          </GridItem>
-        </Grid>
-      </InputSection>
+        <InputSection>
+          <Grid container spacing={3}>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Cédula"
+                name="identification"
+                value={formData.identification}
+                onChange={handleChange}
+                error={Boolean(errors.identification)}
+                helperText={errors.identification}
+                required
+              />
+            </GridItem>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Nombre completo"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                error={Boolean(errors.name)}
+                helperText={errors.name}
+                required
+              />
+            </GridItem>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Fecha de nacimiento"
+                name="birthDate"
+                type="date"
+                value={formData.birthDate}
+                onChange={handleChange}
+                error={Boolean(errors.birthDate)}
+                helperText={errors.birthDate}
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </GridItem>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Fecha de ingreso"
+                name="hireDate"
+                type="date"
+                value={formData.hireDate}
+                onChange={handleChange}
+                error={Boolean(errors.hireDate)}
+                helperText={errors.hireDate}
+                required
+                InputLabelProps={{ shrink: true }}
+              />
+            </GridItem>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Teléfono"
+                name="phone"
+                value={formData.phone}
+                required
+                onChange={handleChange}
+                error={Boolean(errors.phone)}
+                helperText={errors.phone}
+              />
+            </GridItem>
+            <GridItem item xs={12} sm={6}>
+              <TextFieldGeneric
+                fullWidth
+                label="Correo electrónico"
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                error={Boolean(errors.email)}
+                helperText={errors.email}
+              />
+            </GridItem>
+          </Grid>
+        </InputSection>
 
-      {/* Botones */}
-      <ButtonContainer>
-        <BackButtonGeneric
-          onClick={onCancel}
-          startIcon={<StyledArrowBackIcon />}
-        >
-          Volver
-        </BackButtonGeneric>
-        <ButtonGeneric type="submit" disabled={loading}>
-          {loading ? "Guardando..." : "Crear"}
-        </ButtonGeneric>
-      </ButtonContainer>
-    </FormContainer>
+        {/* Botones */}
+        <ButtonContainer>
+          <BackButtonGeneric
+            onClick={onCancel}
+            startIcon={<StyledArrowBackIcon />}
+          >
+            Volver
+          </BackButtonGeneric>
+          <ButtonGeneric type="submit" disabled={loading}>
+            {loading ? "Guardando..." : "Crear"}
+          </ButtonGeneric>
+        </ButtonContainer>
+      </FormContainer>
+    </GlassDialog>
   );
 };

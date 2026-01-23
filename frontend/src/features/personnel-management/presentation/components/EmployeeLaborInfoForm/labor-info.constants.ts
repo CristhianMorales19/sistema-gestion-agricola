@@ -1,4 +1,4 @@
-import { LaborInfoData } from "@features/personnel-management/domain/entities/laborInfoEmployee";
+import { LaborInfoData } from "@features/personnel-management/domain/entities/labor-info-employee";
 
 export const INITIAL_LABOR_INFO: LaborInfoData = {
   payrollCode: "",

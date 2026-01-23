@@ -56,7 +56,7 @@ export const ConfirmDeleteDialog = ({
           <WarningText>{message}</WarningText>
         </WarningContainer>
 
-        {itemLabel && (
+        {itemLabel && open && (
           <ItemLabel>
             <ItemLabelText variant="body1">{itemLabel}</ItemLabelText>
           </ItemLabel>
