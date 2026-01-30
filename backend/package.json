@@ -15,7 +15,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "init-db": "ts-node src/scripts/initDb.ts"
   },
   "keywords": [
     "nodejs",
@@ -26,6 +27,9 @@
     "management"
   ],
   "author": "Tu Nombre",
+  "engines": {
+    "node": "20.x"
+  },
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",
