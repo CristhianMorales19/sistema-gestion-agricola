@@ -155,12 +155,12 @@ export const EmployeeManagementView = () => {
   );
 
   const handleConfirmDelete = useCallback(async () => {
-    const result = await deleteEmployee(selectedEmployee.id);
+    const result = await deleteEmployee(employeeToDelete.id);
     if (result) {
       setEmployeeToDelete(DEFAULT_EMPLOYEE);
       setDeleteDialogOpen(false);
     }
-  }, [deleteEmployee, selectedEmployee]);
+  }, [deleteEmployee, employeeToDelete]);
 
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);

@@ -41,6 +41,8 @@ export class ApiEmployeeRepository implements EmployeeRepository {
   }
 
   async createEmployee(data: CreateEmployeeData): Promise<SafeResult<string>> {
+    console.log("createEmployee:");
+    console.log(data);
     const result = await safeCall(apiService.post(this.baseUrl, data));
     if (!result.success)
       return { success: false, data: null, error: result.error };

@@ -8,8 +8,8 @@ export interface Employee {
   hireDate: string;
   birthDate: string;
   status: boolean;
-  email: string;
-  phone: string;
+  email?: string;
+  phone?: string;
   position?: string;
 }
 
@@ -17,8 +17,8 @@ export interface CreateEmployeeData {
   identification: string;
   name: string;
   birthDate: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
   hireDate: string;
   [key: string]: unknown;
 }

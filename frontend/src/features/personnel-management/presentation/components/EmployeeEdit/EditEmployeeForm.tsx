@@ -46,8 +46,8 @@ const INITIAL_BASIC_EMPLOYEE: Employee = {
   name: "",
   birthDate: "",
   hireDate: new Date().toISOString().split("T")[0],
-  phone: "",
-  email: "",
+  phone: undefined,
+  email: undefined,
   status: false,
 };
 
@@ -271,7 +271,6 @@ export const EditEmployeeForm = ({
               label="Teléfono"
               name="phone"
               value={formBasicData.phone}
-              required
               onChange={handleChangeBasic}
               error={Boolean(basicErrors.phone)}
               helperText={basicErrors.phone}
@@ -283,7 +282,6 @@ export const EditEmployeeForm = ({
               label="Correo electrónico"
               name="email"
               type="email"
-              required
               value={formBasicData.email}
               onChange={handleChangeBasic}
               error={Boolean(basicErrors.email)}

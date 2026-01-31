@@ -1,7 +1,7 @@
-import { Typography } from "@mui/material";
+import { Typography, TypographyProps } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
-export const TextGeneric = styled(Typography)(({ theme }) => ({
+export const TextGeneric = styled(Typography)<TypographyProps>(({ theme }) => ({
   fontWeight: 700,
   background: `linear-gradient(
     135deg,

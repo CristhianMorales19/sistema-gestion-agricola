@@ -148,7 +148,6 @@ export const NewEmployeeForm = ({
                 label="Teléfono"
                 name="phone"
                 value={formData.phone}
-                required
                 onChange={handleChange}
                 error={Boolean(errors.phone)}
                 helperText={errors.phone}
@@ -160,7 +159,6 @@ export const NewEmployeeForm = ({
                 label="Correo electrónico"
                 name="email"
                 type="email"
-                required
                 value={formData.email}
                 onChange={handleChange}
                 error={Boolean(errors.email)}

@@ -17,7 +17,7 @@ import usuariosSistemaRoutes from "./features/authentication/presentation/routes
 import fallbackAuthRoutes from "./features/authentication/presentation/routes/fallback-auth.routes";
 
 // 👥 FEATURE: Personnel Management
-import agroManoTrabajadoresRoutes from "./features/personnel-management/presentation/routes/employee.routes";
+import emplyeeRoutes from "./features/employee-management/presentation/routes/employee.routes";
 
 // ⏰ FEATURE: Attendance Tracking (Legacy)
 import agroManoAsistenciaRoutes from "./features/attendance-tracking/presentation/routes/attendance.routes";
@@ -185,7 +185,7 @@ app.use("/api/auth", fallbackAuthRoutes);
 app.use("/api/auth/legacy", authRoutes);
 
 // Rutas AgroMano con RBAC granular
-app.use("/api/trabajadores", agroManoTrabajadoresRoutes);
+app.use("/api/trabajadores", emplyeeRoutes);
 app.use("/api/agromano/asistencia", agroManoAsistenciaRoutes);
 app.use("/api/agromano/dashboard", agroManoDashboardRoutes);
 

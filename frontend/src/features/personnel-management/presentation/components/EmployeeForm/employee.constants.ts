@@ -5,6 +5,6 @@ export const INITIAL_CREATE_EMPLOYEE: CreateEmployeeData = {
   name: "",
   birthDate: "",
   hireDate: new Date().toISOString().split("T")[0],
-  phone: "",
-  email: "",
+  phone: undefined,
+  email: undefined,
 };

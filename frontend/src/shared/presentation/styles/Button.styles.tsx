@@ -3,6 +3,10 @@ import { Button } from "@mui/material";
 
 export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
   ({ theme, disabled }) => ({
+    padding: theme.spacing(0.5, 1.5),
+    fontSize: "0.875rem",
+    minHeight: 32,
+
     background: disabled
       ? theme.palette.surface.light
       : `linear-gradient(
@@ -13,10 +17,10 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
     color: disabled ? theme.palette.text.secondary : theme.palette.text.primary,
 
     borderRadius: theme.shape.borderRadius * 2,
-    padding: theme.spacing(1, 3),
+    // padding: theme.spacing(2),
     textTransform: "none",
     fontWeight: 600,
-    fontSize: "0.875rem",
+    // fontSize: "0.875rem",
     cursor: disabled ? "default" : "pointer",
 
     border: `1px solid ${
@@ -72,9 +76,7 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
     },
 
     [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(0.5, 1.5),
       fontSize: "0.60rem",
-      minHeight: 32,
     },
   }),
 );

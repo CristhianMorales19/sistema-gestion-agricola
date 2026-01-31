@@ -14,7 +14,7 @@ const textFields: TextField[] = [
     key: "identification",
     label: "La cédula",
     required: true,
-    minLength: 6,
+    minLength: 8,
   },
   {
     key: "name",
@@ -25,13 +25,13 @@ const textFields: TextField[] = [
   {
     key: "phone",
     label: "El teléfono",
-    required: true,
+    required: false,
     minLength: 8,
   },
   {
     key: "email",
     label: "El correo electrónico",
-    required: true,
+    required: false,
   },
 ];
 

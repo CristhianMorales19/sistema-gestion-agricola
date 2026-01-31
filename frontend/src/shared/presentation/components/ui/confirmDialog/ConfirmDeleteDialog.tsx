@@ -47,7 +47,9 @@ export const ConfirmDeleteDialog = ({
     >
       <GlassDialogTitle id="confirm-delete-title">
         <DeleteIcon />
-        <TextGeneric variant="h6">{title}</TextGeneric>
+        <TextGeneric variant="h6" component="span">
+          {title}
+        </TextGeneric>
       </GlassDialogTitle>
 
       <GlassDialogContent dividers>

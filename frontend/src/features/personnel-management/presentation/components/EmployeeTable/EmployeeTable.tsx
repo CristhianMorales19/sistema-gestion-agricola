@@ -55,7 +55,7 @@ const EmployeeRow = memo(
         e.stopPropagation();
         onDelete(employee);
       },
-      [onDelete, employee],
+      [employee, onDelete],
     );
 
     const statusLabel = employee.status ? "Activo" : "Inactivo";

@@ -16,7 +16,7 @@ const textFields: TextField[] = [
     key: "identification",
     label: "La cédula",
     required: true,
-    minLength: 6,
+    minLength: 8,
   },
   {
     key: "name",
@@ -27,13 +27,13 @@ const textFields: TextField[] = [
   {
     key: "phone",
     label: "El teléfono",
-    required: true,
+    required: false,
     minLength: 8,
   },
   {
     key: "email",
     label: "El correo electrónico",
-    required: true,
+    required: false,
   },
 ];
 
@@ -91,6 +91,8 @@ export const validateCreateEmployee = (
     errors.hireDate = "La fecha de ingreso es requerida";
   } else if (new Date(data.hireDate) > new Date()) {
     errors.hireDate = "La fecha de ingreso no puede ser futura";
+  } else if (new Date(data.hireDate) < new Date(data.birthDate)) {
+    errors.hireDate = "La fecha de contratación no puede ser menor a la de nacimiento";
   }
   return errors;
 };
