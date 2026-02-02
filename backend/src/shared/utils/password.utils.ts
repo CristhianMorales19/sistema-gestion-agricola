@@ -1,14 +1,14 @@
 /**
  * 🔐 Utilidades de Seguridad para Contraseñas
- * 
+ *
  * Módulo para gestión segura de contraseñas locales en el sistema de fallback.
  * Implementa hashing con bcrypt, validación de complejidad y generación segura.
- * 
+ *
  * @module password-utils
  */
 
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+import * as bcrypt from "bcryptjs";
+import * as crypto from "crypto";
 
 // ========================================
 // Constantes de Configuración
@@ -29,7 +29,7 @@ const LOCKOUT_DURATION_MINUTES = 15;
 export interface PasswordValidationResult {
   isValid: boolean;
   errors: string[];
-  strength: 'weak' | 'medium' | 'strong' | 'very-strong';
+  strength: "weak" | "medium" | "strong" | "very-strong";
 }
 
 export interface PasswordHashResult {
@@ -47,13 +47,17 @@ export interface PasswordHashResult {
  * @param plainPassword - Contraseña en texto plano
  * @returns Promise con el hash, fecha de creación y expiración
  */
-export async function hashPassword(plainPassword: string): Promise<PasswordHashResult> {
+export async function hashPassword(
+  plainPassword: string,
+): Promise<PasswordHashResult> {
   if (!plainPassword || plainPassword.trim().length === 0) {
-    throw new Error('La contraseña no puede estar vacía');
+    throw new Error("La contraseña no puede estar vacía");
   }
 
   if (plainPassword.length > PASSWORD_MAX_LENGTH) {
-    throw new Error(`La contraseña no puede exceder ${PASSWORD_MAX_LENGTH} caracteres`);
+    throw new Error(
+      `La contraseña no puede exceder ${PASSWORD_MAX_LENGTH} caracteres`,
+    );
   }
 
   try {
@@ -65,11 +69,11 @@ export async function hashPassword(plainPassword: string): Promise<PasswordHashR
     return {
       hash,
       hashedAt,
-      expiresAt
+      expiresAt,
     };
   } catch (error) {
-    console.error('❌ Error al generar hash de contraseña:', error);
-    throw new Error('Error al procesar la contraseña');
+    console.error("❌ Error al generar hash de contraseña:", error);
+    throw new Error("Error al procesar la contraseña");
   }
 }
 
@@ -81,7 +85,7 @@ export async function hashPassword(plainPassword: string): Promise<PasswordHashR
  */
 export async function comparePassword(
   plainPassword: string,
-  passwordHash: string
+  passwordHash: string,
 ): Promise<boolean> {
   if (!plainPassword || !passwordHash) {
     return false;
@@ -90,7 +94,7 @@ export async function comparePassword(
   try {
     return await bcrypt.compare(plainPassword, passwordHash);
   } catch (error) {
-    console.error('❌ Error al comparar contraseñas:', error);
+    console.error("❌ Error al comparar contraseñas:", error);
     return false;
   }
 }
@@ -100,39 +104,49 @@ export async function comparePassword(
  * @param password - Contraseña a validar
  * @returns Resultado de validación con errores y nivel de fortaleza
  */
-export function validatePasswordComplexity(password: string): PasswordValidationResult {
+export function validatePasswordComplexity(
+  password: string,
+): PasswordValidationResult {
   const errors: string[] = [];
-  let strength: 'weak' | 'medium' | 'strong' | 'very-strong' = 'weak';
+  let strength: "weak" | "medium" | "strong" | "very-strong" = "weak";
 
   // Validación de longitud
   if (!password || password.length < PASSWORD_MIN_LENGTH) {
-    errors.push(`La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`);
+    errors.push(
+      `La contraseña debe tener al menos ${PASSWORD_MIN_LENGTH} caracteres`,
+    );
   }
 
   if (password.length > PASSWORD_MAX_LENGTH) {
-    errors.push(`La contraseña no puede exceder ${PASSWORD_MAX_LENGTH} caracteres`);
+    errors.push(
+      `La contraseña no puede exceder ${PASSWORD_MAX_LENGTH} caracteres`,
+    );
   }
 
   // Validación de complejidad
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumbers = /[0-9]/.test(password);
-  const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(
+    password,
+  );
 
   if (!hasUpperCase) {
-    errors.push('La contraseña debe contener al menos una letra mayúscula');
+    errors.push("La contraseña debe contener al menos una letra mayúscula");
   }
 
   if (!hasLowerCase) {
-    errors.push('La contraseña debe contener al menos una letra minúscula');
+    errors.push("La contraseña debe contener al menos una letra minúscula");
   }
 
   if (!hasNumbers) {
-    errors.push('La contraseña debe contener al menos un número');
+    errors.push("La contraseña debe contener al menos un número");
   }
 
   if (!hasSpecialChars) {
-    errors.push('La contraseña debe contener al menos un carácter especial (!@#$%^&*...)');
+    errors.push(
+      "La contraseña debe contener al menos un carácter especial (!@#$%^&*...)",
+    );
   }
 
   // Detectar patrones comunes débiles
@@ -140,33 +154,40 @@ export function validatePasswordComplexity(password: string): PasswordValidation
     /^(123456|password|qwerty|abc123|letmein|admin)/i,
     /(.)\1{3,}/, // Caracteres repetidos
     /(012|123|234|345|456|567|678|789)/, // Secuencias numéricas
-    /(abc|bcd|cde|def|efg|fgh)/i // Secuencias alfabéticas
+    /(abc|bcd|cde|def|efg|fgh)/i, // Secuencias alfabéticas
   ];
 
   for (const pattern of commonPatterns) {
     if (pattern.test(password)) {
-      errors.push('La contraseña contiene patrones comunes o repetitivos inseguros');
+      errors.push(
+        "La contraseña contiene patrones comunes o repetitivos inseguros",
+      );
       break;
     }
   }
 
   // Calcular fortaleza
-  const criteriasMet = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChars].filter(Boolean).length;
-  
+  const criteriasMet = [
+    hasUpperCase,
+    hasLowerCase,
+    hasNumbers,
+    hasSpecialChars,
+  ].filter(Boolean).length;
+
   if (errors.length === 0) {
     if (password.length >= 16 && criteriasMet === 4) {
-      strength = 'very-strong';
+      strength = "very-strong";
     } else if (password.length >= 12 && criteriasMet >= 3) {
-      strength = 'strong';
+      strength = "strong";
     } else if (criteriasMet >= 3) {
-      strength = 'medium';
+      strength = "medium";
     }
   }
 
   return {
     isValid: errors.length === 0,
     errors,
-    strength
+    strength,
   };
 }
 
@@ -175,28 +196,33 @@ export function validatePasswordComplexity(password: string): PasswordValidation
  * @param length - Longitud de la contraseña (default: 16)
  * @returns Contraseña temporal aleatoria
  */
-export function generateTemporaryPassword(length: number = TEMP_PASSWORD_LENGTH): string {
-  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-  const numbers = '0123456789';
-  const special = '!@#$%^&*()_+-=[]{}';
-  
+export function generateTemporaryPassword(
+  length: number = TEMP_PASSWORD_LENGTH,
+): string {
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const special = "!@#$%^&*()_+-=[]{}";
+
   const allChars = uppercase + lowercase + numbers + special;
-  
+
   // Asegurar que tiene al menos un carácter de cada tipo
-  let password = '';
+  let password = "";
   password += uppercase[crypto.randomInt(0, uppercase.length)];
   password += lowercase[crypto.randomInt(0, lowercase.length)];
   password += numbers[crypto.randomInt(0, numbers.length)];
   password += special[crypto.randomInt(0, special.length)];
-  
+
   // Completar con caracteres aleatorios
   for (let i = password.length; i < length; i++) {
     password += allChars[crypto.randomInt(0, allChars.length)];
   }
-  
+
   // Mezclar los caracteres
-  return password.split('').sort(() => crypto.randomInt(-1, 2)).join('');
+  return password
+    .split("")
+    .sort(() => crypto.randomInt(-1, 2))
+    .join("");
 }
 
 /**
@@ -207,13 +233,17 @@ export function generateTemporaryPassword(length: number = TEMP_PASSWORD_LENGTH)
  */
 export function isPasswordExpired(
   passwordChangedAt: Date | null,
-  passwordExpiresAt?: Date | null
+  passwordExpiresAt?: Date | null,
 ): boolean {
   if (!passwordChangedAt) {
     return false; // Si nunca se cambió, no está expirada
   }
 
-  const expiryDate = passwordExpiresAt || new Date(passwordChangedAt.getTime() + PASSWORD_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+  const expiryDate =
+    passwordExpiresAt ||
+    new Date(
+      passwordChangedAt.getTime() + PASSWORD_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+    );
   return new Date() > expiryDate;
 }
 
@@ -236,7 +266,9 @@ export function isAccountLocked(accountLockedUntil: Date | null): boolean {
  */
 export function calculateLockoutExpiry(): Date {
   const lockoutExpiry = new Date();
-  lockoutExpiry.setMinutes(lockoutExpiry.getMinutes() + LOCKOUT_DURATION_MINUTES);
+  lockoutExpiry.setMinutes(
+    lockoutExpiry.getMinutes() + LOCKOUT_DURATION_MINUTES,
+  );
   return lockoutExpiry;
 }
 
@@ -254,7 +286,7 @@ export function shouldLockAccount(failedAttempts: number): boolean {
  * @returns Token aleatorio de 32 bytes en formato hexadecimal
  */
 export function generatePasswordResetToken(): string {
-  return crypto.randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString("hex");
 }
 
 /**
@@ -265,7 +297,7 @@ export function generatePasswordResetToken(): string {
  */
 export async function isPasswordDifferent(
   newPassword: string,
-  oldPasswordHash: string | null
+  oldPasswordHash: string | null,
 ): Promise<boolean> {
   if (!oldPasswordHash) {
     return true; // Si no hay contraseña anterior, permitir cualquiera
@@ -284,5 +316,5 @@ export const PASSWORD_CONFIG = {
   MAX_LENGTH: PASSWORD_MAX_LENGTH,
   EXPIRY_DAYS: PASSWORD_EXPIRY_DAYS,
   MAX_FAILED_ATTEMPTS,
-  LOCKOUT_DURATION_MINUTES
+  LOCKOUT_DURATION_MINUTES,
 };

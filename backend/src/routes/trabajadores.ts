@@ -1,6 +1,9 @@
-import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { authenticateToken, requirePermissions } from '../features/authentication/infrastructure/middleware/rbac.middleware';
+import { Router } from "express";
+import { PrismaClient } from "@prisma/client";
+import {
+  authenticateToken,
+  requirePermissions,
+} from "../features/authentication/infrastructure/middleware/rbac.middleware";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -10,15 +13,18 @@ const prisma = new PrismaClient();
  * @desc Obtener todos los trabajadores activos
  * @access Requiere permisos: trabajadores:read:all OR trabajadores:read:own
  */
-router.get('/', 
+router.get(
+  "/",
   authenticateToken,
-  requirePermissions(['trabajadores:read:all', 'trabajadores:read:own']),
+  requirePermissions(["trabajadores:read:all", "trabajadores:read:own"]),
   async (req, res) => {
     try {
-      console.log('📋 GET /api/trabajadores - Obteniendo lista de trabajadores');
-      
+      console.log(
+        "📋 GET /api/trabajadores - Obteniendo lista de trabajadores",
+      );
+
       const trabajadores = await prisma.mom_trabajador.findMany({
-        where: { is_activo: true },
+        where: { activo: true },
         select: {
           trabajador_id: true,
           documento_identidad: true,
@@ -26,28 +32,30 @@ router.get('/',
           telefono: true,
           email: true,
           fecha_registro_at: true,
-          is_activo: true
+          activo: true,
         },
         orderBy: {
-          nombre_completo: 'asc'
-        }
+          nombre_completo: "asc",
+        },
       });
 
-      console.log(`✅ Se encontraron ${trabajadores.length} trabajadores activos`);
+      console.log(
+        `✅ Se encontraron ${trabajadores.length} trabajadores activos`,
+      );
 
       res.json({
         success: true,
         data: trabajadores,
-        message: 'Trabajadores obtenidos correctamente'
+        message: "Trabajadores obtenidos correctamente",
       });
     } catch (error) {
-      console.error('❌ Error al obtener trabajadores:', error);
+      console.error("❌ Error al obtener trabajadores:", error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
-  }
+  },
 );
 
 /**
@@ -55,9 +63,10 @@ router.get('/',
  * @desc Crear nuevo trabajador
  * @access Requiere permiso 'trabajadores:create'
  */
-router.post('/',
+router.post(
+  "/",
   authenticateToken,
-  requirePermissions(['trabajadores:create']),
+  requirePermissions(["trabajadores:create"]),
   async (req, res) => {
     try {
       const {
@@ -65,14 +74,15 @@ router.post('/',
         nombre_completo,
         fecha_nacimiento,
         telefono,
-        email
+        email,
       } = req.body;
 
       // Validación básica
       if (!documento_identidad || !nombre_completo || !fecha_nacimiento) {
         return res.status(400).json({
           success: false,
-          message: 'Campos obligatorios: documento_identidad, nombre_completo, fecha_nacimiento'
+          message:
+            "Campos obligatorios: documento_identidad, nombre_completo, fecha_nacimiento",
         });
       }
 
@@ -83,38 +93,38 @@ router.post('/',
           fecha_nacimiento: new Date(fecha_nacimiento),
           telefono,
           email,
-          is_activo: true,
+          activo: true,
           fecha_registro_at: new Date(),
           created_at: new Date(),
           created_by: 1, // TODO: Obtener del token de Auth0
           updated_at: null,
           updated_by: null,
-          deleted_at: null
-        }
+          deleted_at: null,
+        },
       });
 
       res.status(201).json({
         success: true,
         data: nuevoTrabajador,
-        message: 'Trabajador creado exitosamente'
+        message: "Trabajador creado exitosamente",
       });
     } catch (error) {
-      console.error('Error al crear trabajador:', error);
+      console.error("Error al crear trabajador:", error);
       const err = error as Error & { code?: string };
-      
-      if (err.code === 'P2002') {
+
+      if (err.code === "P2002") {
         return res.status(409).json({
           success: false,
-          message: 'El documento de identidad ya existe'
+          message: "El documento de identidad ya existe",
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
-  }
+  },
 );
 
 /**
@@ -122,18 +132,14 @@ router.post('/',
  * @desc Actualizar trabajador
  * @access Requiere permiso 'trabajadores:update'
  */
-router.put('/:id',
+router.put(
+  "/:id",
   authenticateToken,
-  requirePermissions(['trabajadores:update']),
+  requirePermissions(["trabajadores:update"]),
   async (req, res) => {
     try {
       const { id } = req.params;
-      const {
-        nombre_completo,
-        telefono,
-        email,
-        is_activo
-      } = req.body;
+      const { nombre_completo, telefono, email, activo } = req.body;
 
       const trabajadorActualizado = await prisma.mom_trabajador.update({
         where: { trabajador_id: parseInt(id) },
@@ -141,34 +147,34 @@ router.put('/:id',
           nombre_completo,
           telefono,
           email,
-          is_activo,
+          activo,
           updated_at: new Date(),
-          updated_by: 1 // TODO: Obtener del token de Auth0
-        }
+          updated_by: 1, // TODO: Obtener del token de Auth0
+        },
       });
 
       res.json({
         success: true,
         data: trabajadorActualizado,
-        message: 'Trabajador actualizado exitosamente'
+        message: "Trabajador actualizado exitosamente",
       });
     } catch (error) {
-      console.error('Error al actualizar trabajador:', error);
+      console.error("Error al actualizar trabajador:", error);
       const err = error as Error & { code?: string };
-      
-      if (err.code === 'P2025') {
+
+      if (err.code === "P2025") {
         return res.status(404).json({
           success: false,
-          message: 'Trabajador no encontrado'
+          message: "Trabajador no encontrado",
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
-  }
+  },
 );
 
 /**
@@ -176,9 +182,10 @@ router.put('/:id',
  * @desc Eliminar trabajador (soft delete)
  * @access Requiere permiso 'trabajadores:delete'
  */
-router.delete('/:id',
+router.delete(
+  "/:id",
   authenticateToken,
-  requirePermissions(['trabajadores:delete']),
+  requirePermissions(["trabajadores:delete"]),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -186,33 +193,33 @@ router.delete('/:id',
       const trabajadorEliminado = await prisma.mom_trabajador.update({
         where: { trabajador_id: parseInt(id) },
         data: {
-          is_activo: false,
+          activo: false,
           deleted_at: new Date(),
-          updated_by: 1 // TODO: Obtener del token de Auth0
-        }
+          updated_by: 1, // TODO: Obtener del token de Auth0
+        },
       });
 
       res.json({
         success: true,
-        message: 'Trabajador eliminado exitosamente'
+        message: "Trabajador eliminado exitosamente",
       });
     } catch (error) {
-      console.error('Error al eliminar trabajador:', error);
+      console.error("Error al eliminar trabajador:", error);
       const err = error as Error & { code?: string };
-      
-      if (err.code === 'P2025') {
+
+      if (err.code === "P2025") {
         return res.status(404).json({
           success: false,
-          message: 'Trabajador no encontrado'
+          message: "Trabajador no encontrado",
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor'
+        message: "Error interno del servidor",
       });
     }
-  }
+  },
 );
 
 export default router;
