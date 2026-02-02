@@ -22,7 +22,7 @@ import {
 
 const INITIAL_FORM_DATA: CreateCrewData = {
   id: 0,
-  active: false,
+  active: true,
   code: "",
   description: "",
   workArea: "",
@@ -173,7 +173,7 @@ export const NewEditCrewForm = ({
           Cancelar
         </BackButtonGeneric>
 
-        <ButtonGeneric type="submit">
+        <ButtonGeneric type="submit" disabled={loading}>
           {loading ? "Guardando..." : initialData ? "Guardar" : "Crear"}
         </ButtonGeneric>
       </ButtonContainer>

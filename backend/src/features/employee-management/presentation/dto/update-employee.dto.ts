@@ -18,7 +18,6 @@ export const LaborInfoSchema = z.object({
   vacationAmount: z.number().nonnegative("No puede ser negativo"),
   incapacityAmount: z.number().nonnegative("No puede ser negativo"),
   lactationAmount: z.number().nonnegative("No puede ser negativo"),
-  // status: z.boolean(),
 });
 
 export const UpdateEmployeeSchema = z.object({

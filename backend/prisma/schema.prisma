@@ -66,7 +66,7 @@ model mom_cuadrilla {
   descripcion                       String?                             @db.Text
   area_trabajo                      String?                             @db.VarChar(150)
   fecha_creacion_at                 DateTime                            @db.DateTime(0)
-  is_activa                         Boolean                             @default(true)
+  activa                            Boolean                             @default(true)
   created_at                        DateTime                            @db.DateTime(0)
   updated_at                        DateTime?                           @db.DateTime(0)
   created_by                        Int
@@ -74,7 +74,7 @@ model mom_cuadrilla {
   deleted_at                        DateTime?                           @db.DateTime(0)
   mot_asignacion_cuadrilla          mot_asignacion_cuadrilla[]
   mot_asignacion_tarea              mot_asignacion_tarea[]
-  rel_mom_cuadrilla__mom_trabajador rel_mom_cuadrilla__mom_trabajador[]
+  mom_trabajador                    mom_trabajador[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -259,7 +259,7 @@ model mom_trabajador {
   fecha_nacimiento                  DateTime                            @db.Date
   telefono                          String?                             @db.VarChar(20)
   email                             String?                             @db.VarChar(100)
-  is_activo                         Boolean                             @default(true)
+  activo                            Boolean                             @default(true)
   fecha_registro_at                 DateTime                            @db.DateTime(0)
   created_at                        DateTime                            @db.DateTime(0)
   updated_at                        DateTime?                           @db.DateTime(0)
@@ -272,14 +272,16 @@ model mom_trabajador {
   mot_asistencia                    mot_asistencia[]
   mot_ausencia_justificada          mot_ausencia_justificada[]
   mot_deduccion_especial            mot_deduccion_especial[]
-  mot_info_laboral                  mot_info_laboral[]
+  mot_info_laboral                  mot_info_laboral?
   mot_liquidacion                   mot_liquidacion[]
   mot_registro_productividad        mot_registro_productividad[]
   mot_usuario                       mot_usuario[]
-  rel_mom_cuadrilla__mom_trabajador rel_mom_cuadrilla__mom_trabajador[]
+  cuadrilla_id                      Int?    
+  mom_cuadrilla                     mom_cuadrilla?                      @relation(fields: [cuadrilla_id], references: [cuadrilla_id], onUpdate: Restrict, map: "FK_MOM_TRABAJADOR_RELATION_MOM_CUADRILLA")
 
   @@index([documento_identidad], map: "idx_mom_trabajador_documento")
   @@index([nombre_completo], map: "idx_mom_trabajador_nombre")
+  @@index([cuadrilla_id], map: "FK_MOM_TRABAJADOR_RELATION_MOM_CUADRILLA")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -291,7 +293,7 @@ model mot_asignacion_cuadrilla {
   usuario_asignacion  Int
   fecha_retiro_at     DateTime?      @db.DateTime(0)
   usuario_retiro      Int?
-  is_activa           Boolean        @default(true)
+  activa              Boolean        @default(true)
   created_at          DateTime       @db.DateTime(0)
   updated_at          DateTime?      @db.DateTime(0)
   created_by          Int
@@ -486,6 +488,7 @@ model mot_info_laboral {
   deleted_at                    DateTime?      @db.DateTime(0)
   mom_trabajador                mom_trabajador @relation(fields: [trabajador_id], references: [trabajador_id], onUpdate: Restrict, map: "FK_MOT_INFO_LABORAL_RELATION_MOM_TRABAJADOR")
 
+  @@unique([trabajador_id])
   @@index([trabajador_id], map: "FK_MOT_INFO_LABORAL_RELATION_MOM_TRABAJADOR")
 }
 
@@ -615,25 +618,6 @@ model mot_usuario {
   @@index([trabajador_id], map: "FK_MOT_USUARIO_RELATION_MOM_TRABAJADOR")
   @@index([email], map: "idx_mot_usuario_email")
   @@index([last_auth_method], map: "idx_mot_usuario_auth_method")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model rel_mom_cuadrilla__mom_trabajador {
-  cuadrilla_id        Int
-  trabajador_id       Int
-  fecha_asignacion_at DateTime       @db.DateTime(0)
-  fecha_retiro_at     DateTime?      @db.DateTime(0)
-  usuario_asignacion  Int
-  created_at          DateTime       @db.DateTime(0)
-  created_by          Int
-  updated_at          DateTime?      @db.DateTime(0)
-  updated_by          Int?
-  deleted_at          DateTime?      @db.DateTime(0)
-  mom_cuadrilla       mom_cuadrilla  @relation(fields: [cuadrilla_id], references: [cuadrilla_id], onUpdate: Restrict, map: "FK_REL_MOM_CUADRILLA__MOM_TRABAJADOR_RELATION_MOM_CUADRILLA")
-  mom_trabajador      mom_trabajador @relation(fields: [trabajador_id], references: [trabajador_id], onUpdate: Restrict, map: "FK_REL_MOM_CUADRILLA__MOM_TRABAJADOR_RELATION_MOM_TRABAJADOR")
-
-  @@id([cuadrilla_id, trabajador_id])
-  @@index([trabajador_id], map: "FK_REL_MOM_CUADRILLA__MOM_TRABAJADOR_RELATION_MOM_TRABAJADOR")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

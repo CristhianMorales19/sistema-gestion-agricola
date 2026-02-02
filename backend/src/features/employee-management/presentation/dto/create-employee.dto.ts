@@ -15,6 +15,8 @@ export const CreateEmployeeSchema = z.object({
     .string()
     .regex(/^\d{8}$/, "El teléfono debe tener 8 dígitos numéricos")
     .optional(),
+
+  status: z.boolean().optional(),
 });
 
 export type CreateEmployeeDTO = z.infer<typeof CreateEmployeeSchema>;

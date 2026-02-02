@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaEmployeeRepository } from "../../infrastructure/prisma-employee.repository";
 import { GetEmployeesUseCase } from "../../application/get-employees.usecase";
 import { EmployeeController } from "../controller/employee.controller";
-import { validateBody } from "../middleware/validate-body";
+import { validateBody } from "../../../../shared/utils/validate-body";
 import { CreateEmployeeSchema } from "../dto/create-employee.dto";
 
 import { checkJwt } from "../../../../shared/infrastructure/config/auth0-simple.config";
@@ -21,8 +21,8 @@ import { UpdateEmployeeSchema } from "../dto/update-employee.dto";
 
 const router = Router();
 const prisma = new PrismaClient();
-
 const repo = new PrismaEmployeeRepository(prisma);
+
 const getEmployeesUseCase = new GetEmployeesUseCase(repo);
 const createEmployeeUseCase = new CreateEmployeeUseCase(repo);
 const deleteEmployee = new DeleteEmployeeUseCase(repo);

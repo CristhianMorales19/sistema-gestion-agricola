@@ -31,12 +31,9 @@ export class CreateEmployeeUseCase {
 
     await this.repo.create(
       {
-        identification: data.identification,
-        name: data.name,
+        ...data,
         birthDate: birth,
         hireDate: hire,
-        phone: data.phone,
-        email: data.email,
         status: true,
       },
       userId,

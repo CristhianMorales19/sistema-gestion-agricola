@@ -66,6 +66,7 @@ export class ApiCrewRepository implements CrewRepository {
   }
 
   private mapCrew(apiCrew: any) {
+    if (apiCrew.workers === undefined) return apiCrew;
     const workerIds = apiCrew.workers.map((w: Employee) => w.id);
     return {
       ...apiCrew,

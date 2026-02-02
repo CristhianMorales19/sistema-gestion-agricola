@@ -3,21 +3,21 @@
  * Orquesta las operaciones de asistencia del dominio
  */
 
-import { Attendance, IAttendanceRecord } from '../domain/Attendance';
-import { IAttendanceRepository } from '../domain/AttendanceRepository';
+import { Attendance, IAttendanceRecord } from "../domain/Attendance";
+import { IAttendanceRepository } from "../domain/AttendanceRepository";
 import {
   WorkerNotFoundError,
   ActiveEntryExistsError,
   NoActiveEntryError,
-  AttendanceNotFoundError
-} from '../domain/AttendanceError';
-import { PrismaClient } from '@prisma/client';
+  AttendanceNotFoundError,
+} from "../domain/AttendanceError";
+import { PrismaClient } from "@prisma/client";
 import {
   createLocalDateTime,
   createLocalDateTimeNow,
   getTodayString,
-  isDateInFuture
-} from './dateTimeUtils';
+  isDateInFuture,
+} from "./dateTimeUtils";
 
 const prisma = new PrismaClient();
 
@@ -32,15 +32,15 @@ export class AttendanceService {
     location?: string,
     notes?: string,
     entryTime?: string,
-    fecha?: string // YYYY-MM-DD
+    fecha?: string, // YYYY-MM-DD
   ): Promise<Attendance> {
     // Validar que el trabajador existe
     const worker = await prisma.mom_trabajador.findFirst({
       where: {
         trabajador_id: workerId,
         deleted_at: null,
-        is_activo: true
-      }
+        activo: true,
+      },
     });
 
     if (!worker) {
@@ -49,32 +49,45 @@ export class AttendanceService {
 
     // Obtener la fecha a usar (hoy si no se proporciona)
     const fechaToUse = fecha || getTodayString();
-    
+
     // Validar que la fecha no sea futura
     if (isDateInFuture(fechaToUse)) {
-      throw new Error('No se puede registrar asistencia para fechas futuras');
+      throw new Error("No se puede registrar asistencia para fechas futuras");
     }
 
     // Obtener la hora a usar (ahora si no se proporciona)
     const horaToUse = entryTime || new Date().toTimeString().slice(0, 5);
-    
+
     // Crear fecha/hora usando utilidades que evitan conversión de zona horaria
     const finalEntryTime = createLocalDateTime(horaToUse, fechaToUse);
 
     // DEBUG: Log para verificar la conversión de fecha/hora
-    console.log('🕐 DEBUG registerEntry:');
-    console.log('  - entryTime recibido:', entryTime);
-    console.log('  - horaToUse:', horaToUse);
-    console.log('  - fechaToUse:', fechaToUse);
-    console.log('  - finalEntryTime (Date):', finalEntryTime);
-    console.log('  - finalEntryTime.toISOString():', finalEntryTime.toISOString());
-    console.log('  - finalEntryTime.getUTCHours():', finalEntryTime.getUTCHours());
-    console.log('  - finalEntryTime.getUTCMinutes():', finalEntryTime.getUTCMinutes());
+    console.log("🕐 DEBUG registerEntry:");
+    console.log("  - entryTime recibido:", entryTime);
+    console.log("  - horaToUse:", horaToUse);
+    console.log("  - fechaToUse:", fechaToUse);
+    console.log("  - finalEntryTime (Date):", finalEntryTime);
+    console.log(
+      "  - finalEntryTime.toISOString():",
+      finalEntryTime.toISOString(),
+    );
+    console.log(
+      "  - finalEntryTime.getUTCHours():",
+      finalEntryTime.getUTCHours(),
+    );
+    console.log(
+      "  - finalEntryTime.getUTCMinutes():",
+      finalEntryTime.getUTCMinutes(),
+    );
 
     // Validar que no tenga entrada activa PARA ESTA FECHA
-    const existingEntries = await this.attendanceRepository.findByWorkerIdAndDate(workerId, finalEntryTime);
+    const existingEntries =
+      await this.attendanceRepository.findByWorkerIdAndDate(
+        workerId,
+        finalEntryTime,
+      );
     const hasEntryThisDay = existingEntries.length > 0;
-    
+
     if (hasEntryThisDay) {
       throw new ActiveEntryExistsError();
     }
@@ -85,10 +98,10 @@ export class AttendanceService {
       entryTime: finalEntryTime,
       location: location || null,
       workedHours: null,
-      status: 'incompleta',
+      status: "incompleta",
       notes: notes || null,
       createdAt: createLocalDateTimeNow(),
-      updatedAt: createLocalDateTimeNow()
+      updatedAt: createLocalDateTimeNow(),
     });
 
     return newAttendance;
@@ -100,7 +113,7 @@ export class AttendanceService {
   async registerExit(
     attendanceId: number,
     notes?: string,
-    exitTime?: string
+    exitTime?: string,
   ): Promise<Attendance> {
     // Verificar que existe la asistencia
     const attendance = await this.attendanceRepository.findById(attendanceId);
@@ -116,18 +129,18 @@ export class AttendanceService {
     // Obtener la fecha de entrada para usarla en la salida
     const entryTime = attendance.getEntryTime();
     // Extraer la fecha en formato YYYY-MM-DD usando UTC (porque guardamos como fake UTC)
-    const entryDateString = `${entryTime.getUTCFullYear()}-${String(entryTime.getUTCMonth() + 1).padStart(2, '0')}-${String(entryTime.getUTCDate()).padStart(2, '0')}`;
-    
+    const entryDateString = `${entryTime.getUTCFullYear()}-${String(entryTime.getUTCMonth() + 1).padStart(2, "0")}-${String(entryTime.getUTCDate()).padStart(2, "0")}`;
+
     // Obtener la hora a usar (ahora si no se proporciona)
     const horaToUse = exitTime || new Date().toTimeString().slice(0, 5);
-    
+
     // Crear fecha/hora usando utilidades que evitan conversión de zona horaria
     const finalExitTime = createLocalDateTime(horaToUse, entryDateString);
 
     // Registrar salida (el repositorio recalculará horas_trabajadas automáticamente)
     const updatedAttendance = await this.attendanceRepository.registerExit(
       attendanceId,
-      finalExitTime
+      finalExitTime,
     );
 
     // Actualizar notas si se proporcionan
@@ -153,7 +166,8 @@ export class AttendanceService {
    * Obtener asistencia por ID incluyendo registros eliminados (para reactivación)
    */
   async getAttendanceByIdIncludeDeleted(id: number): Promise<Attendance> {
-    const attendance = await this.attendanceRepository.findByIdIncludeDeleted(id);
+    const attendance =
+      await this.attendanceRepository.findByIdIncludeDeleted(id);
     if (!attendance) {
       throw new AttendanceNotFoundError();
     }
@@ -166,13 +180,13 @@ export class AttendanceService {
   async getWorkerAttendances(
     workerId: number,
     startDate?: Date,
-    endDate?: Date
+    endDate?: Date,
   ): Promise<Attendance[]> {
     if (startDate && endDate) {
       return await this.attendanceRepository.findByWorkerIdAndDateRange(
         workerId,
         startDate,
-        endDate
+        endDate,
       );
     }
 
@@ -181,7 +195,11 @@ export class AttendanceService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    return await this.attendanceRepository.findByWorkerIdAndDateRange(workerId, today, tomorrow);
+    return await this.attendanceRepository.findByWorkerIdAndDateRange(
+      workerId,
+      today,
+      tomorrow,
+    );
   }
 
   /*
@@ -201,20 +219,26 @@ export class AttendanceService {
   /*
    * Obtener asistencias paginadas
    */
-  async getAttendancesPaginated(page: number, limit: number): Promise<{
+  async getAttendancesPaginated(
+    page: number,
+    limit: number,
+  ): Promise<{
     data: Attendance[];
     total: number;
     page: number;
     limit: number;
     totalPages: number;
   }> {
-    const { data, total } = await this.attendanceRepository.getAllPaginated(page, limit);
+    const { data, total } = await this.attendanceRepository.getAllPaginated(
+      page,
+      limit,
+    );
     return {
       data,
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -224,30 +248,33 @@ export class AttendanceService {
   async getWorkerStatistics(
     workerId: number,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<{
     totalRecords: number;
     totalWorkedHours: number;
     averageHoursPerDay: number;
   }> {
-    const totalRecords = await this.attendanceRepository.countByWorkerAndDateRange(
-      workerId,
-      startDate,
-      endDate
-    );
+    const totalRecords =
+      await this.attendanceRepository.countByWorkerAndDateRange(
+        workerId,
+        startDate,
+        endDate,
+      );
 
-    const totalWorkedHours = await this.attendanceRepository.getTotalWorkedHoursByWorkerAndDateRange(
-      workerId,
-      startDate,
-      endDate
-    );
+    const totalWorkedHours =
+      await this.attendanceRepository.getTotalWorkedHoursByWorkerAndDateRange(
+        workerId,
+        startDate,
+        endDate,
+      );
 
-    const averageHoursPerDay = totalRecords > 0 ? totalWorkedHours / totalRecords : 0;
+    const averageHoursPerDay =
+      totalRecords > 0 ? totalWorkedHours / totalRecords : 0;
 
     return {
       totalRecords,
       totalWorkedHours,
-      averageHoursPerDay: Math.round(averageHoursPerDay * 100) / 100
+      averageHoursPerDay: Math.round(averageHoursPerDay * 100) / 100,
     };
   }
 
@@ -266,7 +293,10 @@ export class AttendanceService {
   /*
    * Actualizar ubicación de asistencia
    */
-  async updateAttendanceLocation(id: number, location: string): Promise<Attendance> {
+  async updateAttendanceLocation(
+    id: number,
+    location: string,
+  ): Promise<Attendance> {
     const attendance = await this.attendanceRepository.findById(id);
     if (!attendance) {
       throw new AttendanceNotFoundError();
@@ -286,12 +316,14 @@ export class AttendanceService {
 
     // Obtener la fecha del registro existente para mantenerla
     const existingEntryTime = attendance.getEntryTime();
-    const existingDateString = `${existingEntryTime.getUTCFullYear()}-${String(existingEntryTime.getUTCMonth() + 1).padStart(2, '0')}-${String(existingEntryTime.getUTCDate()).padStart(2, '0')}`;
-    
+    const existingDateString = `${existingEntryTime.getUTCFullYear()}-${String(existingEntryTime.getUTCMonth() + 1).padStart(2, "0")}-${String(existingEntryTime.getUTCDate()).padStart(2, "0")}`;
+
     // Crear nueva fecha/hora usando utilidades
     const newEntryTime = createLocalDateTime(entryTime, existingDateString);
 
-    return await this.attendanceRepository.update(id, { entryTime: newEntryTime });
+    return await this.attendanceRepository.update(id, {
+      entryTime: newEntryTime,
+    });
   }
 
   /*
@@ -305,12 +337,14 @@ export class AttendanceService {
 
     // Obtener la fecha del registro existente para mantenerla
     const existingEntryTime = attendance.getEntryTime();
-    const existingDateString = `${existingEntryTime.getUTCFullYear()}-${String(existingEntryTime.getUTCMonth() + 1).padStart(2, '0')}-${String(existingEntryTime.getUTCDate()).padStart(2, '0')}`;
-    
+    const existingDateString = `${existingEntryTime.getUTCFullYear()}-${String(existingEntryTime.getUTCMonth() + 1).padStart(2, "0")}-${String(existingEntryTime.getUTCDate()).padStart(2, "0")}`;
+
     // Crear nueva fecha/hora usando utilidades
     const newExitTime = createLocalDateTime(exitTime, existingDateString);
 
-    return await this.attendanceRepository.update(id, { exitTime: newExitTime });
+    return await this.attendanceRepository.update(id, {
+      exitTime: newExitTime,
+    });
   }
 
   /*
@@ -324,11 +358,11 @@ export class AttendanceService {
       location?: string;
       notes?: string;
       deletedAt?: null;
-    }
+    },
   ): Promise<Attendance> {
     // Intentar obtener registro activo primero
     let attendance = await this.attendanceRepository.findById(id);
-    
+
     // Si no existe activo pero se requiere reactivación, buscar eliminado
     if (!attendance && data.deletedAt === null) {
       attendance = await this.attendanceRepository.findByIdIncludeDeleted(id);
@@ -385,31 +419,33 @@ export class AttendanceService {
    * Si no tiene registro, crea uno marcado como eliminado
    */
   async markAsAbsent(workerId: number, fecha: string): Promise<void> {
-    console.log(`🎯 AttendanceService.markAsAbsent - Trabajador ID: ${workerId}, Fecha: ${fecha}`);
-    
+    console.log(
+      `🎯 AttendanceService.markAsAbsent - Trabajador ID: ${workerId}, Fecha: ${fecha}`,
+    );
+
     // Parsear la fecha como string local (no UTC) para ser consistente con registerEntry
-    const [year, month, day] = fecha.split('-').map(Number);
+    const [year, month, day] = fecha.split("-").map(Number);
     const fechaDate = new Date(year, month - 1, day, 0, 0, 0, 0);
-    
+
     // Validar que la fecha no sea futura
     const now = new Date();
     const todayYear = now.getFullYear();
     const todayMonth = now.getMonth() + 1;
     const todayDay = now.getDate();
-    const todayString = `${todayYear}-${String(todayMonth).padStart(2, '0')}-${String(todayDay).padStart(2, '0')}`;
-    
+    const todayString = `${todayYear}-${String(todayMonth).padStart(2, "0")}-${String(todayDay).padStart(2, "0")}`;
+
     if (fecha > todayString) {
-      throw new Error('No se puede marcar como ausente para fechas futuras');
+      throw new Error("No se puede marcar como ausente para fechas futuras");
     }
-    
+
     // Validar que el trabajador existe
-    console.log('🔍 Validando que el trabajador existe...');
+    console.log("🔍 Validando que el trabajador existe...");
     const worker = await prisma.mom_trabajador.findFirst({
       where: {
         trabajador_id: workerId,
         deleted_at: null,
-        is_activo: true
-      }
+        activo: true,
+      },
     });
 
     if (!worker) {
@@ -420,38 +456,47 @@ export class AttendanceService {
 
     // Buscar si ya existe un registro para ese día
     console.log(`🔍 Buscando registros existentes para ${fecha}...`);
-    const existingRecords = await this.attendanceRepository.findByWorkerIdAndDate(
-      workerId,
-      fechaDate
-    );
+    const existingRecords =
+      await this.attendanceRepository.findByWorkerIdAndDate(
+        workerId,
+        fechaDate,
+      );
 
     if (existingRecords && existingRecords.length > 0) {
-      console.log(`📝 Registro existente encontrado (ID: ${existingRecords[0].getAttendanceId()}), marcándolo como eliminado...`);
+      console.log(
+        `📝 Registro existente encontrado (ID: ${existingRecords[0].getAttendanceId()}), marcándolo como eliminado...`,
+      );
       // Si ya existe, marcarlo como eliminado
-      await this.attendanceRepository.delete(existingRecords[0].getAttendanceId());
-      console.log('✅ Registro marcado como eliminado');
+      await this.attendanceRepository.delete(
+        existingRecords[0].getAttendanceId(),
+      );
+      console.log("✅ Registro marcado como eliminado");
     } else {
-      console.log('📝 No hay registro existente, creando nuevo registro marcado como ausente...');
+      console.log(
+        "📝 No hay registro existente, creando nuevo registro marcado como ausente...",
+      );
       // Si no existe, crear uno y marcarlo como eliminado directamente en la BD
       const newRecord = await prisma.mot_asistencia.create({
         data: {
           trabajador_id: workerId,
           fecha_at: fechaDate,
-          hora_entrada_at: fechaDate,  // Usar la misma fecha (hora 00:00:00)
+          hora_entrada_at: fechaDate, // Usar la misma fecha (hora 00:00:00)
           hora_salida_at: null,
           ubicacion_entrada: null,
           horas_trabajadas: null,
-          estado: 'incompleta',
-          observaciones_salida: 'Marcado como ausente',
+          estado: "incompleta",
+          observaciones_salida: "Marcado como ausente",
           created_at: new Date(),
           updated_at: new Date(),
           created_by: 1,
           updated_by: null,
-          deleted_at: new Date() // Marcado como eliminado desde el inicio
-        }
+          deleted_at: new Date(), // Marcado como eliminado desde el inicio
+        },
       });
-      console.log(`✅ Nuevo registro creado con ID: ${newRecord.asistencia_id}, fecha_at: ${newRecord.fecha_at}`);
+      console.log(
+        `✅ Nuevo registro creado con ID: ${newRecord.asistencia_id}, fecha_at: ${newRecord.fecha_at}`,
+      );
     }
-    console.log('🎉 markAsAbsent completado exitosamente');
+    console.log("🎉 markAsAbsent completado exitosamente");
   }
 }

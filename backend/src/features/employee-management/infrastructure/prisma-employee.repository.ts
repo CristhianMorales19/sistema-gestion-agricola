@@ -22,17 +22,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       orderBy: { created_at: "desc" },
     });
 
-    return employees.map((t) => ({
-      id: t.trabajador_id,
-      name: t.nombre_completo,
-      identification: t.documento_identidad,
-      position: t.mot_info_laboral[0]?.cargo ?? "Sin definir",
-      hireDate: t.fecha_registro_at,
-      birthDate: t.fecha_nacimiento,
-      status: Boolean(t.is_activo),
-      email: t.email ?? undefined,
-      phone: t.telefono ?? undefined,
-    }));
+    return this.mapEmployees(employees);
   }
 
   async findById(id: number): Promise<EmployeeWithLabor | null> {
@@ -43,7 +33,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
 
     if (!employee) return null;
 
-    const labor = employee.mot_info_laboral[0];
+    const labor = employee.mot_info_laboral;
 
     return {
       employee: {
@@ -54,7 +44,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         phone: employee.telefono ?? undefined,
         email: employee.email ?? undefined,
         hireDate: employee.fecha_registro_at,
-        status: Boolean(employee.is_activo),
+        status: Boolean(employee.activo),
       },
       laborInfo: labor
         ? {
@@ -94,7 +84,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         fecha_registro_at: employee.hireDate,
         telefono: employee.phone,
         email: employee.email,
-        is_activo: employee.status,
+        activo: employee.status,
         created_at: new Date(),
         created_by: userId,
       },
@@ -132,10 +122,6 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         where: { trabajador_id: id },
       });
       await tx.mot_usuario.deleteMany({ where: { trabajador_id: id } });
-      await tx.rel_mom_cuadrilla__mom_trabajador.deleteMany({
-        where: { trabajador_id: id },
-      });
-
       await tx.mom_trabajador.delete({
         where: { trabajador_id: id },
       });
@@ -152,7 +138,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
               { documento_identidad: { contains: query } },
               {
                 mot_info_laboral: {
-                  some: { cargo: { contains: query } },
+                  is: { cargo: { contains: query } },
                 },
               },
             ],
@@ -161,33 +147,20 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       },
       include: {
         mot_info_laboral: {
-          take: 1,
-          orderBy: { info_laboral_id: "desc" },
+          select: { cargo: true },
         },
       },
       orderBy: { created_at: "desc" },
       take: 50,
     });
 
-    return employees.map((t) => ({
-      id: t.trabajador_id,
-      name: t.nombre_completo,
-      identification: t.documento_identidad,
-      position: t.mot_info_laboral[0]?.cargo ?? "Sin definir",
-      hireDate: t.fecha_registro_at,
-      birthDate: t.fecha_nacimiento,
-      status: t.is_activo,
-      email: t.email ?? undefined,
-      phone: t.telefono ?? undefined,
-    }));
+    return this.mapEmployees(employees);
   }
 
   async findWithoutCrew(): Promise<Employee[]> {
     const employees = await this.prisma.mom_trabajador.findMany({
       where: {
-        rel_mom_cuadrilla__mom_trabajador: {
-          none: {},
-        },
+        cuadrilla_id: null,
       },
       include: {
         mot_info_laboral: {
@@ -199,17 +172,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       orderBy: { created_at: "desc" },
     });
 
-    return employees.map((t) => ({
-      id: t.trabajador_id,
-      name: t.nombre_completo,
-      identification: t.documento_identidad,
-      position: t.mot_info_laboral[0]?.cargo ?? "Sin definir",
-      hireDate: t.fecha_registro_at,
-      birthDate: t.fecha_nacimiento,
-      status: Boolean(t.is_activo),
-      email: t.email ?? undefined,
-      phone: t.telefono ?? undefined,
-    }));
+    return this.mapEmployees(employees);
   }
 
   async updateEmployee(
@@ -227,17 +190,17 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       data: {
         documento_identidad: data.employee.identification,
         nombre_completo: data.employee.name,
-        fecha_nacimiento: new Date(data.employee.birthDate),
-        fecha_registro_at: new Date(data.employee.hireDate),
+        fecha_nacimiento: data.employee.birthDate,
+        fecha_registro_at: data.employee.hireDate,
         telefono: data.employee.phone,
         email: data.employee.email,
-        is_activo: data.employee.status,
+        activo: data.employee.status,
         updated_at: new Date(),
         updated_by: userId,
       },
     });
 
-    const labor = existing?.mot_info_laboral[0];
+    const labor = existing?.mot_info_laboral;
 
     const laborData = {
       trabajador_id: id,
@@ -279,5 +242,19 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
         },
       });
     }
+  }
+
+  private mapEmployees(employees: any[]): Employee[] {
+    return employees.map((t) => ({
+      id: t.trabajador_id,
+      name: t.nombre_completo,
+      identification: t.documento_identidad,
+      position: t.mot_info_laboral?.cargo ?? "Sin definir",
+      hireDate: t.fecha_registro_at,
+      birthDate: t.fecha_nacimiento,
+      status: Boolean(t.activo),
+      email: t.email ?? undefined,
+      phone: t.telefono ?? undefined,
+    }));
   }
 }

@@ -5,7 +5,7 @@ export interface Employee {
   position?: string;
   hireDate: Date;
   birthDate: Date;
-  status: boolean;
+  status?: boolean;
   email?: string;
   phone?: string;
 }
@@ -34,7 +34,7 @@ export interface EmployeeWithLabor {
 }
 
 export interface UpdateEmployee {
-  employee: Employee;
+  employee: Omit<Employee, "id">;
   laborInfo: LaborInfo;
 }
 

@@ -3,17 +3,17 @@
  * Endpoints para registro de entrada/salida y consultas
  */
 
-import { Router, Request, Response } from 'express';
-import { AttendanceController } from '../controllers/AttendanceController';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response } from "express";
+import { AttendanceController } from "../controllers/AttendanceController";
+import { PrismaClient } from "@prisma/client";
 import {
   checkJwt,
-  agroManoAuthMiddleware
-} from '../../../authentication/infrastructure/middleware/agromano-auth.middleware';
+  agroManoAuthMiddleware,
+} from "../../../authentication/infrastructure/middleware/agromano-auth.middleware";
 import {
   requirePermission,
-  requireAnyPermission
-} from '../../../authentication/infrastructure/middleware/agromano-rbac.middleware';
+  requireAnyPermission,
+} from "../../../authentication/infrastructure/middleware/agromano-rbac.middleware";
 
 const router = Router();
 const attendanceController = new AttendanceController();
@@ -28,8 +28,8 @@ const prisma = new PrismaClient();
  * Health check para el módulo de asistencia
  * @access Público (sin autenticación)
  */
-router.get('/health', (req: Request, res: Response) => {
-  res.json({ success: true, message: 'Attendance module is healthy' });
+router.get("/health", (req: Request, res: Response) => {
+  res.json({ success: true, message: "Attendance module is healthy" });
 });
 
 /**
@@ -37,92 +37,86 @@ router.get('/health', (req: Request, res: Response) => {
  * Obtener lista de trabajadores activos para asistencia
  * @access Público (sin autenticación)
  */
-router.get(
-  '/trabajadores-activos',
-  async (req: Request, res: Response) => {
-    try {
-      const trabajadores = await prisma.mom_trabajador.findMany({
-        where: {
-          is_activo: true,
-          deleted_at: null
-        },
-        select: {
-          trabajador_id: true,
-          documento_identidad: true,
-          nombre_completo: true,
-          email: true,
-          telefono: true
-        },
-        orderBy: {
-          nombre_completo: 'asc'
-        }
-      });
+router.get("/trabajadores-activos", async (req: Request, res: Response) => {
+  try {
+    const trabajadores = await prisma.mom_trabajador.findMany({
+      where: {
+        activo: true,
+        deleted_at: null,
+      },
+      select: {
+        trabajador_id: true,
+        documento_identidad: true,
+        nombre_completo: true,
+        email: true,
+        telefono: true,
+      },
+      orderBy: {
+        nombre_completo: "asc",
+      },
+    });
 
-      const formattedData = trabajadores.map(t => ({
-        value: t.trabajador_id,
-        label: `${t.documento_identidad} - ${t.nombre_completo}`,
-        trabajador_id: t.trabajador_id,
-        documento_identidad: t.documento_identidad,
-        nombre_completo: t.nombre_completo
-      }));
+    const formattedData = trabajadores.map((t) => ({
+      value: t.trabajador_id,
+      label: `${t.documento_identidad} - ${t.nombre_completo}`,
+      trabajador_id: t.trabajador_id,
+      documento_identidad: t.documento_identidad,
+      nombre_completo: t.nombre_completo,
+    }));
 
-      res.json({
-        success: true,
-        data: formattedData,
-        total: formattedData.length
-      });
-    } catch (error: any) {
-      console.error('Error al obtener trabajadores para asistencia:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error al obtener trabajadores',
-        error: error.message
-      });
-    }
+    res.json({
+      success: true,
+      data: formattedData,
+      total: formattedData.length,
+    });
+  } catch (error: any) {
+    console.error("Error al obtener trabajadores para asistencia:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener trabajadores",
+      error: error.message,
+    });
   }
-);
+});
 
 /**
  * GET /api/attendance/workers
  * Obtener lista de trabajadores activos para asistencia (alias)
  * @access Público (sin autenticación)
  */
-router.get(
-  '/workers',
-  async (req: Request, res: Response) => {
-    try {
-      const trabajadores = await prisma.mom_trabajador.findMany({
-        where: {
-          is_activo: true,
-          deleted_at: null
-        },
-        select: {
-          trabajador_id: true,
-          documento_identidad: true,
-          nombre_completo: true,
-          email: true,
-          telefono: true
-        },
-        orderBy: {
-          nombre_completo: 'asc'
-        }
-      });
+router.get("/workers", async (req: Request, res: Response) => {
+  try {
+    const trabajadores = await prisma.mom_trabajador.findMany({
+      where: {
+        activo: true,
+        deleted_at: null,
+      },
+      select: {
+        trabajador_id: true,
+        documento_identidad: true,
+        nombre_completo: true,
+        email: true,
+        telefono: true,
+      },
+      orderBy: {
+        nombre_completo: "asc",
+      },
+    });
 
-      res.json({
-        success: true,
-        data: trabajadores,
-        total: trabajadores.length
-      });
-    } catch (error: any) {
-      console.error('Error al obtener trabajadores para asistencia:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error al obtener trabajadores',
-        error: error.message
-      });
-    }
+    res.json({
+      success: true,
+      data: trabajadores,
+      total: trabajadores.length,
+    });
+  } catch (error: any) {
+    console.error("Error al obtener trabajadores para asistencia:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener trabajadores",
+      error: error.message,
+    });
   }
-);
+});
 
 // ============================================================================
 // MIDDLEWARE DE AUTENTICACIÓN PARA RUTAS PROTEGIDAS
@@ -136,9 +130,9 @@ router.use(agroManoAuthMiddleware);
  * @access Requiere permiso: asistencia:register
  */
 router.post(
-  '/entry',
-  requirePermission('asistencia:register'),
-  (req: Request, res: Response) => attendanceController.registerEntry(req, res)
+  "/entry",
+  requirePermission("asistencia:register"),
+  (req: Request, res: Response) => attendanceController.registerEntry(req, res),
 );
 
 /**
@@ -147,9 +141,9 @@ router.post(
  * @access Requiere permiso: asistencia:register
  */
 router.post(
-  '/:id/exit',
-  requirePermission('asistencia:register'),
-  (req: Request, res: Response) => attendanceController.registerExit(req, res)
+  "/:id/exit",
+  requirePermission("asistencia:register"),
+  (req: Request, res: Response) => attendanceController.registerExit(req, res),
 );
 
 /**
@@ -158,9 +152,10 @@ router.post(
  * @access Requiere permiso: asistencia:read:all o asistencia:read:own
  */
 router.get(
-  '/:id',
-  requireAnyPermission(['asistencia:read:all', 'asistencia:read:own']),
-  (req: Request, res: Response) => attendanceController.getAttendanceById(req, res)
+  "/:id",
+  requireAnyPermission(["asistencia:read:all", "asistencia:read:own"]),
+  (req: Request, res: Response) =>
+    attendanceController.getAttendanceById(req, res),
 );
 
 /**
@@ -169,9 +164,10 @@ router.get(
  * @access Requiere permiso: asistencia:read:all o asistencia:read:own
  */
 router.get(
-  '/worker/:workerId',
-  requireAnyPermission(['asistencia:read:all', 'asistencia:read:own']),
-  (req: Request, res: Response) => attendanceController.getWorkerAttendances(req, res)
+  "/worker/:workerId",
+  requireAnyPermission(["asistencia:read:all", "asistencia:read:own"]),
+  (req: Request, res: Response) =>
+    attendanceController.getWorkerAttendances(req, res),
 );
 
 /**
@@ -180,9 +176,10 @@ router.get(
  * @access Requiere permiso: asistencia:read:all o asistencia:read:own
  */
 router.get(
-  '/worker/:workerId/active',
-  requireAnyPermission(['asistencia:read:all', 'asistencia:read:own']),
-  (req: Request, res: Response) => attendanceController.getWorkerActiveEntry(req, res)
+  "/worker/:workerId/active",
+  requireAnyPermission(["asistencia:read:all", "asistencia:read:own"]),
+  (req: Request, res: Response) =>
+    attendanceController.getWorkerActiveEntry(req, res),
 );
 
 /**
@@ -191,9 +188,10 @@ router.get(
  * @access Requiere permiso: asistencia:read:all
  */
 router.get(
-  '/active/list',
-  requirePermission('asistencia:read:all'),
-  (req: Request, res: Response) => attendanceController.getActiveWorkers(req, res)
+  "/active/list",
+  requirePermission("asistencia:read:all"),
+  (req: Request, res: Response) =>
+    attendanceController.getActiveWorkers(req, res),
 );
 
 /**
@@ -202,9 +200,10 @@ router.get(
  * @access Requiere permiso: asistencia:read:all o asistencia:reports
  */
 router.get(
-  '/worker/:workerId/statistics',
-  requireAnyPermission(['asistencia:read:all', 'asistencia:reports']),
-  (req: Request, res: Response) => attendanceController.getWorkerStatistics(req, res)
+  "/worker/:workerId/statistics",
+  requireAnyPermission(["asistencia:read:all", "asistencia:reports"]),
+  (req: Request, res: Response) =>
+    attendanceController.getWorkerStatistics(req, res),
 );
 
 /**
@@ -213,9 +212,10 @@ router.get(
  * @access Requiere permiso: asistencia:read:all
  */
 router.get(
-  '/',
-  requireAnyPermission(['asistencia:read:all', 'asistencia:register']),
-  (req: Request, res: Response) => attendanceController.getAttendancesPaginated(req, res)
+  "/",
+  requireAnyPermission(["asistencia:read:all", "asistencia:register"]),
+  (req: Request, res: Response) =>
+    attendanceController.getAttendancesPaginated(req, res),
 );
 
 /**
@@ -224,9 +224,10 @@ router.get(
  * @access Requiere permiso: asistencia:update
  */
 router.put(
-  '/:id',
-  requirePermission('asistencia:update'),
-  (req: Request, res: Response) => attendanceController.updateAttendance(req, res)
+  "/:id",
+  requirePermission("asistencia:update"),
+  (req: Request, res: Response) =>
+    attendanceController.updateAttendance(req, res),
 );
 
 /**
@@ -235,9 +236,10 @@ router.put(
  * @access Requiere permiso: asistencia:register (eliminar registros propios)
  */
 router.delete(
-  '/:id',
-  requirePermission('asistencia:register'),
-  (req: Request, res: Response) => attendanceController.deleteAttendance(req, res)
+  "/:id",
+  requirePermission("asistencia:register"),
+  (req: Request, res: Response) =>
+    attendanceController.deleteAttendance(req, res),
 );
 
 /**
@@ -246,11 +248,11 @@ router.delete(
  * @access Requiere permiso: asistencia:register
  */
 router.post(
-  '/mark-absent',
+  "/mark-absent",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission('asistencia:register'),
-  (req: Request, res: Response) => attendanceController.markAsAbsent(req, res)
+  requirePermission("asistencia:register"),
+  (req: Request, res: Response) => attendanceController.markAsAbsent(req, res),
 );
 
 export default router;

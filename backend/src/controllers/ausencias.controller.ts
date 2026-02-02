@@ -219,7 +219,7 @@ export class AusenciasController {
         where: {
           trabajador_id: validatedData.trabajador_id,
           deleted_at: null,
-          is_activo: true,
+          activo: true,
         },
       });
 
