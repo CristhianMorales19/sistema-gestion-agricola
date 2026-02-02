@@ -7,7 +7,7 @@
  * @module password-utils
  */
 
-import * as bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import * as crypto from "crypto";
 
 // ========================================
