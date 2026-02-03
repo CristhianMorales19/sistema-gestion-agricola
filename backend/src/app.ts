@@ -29,10 +29,10 @@ import attendanceRoutes from "./features/attendance/presentation/routes/attendan
 import agroManoDashboardRoutes from "./shared/presentation/routes/dashboard.routes";
 
 // 👑 ADMIN: User & Role Management
-import userRoleManagementRoutes from "../src/routes/user-role-management";
+import userRoleManagementRoutes from "./routes/user-role-management";
 
 // 🏖️ ABSENCES: Ausencias/Permisos
-import ausenciasRoutes from "../src/routes/ausencias.routes";
+import ausenciasRoutes from "./routes/ausencias.routes";
 
 // 👥 FEATURE: Crew Management
 import crewRoutes from "./features/crew-management/presentation/routes/crew.routes";
