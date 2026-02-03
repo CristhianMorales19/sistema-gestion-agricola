@@ -1,4 +1,4 @@
-import { WorkCondition, CreateWorkConditionDTO } from '../domain/entities/WorkCondition';
+import { WorkCondition } from "../domain/entities/WorkCondition";
 
 export class WorkConditionsService {
   /**
@@ -11,23 +11,29 @@ export class WorkConditionsService {
     const errors: string[] = [];
 
     if (!data.fecha) {
-      errors.push('La fecha es obligatoria');
+      errors.push("La fecha es obligatoria");
     }
 
     if (!data.condicionGeneral) {
-      errors.push('La condición general es obligatoria');
-    } else if (!['despejado', 'lluvioso', 'muy_caluroso', 'nublado'].includes(data.condicionGeneral)) {
-      errors.push('Condición general inválida');
+      errors.push("La condición general es obligatoria");
+    } else if (
+      !["despejado", "lluvioso", "muy_caluroso", "nublado"].includes(
+        data.condicionGeneral,
+      )
+    ) {
+      errors.push("Condición general inválida");
     }
 
     if (!data.nivelDificultad) {
-      errors.push('El nivel de dificultad es obligatorio');
-    } else if (!['normal', 'dificil', 'muy_dificil'].includes(data.nivelDificultad)) {
-      errors.push('Nivel de dificultad inválido');
+      errors.push("El nivel de dificultad es obligatorio");
+    } else if (
+      !["normal", "dificil", "muy_dificil"].includes(data.nivelDificultad)
+    ) {
+      errors.push("Nivel de dificultad inválido");
     }
 
-    if (data.observacion && data.observacion.length > 200) {
-      errors.push('La observación no puede exceder 200 caracteres');
+    if (data.observaciones && data.observaciones.length > 200) {
+      errors.push("La observación no puede exceder 200 caracteres");
     }
 
     return {
@@ -41,11 +47,11 @@ export class WorkConditionsService {
    */
   static formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   }
 
@@ -54,12 +60,12 @@ export class WorkConditionsService {
    */
   static getConditionColor(condition: string): string {
     const colors: Record<string, string> = {
-      despejado: '#fbbf24',
-      lluvioso: '#3b82f6',
-      muy_caluroso: '#ef4444',
-      nublado: '#6b7280',
+      despejado: "#fbbf24",
+      lluvioso: "#3b82f6",
+      muy_caluroso: "#ef4444",
+      nublado: "#6b7280",
     };
-    return colors[condition] || '#6b7280';
+    return colors[condition] || "#6b7280";
   }
 
   /**
@@ -67,12 +73,12 @@ export class WorkConditionsService {
    */
   static getConditionIcon(condition: string): string {
     const icons: Record<string, string> = {
-      despejado: '☀️',
-      lluvioso: '🌧️',
-      muy_caluroso: '🔥',
-      nublado: '☁️',
+      despejado: "☀️",
+      lluvioso: "🌧️",
+      muy_caluroso: "🔥",
+      nublado: "☁️",
     };
-    return icons[condition] || '☁️';
+    return icons[condition] || "☁️";
   }
 
   /**
@@ -80,11 +86,11 @@ export class WorkConditionsService {
    */
   static getDifficultyColor(difficulty: string): string {
     const colors: Record<string, string> = {
-      normal: '#10b981',
-      dificil: '#f97316',
-      muy_dificil: '#ef4444',
+      normal: "#10b981",
+      dificil: "#f97316",
+      muy_dificil: "#ef4444",
     };
-    return colors[difficulty] || '#10b981';
+    return colors[difficulty] || "#10b981";
   }
 
   /**
@@ -92,9 +98,9 @@ export class WorkConditionsService {
    */
   static getDifficultyLabel(difficulty: string): string {
     const labels: Record<string, string> = {
-      normal: 'Normal',
-      dificil: 'Difícil',
-      muy_dificil: 'Muy Difícil',
+      normal: "Normal",
+      dificil: "Difícil",
+      muy_dificil: "Muy Difícil",
     };
     return labels[difficulty] || difficulty;
   }
@@ -105,7 +111,7 @@ export class WorkConditionsService {
   static groupConditionsByMonth(
     conditions: WorkCondition[],
     month: number,
-    year: number
+    year: number,
   ): Map<string, WorkCondition> {
     const map = new Map<string, WorkCondition>();
 
@@ -131,7 +137,7 @@ export class WorkConditionsService {
       return {
         totalRegistros: 0,
         condicionesPorTipo: {},
-        dificultadPromedio: 'N/A',
+        dificultadPromedio: "N/A",
       };
     }
 
@@ -153,14 +159,15 @@ export class WorkConditionsService {
       dificultadCount[c.nivelDificultad]++;
     });
 
-    const totalDificil = dificultadCount.dificil * 1 + dificultadCount.muy_dificil * 2;
+    const totalDificil =
+      dificultadCount.dificil * 1 + dificultadCount.muy_dificil * 2;
     const promedio = totalDificil / conditions.length;
 
-    let dificultadPromedio = 'Normal';
+    let dificultadPromedio = "Normal";
     if (promedio > 1.5) {
-      dificultadPromedio = 'Muy Difícil';
+      dificultadPromedio = "Muy Difícil";
     } else if (promedio > 0.5) {
-      dificultadPromedio = 'Difícil';
+      dificultadPromedio = "Difícil";
     }
 
     return {

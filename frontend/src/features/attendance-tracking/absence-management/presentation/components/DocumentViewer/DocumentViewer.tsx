@@ -138,7 +138,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
       if (contentDisposition) {
         const match = contentDisposition.match(
-          /filename[^;=\n]*=(["\']?)([^"\';]*)\1/,
+          /filename[^;=\n]*=(["']?)([^"';]*)\1/,
         );
         if (match) {
           filename = match[2];

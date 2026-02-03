@@ -19,7 +19,6 @@ import { UserManagementView } from "../../../../user-management/presentation/com
 import { AbsenceManagementView } from "../../../../attendance-tracking";
 import { CrewManagementView } from "../../../../crew-managenet/presentation/components/CrewManagementView";
 import { ProductivityManagementView } from "../../../../productivity-management";
-import AsistenciaPage from "../../../../asistencia/AsistenciaPage";
 import AttendancePage from "../../../../attendance/pages/AttendancePage";
 import {
   StyledContainer,

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, AlertTriangle, AlertCircle, LogOut } from 'lucide-react';
-import { getCurrentTimeHHMM } from '../../../application/utils/dateUtils';
+import React, { useState } from "react";
+import { X, AlertCircle, LogOut } from "lucide-react";
+import { getCurrentTimeHHMM } from "../../../application/utils/dateUtils";
 
 interface BulkExitModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
   workersWithExit = 0,
 }) => {
   const [time, setTime] = useState(getCurrentTimeHHMM());
-  const [observations, setObservations] = useState('');
+  const [observations, setObservations] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,19 +31,20 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
       setError(null);
 
       if (!time) {
-        setError('Por favor ingresa la hora de salida');
+        setError("Por favor ingresa la hora de salida");
         return;
       }
 
       setLoading(true);
       await onConfirm(time, observations.trim());
-      
+
       // Reset form
       setTime(getCurrentTimeHHMM());
-      setObservations('');
+      setObservations("");
       onClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al registrar salida';
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al registrar salida";
       setError(errorMessage);
       // No usar toast, mostrar solo en el dialog
     } finally {
@@ -51,8 +52,8 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
     }
   };
 
-  const workersCanExit = selectedCount - workersWithoutEntry;
-  const hasWarning = workersWithoutEntry > 0 || workersWithExit > 0;
+  // const workersCanExit = selectedCount - workersWithoutEntry;
+  // const hasWarning = workersWithoutEntry > 0 || workersWithExit > 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -81,26 +82,39 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
         <div className="mb-6">
           <div className="p-4 bg-purple-900/20 border border-purple-600/30 rounded-lg">
             <p className="text-sm text-purple-300 mb-3">
-              <strong>{selectedCount} trabajador{selectedCount !== 1 ? 'es' : ''} seleccionado{selectedCount !== 1 ? 's' : ''}</strong>
+              <strong>
+                {selectedCount} trabajador{selectedCount !== 1 ? "es" : ""}{" "}
+                seleccionado{selectedCount !== 1 ? "s" : ""}
+              </strong>
             </p>
-            
+
             {/* Resumen de estado */}
             <div className="space-y-2 text-xs">
-              {(selectedCount - workersWithoutEntry - workersWithExit) > 0 && (
+              {selectedCount - workersWithoutEntry - workersWithExit > 0 && (
                 <p className="text-green-300">
-                  ✔ {(selectedCount - workersWithoutEntry - workersWithExit)} {(selectedCount - workersWithoutEntry - workersWithExit) === 1 ? 'puede registrar' : 'pueden registrar'} salida (nueva)
+                  ✔ {selectedCount - workersWithoutEntry - workersWithExit}{" "}
+                  {selectedCount - workersWithoutEntry - workersWithExit === 1
+                    ? "puede registrar"
+                    : "pueden registrar"}{" "}
+                  salida (nueva)
                 </p>
               )}
-              
+
               {workersWithExit > 0 && (
                 <p className="text-blue-300">
-                  🔄 {workersWithExit} {workersWithExit === 1 ? 'puede actualizar' : 'pueden actualizar'} salida (existente)
+                  🔄 {workersWithExit}{" "}
+                  {workersWithExit === 1
+                    ? "puede actualizar"
+                    : "pueden actualizar"}{" "}
+                  salida (existente)
                 </p>
               )}
-              
+
               {workersWithoutEntry > 0 && (
                 <p className="text-red-400">
-                  ❌ {workersWithoutEntry} {workersWithoutEntry === 1 ? 'no tiene' : 'no tienen'} entrada registrada
+                  ❌ {workersWithoutEntry}{" "}
+                  {workersWithoutEntry === 1 ? "no tiene" : "no tienen"} entrada
+                  registrada
                 </p>
               )}
             </div>
@@ -145,7 +159,10 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
 
         {/* Info Text */}
         <p className="text-sm text-gray-400 mb-6">
-          Se registrará salida a las <span className="font-mono font-semibold text-purple-400">{time}</span>
+          Se registrará salida a las{" "}
+          <span className="font-mono font-semibold text-purple-400">
+            {time}
+          </span>
         </p>
 
         {/* Buttons */}
@@ -162,7 +179,7 @@ export const BulkExitModal: React.FC<BulkExitModalProps> = ({
             disabled={loading || !time}
             className="flex-1 py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Registrando...' : 'Confirmar Salida'}
+            {loading ? "Registrando..." : "Confirmar Salida"}
           </button>
         </div>
       </div>

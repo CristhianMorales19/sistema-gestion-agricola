@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { X, AlertTriangle, AlertCircle, LogIn } from 'lucide-react';
-import { toast } from 'sonner';
-import { LocationParcelSelector, LocationValue, getLocationString, isLocationValid } from '../LocationParcelSelector';
-import { useParcelsForAttendance } from '../../../application/hooks/useParcelsForAttendance';
-import { getCurrentTimeHHMM } from '../../../application/utils/dateUtils';
+import React, { useState } from "react";
+import { X, AlertCircle, LogIn } from "lucide-react";
+import { toast } from "sonner";
+import {
+  LocationParcelSelector,
+  LocationValue,
+  getLocationString,
+  isLocationValid,
+} from "../LocationParcelSelector";
+import { useParcelsForAttendance } from "../../../application/hooks/useParcelsForAttendance";
+import { getCurrentTimeHHMM } from "../../../application/utils/dateUtils";
 
 interface BulkEntryModalProps {
   isOpen: boolean;
@@ -21,7 +26,9 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
   workersWithEntries = 0,
 }) => {
   const [time, setTime] = useState(getCurrentTimeHHMM());
-  const [locationValue, setLocationValue] = useState<LocationValue>({ type: 'parcel' });
+  const [locationValue, setLocationValue] = useState<LocationValue>({
+    type: "parcel",
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,13 +42,13 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
       setError(null);
 
       if (!time) {
-        setError('Por favor ingresa la hora de entrada');
+        setError("Por favor ingresa la hora de entrada");
         return;
       }
 
       // Validar ubicación usando el nuevo selector
       if (!isLocationValid(locationValue, true)) {
-        setError('Por favor selecciona o ingresa la ubicación/parcela');
+        setError("Por favor selecciona o ingresa la ubicación/parcela");
         return;
       }
 
@@ -49,13 +56,14 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
 
       setLoading(true);
       await onConfirm(time, locationFinal);
-      
+
       // Reset form
       setTime(getCurrentTimeHHMM());
-      setLocationValue({ type: 'parcel' });
+      setLocationValue({ type: "parcel" });
       onClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al registrar entrada';
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al registrar entrada";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -63,7 +71,7 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
     }
   };
 
-  const workersToRegister = selectedCount - workersWithEntries;
+  // const workersToRegister = selectedCount - workersWithEntries;
   const hasWarning = workersWithEntries > 0;
 
   return (
@@ -76,7 +84,9 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
               <LogIn className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Registrar Entrada</h2>
+              <h2 className="text-xl font-bold text-white">
+                Registrar Entrada
+              </h2>
               <p className="text-sm text-gray-400">Seleccionados</p>
             </div>
           </div>
@@ -93,11 +103,16 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
         <div className="mb-6">
           <div className="p-4 bg-green-900/20 border border-green-600/30 rounded-lg">
             <p className="text-sm text-green-300">
-              <strong>{selectedCount} trabajador{selectedCount !== 1 ? 'es' : ''} seleccionado{selectedCount !== 1 ? 's' : ''}</strong>
+              <strong>
+                {selectedCount} trabajador{selectedCount !== 1 ? "es" : ""}{" "}
+                seleccionado{selectedCount !== 1 ? "s" : ""}
+              </strong>
             </p>
             {hasWarning && (
               <p className="text-xs text-yellow-300 mt-2">
-                ⚠️ {workersWithEntries} ya {workersWithEntries === 1 ? 'tiene' : 'tienen'} entrada registrada
+                ⚠️ {workersWithEntries} ya{" "}
+                {workersWithEntries === 1 ? "tiene" : "tienen"} entrada
+                registrada
               </p>
             )}
           </div>
@@ -139,7 +154,8 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
 
         {/* Info Text */}
         <p className="text-sm text-gray-400 mb-6">
-          Se registrará entrada a las <span className="font-mono font-semibold text-green-400">{time}</span>
+          Se registrará entrada a las{" "}
+          <span className="font-mono font-semibold text-green-400">{time}</span>
         </p>
 
         {/* Buttons */}
@@ -156,7 +172,7 @@ export const BulkEntryModal: React.FC<BulkEntryModalProps> = ({
             disabled={loading || !time || !isLocationValid(locationValue, true)}
             className="flex-1 py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Registrando...' : 'Confirmar Entrada'}
+            {loading ? "Registrando..." : "Confirmar Entrada"}
           </button>
         </div>
       </div>

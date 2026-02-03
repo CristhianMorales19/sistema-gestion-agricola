@@ -1,8 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  Add as AddIcon,
-  PersonAdd as PersonAddIcon,
-} from "@mui/icons-material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { EmployeeTable } from "./EmployeeTable/EmployeeTable";
 import { NewEmployeeForm } from "./EmployeeForm/NewEmployeeForm";
 import { LaborInfoView } from "./EmployeeLaborInfoForm/LaborInfoView";
@@ -103,11 +100,11 @@ export const EmployeeManagementView = () => {
     }
   };
 
-  const handleAddLaborInfo = useCallback(() => {
-    if (selectedEmployee) {
-      setCurrentView("labor-info");
-    }
-  }, [selectedEmployee]);
+  // const handleAddLaborInfo = useCallback(() => {
+  //   if (selectedEmployee) {
+  //     setCurrentView("labor-info");
+  //   }
+  // }, [selectedEmployee]);
 
   const handleAddEmployeeClick = useCallback(() => {
     setShowCreateDialog(true);

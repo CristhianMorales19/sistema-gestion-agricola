@@ -42,8 +42,6 @@ export const AbsenceManagementView: React.FC = () => {
   const {
     absences,
     loading,
-    error,
-    successMessage,
     stats,
     registerAbsence,
     deleteAbsence,
@@ -51,10 +49,9 @@ export const AbsenceManagementView: React.FC = () => {
     rejectAbsence,
     uploadDocument,
     refreshAbsences,
-    clearMessages,
   } = useAbsenceManagement();
 
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -153,13 +150,6 @@ export const AbsenceManagementView: React.FC = () => {
   const handleViewDetails = useCallback((absence: Absence) => {
     setSelectedAbsence(absence);
     setShowDetailsDialog(true);
-  }, []);
-
-  /**
-   * Manejar vista de documento
-   */
-  const handleViewDocument = useCallback((absence: Absence) => {
-    // Ya no se usa - el documento se ve en detalles
   }, []);
 
   return (

@@ -1,6 +1,3 @@
-// src/features/parcel-management/pages/ParcelManagementPage.tsx
-import React from "react";
-import { Box } from "@mui/material";
 import { ParcelManagementView } from "../presentation";
 import { useAuth0 } from "@auth0/auth0-react";
 import {

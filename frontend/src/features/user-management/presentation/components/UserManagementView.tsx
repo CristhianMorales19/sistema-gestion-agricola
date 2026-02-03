@@ -62,7 +62,7 @@ export const UserManagementView: React.FC = () => {
   const [databaseRoles, setDatabaseRoles] = useState<any[]>([]); // Roles de BD para crear usuarios
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [, setSuccess] = useState<string | null>(null);
   const { showMessage } = useMessage();
 
   // Estados para filtros
@@ -122,13 +122,13 @@ export const UserManagementView: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  const handleCloseError = useCallback(() => {
-    setError(null);
-  }, []);
+  // const handleCloseError = useCallback(() => {
+  //   setError(null);
+  // }, []);
 
-  const handleCloseSuccess = useCallback(() => {
-    setSuccess(null);
-  }, []);
+  // const handleCloseSuccess = useCallback(() => {
+  //   setSuccess(null);
+  // }, []);
 
   const handleSyncUsers = useCallback(async () => {
     try {

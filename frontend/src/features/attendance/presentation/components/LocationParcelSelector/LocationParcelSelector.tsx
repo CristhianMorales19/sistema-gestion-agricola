@@ -161,20 +161,20 @@ export const LocationParcelSelector: React.FC<LocationParcelSelectorProps> = ({
     return getDisplayText();
   };
 
-  const isValid = (): boolean => {
-    if (!required) return true;
+  // const isValid = (): boolean => {
+  //   if (!required) return true;
 
-    if (value.type === "parcel") {
-      return !!value.parcelId;
-    }
-    if (value.type === "not-applicable") {
-      return true;
-    }
-    if (value.type === "other") {
-      return !!value.customText?.trim();
-    }
-    return false;
-  };
+  //   if (value.type === "parcel") {
+  //     return !!value.parcelId;
+  //   }
+  //   if (value.type === "not-applicable") {
+  //     return true;
+  //   }
+  //   if (value.type === "other") {
+  //     return !!value.customText?.trim();
+  //   }
+  //   return false;
+  // };
 
   return (
     <Box ref={containerRef} sx={{ position: "relative" }}>

@@ -818,7 +818,7 @@ export const AttendanceManagementView: React.FC = () => {
         exitsCount: exitWorkerIds.size,
         absentsCount: absentWorkerIds.size,
       };
-    }, [attendances, selectedDate, workers]);
+    }, [attendances, selectedDate]);
 
   const handleBulkRegister = async (
     type: "entrada" | "salida",
@@ -1005,7 +1005,7 @@ export const AttendanceManagementView: React.FC = () => {
     locationOrObservations: string,
   ) => {
     try {
-      let successCount = 0;
+      //let successCount = 0;
       const errors: Array<{ name: string; reason: string }> = [];
       const dateToCheck = selectedDate;
       const attendancesArray = Array.isArray(attendances) ? attendances : [];
@@ -1021,7 +1021,7 @@ export const AttendanceManagementView: React.FC = () => {
               horaEntrada: time,
               ubicacion: locationOrObservations || "Campo",
             });
-            successCount++;
+            //successCount++;
           } else {
             // Registrar salida (solo para los que tienen entrada activa)
             const attendance = attendancesArray.find(
@@ -1041,7 +1041,7 @@ export const AttendanceManagementView: React.FC = () => {
                 },
                 dateToCheck,
               );
-              successCount++;
+              //successCount++;
             }
           }
         } catch (error) {
@@ -1081,7 +1081,7 @@ export const AttendanceManagementView: React.FC = () => {
                 horaEntrada: time,
                 ubicacion: locationOrObservations || "Campo",
               });
-              successCount++;
+              //successCount++;
             } else if (deletedRecord) {
               // Reactivar desde ausencia
               // NO incluir horaSalida ni observaciones_salida para evitar problemas de validación
@@ -1091,7 +1091,7 @@ export const AttendanceManagementView: React.FC = () => {
                 ubicacion: locationOrObservations || "Campo",
                 deleted_at: null,
               });
-              successCount++;
+              //successCount++;
             }
           } else {
             // SALIDA: Solo actualizar si hay registro activo con entrada
@@ -1100,7 +1100,7 @@ export const AttendanceManagementView: React.FC = () => {
                 horaSalida: time,
                 observaciones_salida: locationOrObservations || "",
               });
-              successCount++;
+              //successCount++;
             }
           }
         } catch (error) {

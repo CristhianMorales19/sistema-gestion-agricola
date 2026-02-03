@@ -61,7 +61,7 @@ export const BulkRegistrationModal: React.FC<BulkRegistrationModalProps> = ({
   const [locationValue, setLocationValue] = useState<LocationValue>({
     type: "parcel",
   });
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Hook para obtener parcelas
@@ -115,10 +115,10 @@ export const BulkRegistrationModal: React.FC<BulkRegistrationModalProps> = ({
 
   const noEntryMessage = `${workersWithoutEntry} ${workersWithoutEntry === 1 ? "no tiene" : "no tienen"} entrada registrada (no se registrará salida)`;
 
-  const workersToProcess =
-    type === "entrada"
-      ? totalWorkers - workersWithEntry
-      : totalWorkers - workersWithExit;
+  // const workersToProcess =
+  //   type === "entrada"
+  //     ? totalWorkers - workersWithEntry
+  //     : totalWorkers - workersWithExit;
 
   // Validar si el botón de confirmar debe estar habilitado
   const isConfirmDisabled =

@@ -50,11 +50,7 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
   initialData,
 }) => {
   // Hook para cargar trabajadores desde la API
-  const {
-    trabajadores,
-    loading: loadingTrabajadores,
-    error: errorTrabajadores,
-  } = useTrabajadores();
+  const { trabajadores, loading: loadingTrabajadores } = useTrabajadores();
 
   const [formData, setFormData] = useState<NewProductivityFormData>(
     initialData || { workerId: "", taskId: "", producedQuantity: 0, date: "" },
@@ -99,10 +95,10 @@ export const ProductivityForm: React.FC<ProductivityFormProps> = ({
       }));
     };
 
-  const getTaskUnit = (taskId: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    return task?.unit || "";
-  };
+  // const getTaskUnit = (taskId: string) => {
+  //   const task = tasks.find((t) => t.id === taskId);
+  //   return task?.unit || "";
+  // };
 
   const getTaskLimit = (taskId: string) => {
     const task = tasks.find((t) => t.id === taskId);

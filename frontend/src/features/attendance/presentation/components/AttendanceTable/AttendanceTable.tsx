@@ -12,7 +12,6 @@ import {
   getDateString,
   getTodayString,
 } from "../../../application/utils/dateUtils";
-import { CheckCircle2 } from "lucide-react";
 
 import {
   StyledTableContainer,
