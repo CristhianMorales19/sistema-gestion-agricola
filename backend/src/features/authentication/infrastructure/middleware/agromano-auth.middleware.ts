@@ -79,6 +79,8 @@ export const agroManoAuthMiddleware = async (
       [key: string]: unknown;
     };
     try {
+      console.log("AUTH0 USER:", req.auth);
+
       localUser = await AgroManoUserSyncService.getOrCreateUser(auth0UserId, {
         email: auth0Email,
         email_verified: auth0EmailVerified,

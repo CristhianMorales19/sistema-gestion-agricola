@@ -1,13 +1,14 @@
-// Configuración de Auth0
+if (!process.env.REACT_APP_AUTH0_CLIENT_ID) {
+  throw new Error("Missing Auth0 Client ID");
+}
+if (!process.env.REACT_APP_AUTH0_DOMAIN) {
+  throw new Error("Missing Auth0 Domain");
+}
+
 export const auth0Config = {
-  domain: process.env.REACT_APP_AUTH0_DOMAIN || "dev-agromano.us.auth0.com",
-  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID || "",
-  audience: process.env.REACT_APP_AUTH0_AUDIENCE || "https://agromano-api.com",
+  domain: process.env.REACT_APP_AUTH0_DOMAIN,
+  clientId: process.env.REACT_APP_AUTH0_CLIENT_ID,
+  audience: process.env.REACT_APP_AUTH0_AUDIENCE,
   redirectUri: `${window.location.origin}/callback`,
   scope: "openid profile email",
-};
-
-// Configuración de API
-export const apiConfig = {
-  baseUrl: process.env.REACT_APP_API_URL || "http://localhost:3001/api",
 };
