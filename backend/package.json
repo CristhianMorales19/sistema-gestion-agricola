@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "nodemon --exec ts-node --files src/app.ts",
     "build": "tsc",
     "test": "jest",
     "test:user-roles": "tsx scripts/test-user-roles.ts",
