@@ -1,9 +1,9 @@
-import { Request } from 'express';
+import { Request } from "express";
 
 /**
  * Tipo extendido para Request con usuario autenticado
  * Usado en toda la aplicación cuando el middleware de autenticación agrega datos del usuario
- * 
+ *
  * NOTA: Los tipos de usuario ya están definidos globalmente en express.ts
  * Esta interfaz se mantiene para compatibilidad pero ahora usa los tipos globales
  */

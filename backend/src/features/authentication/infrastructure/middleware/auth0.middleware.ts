@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 import { checkJwt } from "../../../../shared/infrastructure/config/auth0.config";
-import { Auth0User, LocalUser } from "../../../../types/express"; // Importar desde el archivo único
+import { Auth0User, LocalUser } from "../../../../types/auth.types"; // Importar desde el archivo único
 
 const prisma = new PrismaClient();
 
