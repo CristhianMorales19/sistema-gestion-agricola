@@ -8,7 +8,7 @@ import {
   Box,
   styled,
 } from "@mui/material";
-import { Edit, Delete, Add, Padding } from "@mui/icons-material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 
 // Contenedor de la tabla con efecto glass
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
