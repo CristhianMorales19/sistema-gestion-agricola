@@ -158,7 +158,7 @@ export const ProductivityManagementView: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={handleAddRecordClick}
           >
-            Nuevo Registro
+            Crear
           </ButtonGeneric>
         </Box>
       </HeaderGeneric>

@@ -376,11 +376,11 @@ export const UserManagementView: React.FC = () => {
             Actualizar
           </ButtonGeneric>
           <ButtonGeneric startIcon={<AddIcon />} onClick={handleCrearUsuario}>
-            Crear Usuario
+            Crea
           </ButtonGeneric>
 
           <ButtonGeneric startIcon={<PersonAdd />} onClick={handleSyncUsers}>
-            Sincronizar Auth0
+            Sincronizar
           </ButtonGeneric>
         </Box>
       </HeaderGeneric>

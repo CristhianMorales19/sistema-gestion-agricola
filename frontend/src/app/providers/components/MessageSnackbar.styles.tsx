@@ -33,6 +33,13 @@ export const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
       )`,
     },
   },
+
+  [theme.breakpoints.down("sm")]: {
+    left: "50% !important",
+    right: "auto !important",
+    transform: "translateX(-50%)",
+    width: "calc(100% - 16px)",
+  },
 }));
 
 // Alert personalizado con efecto glass para cada tipo
@@ -40,6 +47,7 @@ export const StyledAlert = styled(Alert)<{
   severity?: "success" | "error" | "warning" | "info";
 }>(({ theme, severity }) => {
   // Colores según el tipo de alerta y modo del tema
+
   const getColors = () => {
     const isDark = theme.palette.mode === "dark";
 
@@ -174,6 +182,28 @@ export const StyledAlert = styled(Alert)<{
         `,
       borderColor: `${colors.iconColor}60`,
     },
+
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1, 1.25),
+      maxWidth: "100%",
+
+      "& .MuiAlert-message": {
+        fontSize: "0.65rem",
+      },
+
+      "& .MuiAlert-icon": {
+        marginRight: theme.spacing(1),
+        fontSize: "0.9rem",
+      },
+
+      "& .MuiIconButton-root": {
+        padding: theme.spacing(0.25),
+      },
+
+      "& .MuiIconButton-root svg": {
+        fontSize: "1.1rem",
+      },
+    },
   };
 });
 
@@ -187,6 +217,13 @@ export const SnackbarStack = styled("div")(({ theme }) => ({
   gap: theme.spacing(1),
   zIndex: theme.zIndex.snackbar,
   maxWidth: "400px",
+
+  [theme.breakpoints.down("sm")]: {
+    right: "50%",
+    transform: "translateX(50%)",
+    maxWidth: "100%",
+    padding: theme.spacing(0, 1),
+  },
 }));
 
 // Indicador de progreso para auto-hide
@@ -229,6 +266,10 @@ export const ProgressIndicator = styled("div", {
         width: "0%",
         opacity: 0,
       },
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      height: "1px",
     },
   };
 });

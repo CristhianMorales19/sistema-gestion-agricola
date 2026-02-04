@@ -210,7 +210,7 @@ export const ActionsContainer = styled(Box)(({ theme }) => ({
     fontSize: "1.125rem",
 
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.5rem",
+      fontSize: "0.8rem",
     },
   },
 }));

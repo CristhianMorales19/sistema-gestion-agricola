@@ -1229,7 +1229,7 @@ export const AttendanceManagementView: React.FC = () => {
             onClick={() => setShowBulkModal(true)}
             startIcon={<AddIcon />}
           >
-            Registro Masivo
+            Registrar
           </ButtonGeneric>
         </Box>
 

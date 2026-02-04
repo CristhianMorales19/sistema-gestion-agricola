@@ -181,7 +181,7 @@ export const AbsenceManagementView: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={() => setShowCreateDialog(true)}
           >
-            Nueva Ausencia
+            Crear
           </ButtonGeneric>
           <ButtonGeneric startIcon={<RefreshIcon />} onClick={refreshAbsences}>
             Actualizar
