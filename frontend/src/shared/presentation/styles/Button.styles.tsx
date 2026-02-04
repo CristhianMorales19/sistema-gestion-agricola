@@ -6,6 +6,7 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
     padding: theme.spacing(0.5, 1.5),
     fontSize: "0.875rem",
     minHeight: 32,
+    gap: theme.spacing(0),
 
     background: disabled
       ? theme.palette.surface.light
@@ -65,6 +66,10 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
 
     "&:active": {
       transform: disabled ? "none" : "translateY(0)",
+    },
+
+    "& .MuiButton-startIcon": {
+      marginRight: 0,
     },
 
     "& .MuiButton-startIcon svg": {

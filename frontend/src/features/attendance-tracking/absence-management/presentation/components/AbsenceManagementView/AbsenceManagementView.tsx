@@ -172,9 +172,7 @@ export const AbsenceManagementView: React.FC = () => {
       />
 
       <HeaderGeneric>
-        <TextGeneric variant="h4">
-          Gestión de Ausencias Justificadas
-        </TextGeneric>
+        <TextGeneric variant="h4">Gestión de Ausencias</TextGeneric>
 
         <Box sx={{ display: "flex", gap: 2 }}>
           <ButtonGeneric

@@ -129,7 +129,7 @@ export const TextFieldGeneric = styled(TextField, {
 
       "& .MuiInputBase-input": {
         padding: "6px 8px",
-        fontSize: "0.7rem",
+        fontSize: "0.6rem",
       },
 
       "& .MuiOutlinedInput-root": {

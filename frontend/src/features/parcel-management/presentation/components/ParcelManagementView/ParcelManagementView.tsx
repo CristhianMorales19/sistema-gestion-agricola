@@ -337,7 +337,7 @@ export const ParcelManagementView = () => {
               startIcon={<AddIcon />}
               onClick={handleAddParcelClick}
             >
-              Crear Parcela
+              Crear
             </ButtonGeneric>
           </Box>
         )}
