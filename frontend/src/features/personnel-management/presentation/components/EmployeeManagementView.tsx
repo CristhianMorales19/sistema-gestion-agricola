@@ -12,7 +12,6 @@ import {
 import {
   HeaderButtonContainer,
   SearchMessage,
-  SelectedEmployeeMessage,
 } from "./EmployeeManagementView.styles";
 import { InputAdornment } from "@mui/material";
 import { ButtonGeneric } from "../../../../shared/presentation/styles/Button.styles";
@@ -233,11 +232,11 @@ export const EmployeeManagementView = () => {
                 </SearchMessage>
               )}
 
-              {selectedEmployee.id !== 0 && (
+              {/* {selectedEmployee.id !== 0 && (
                 <SelectedEmployeeMessage variant="body2">
                   Empleado seleccionado: {selectedEmployee.name}
                 </SelectedEmployeeMessage>
-              )}
+              )} */}
             </SearchContainerGeneric>
 
             {loading ? (
