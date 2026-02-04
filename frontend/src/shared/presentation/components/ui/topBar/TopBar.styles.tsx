@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 export const TOP_BAR_HEIGHT = 80;
+export const TOP_BAR_HEIGHT_MOBILE = 56;
 
 // Logo
 export const LogoContainer = styled(Box)(({ theme }) => ({
@@ -15,6 +16,10 @@ export const LogoContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   borderBottom: `1px solid ${theme.palette.surface.light}`,
   background: `linear-gradient(135deg, ${theme.palette.surface.main} 0%, ${theme.palette.background.default} 10%)`,
+  [theme.breakpoints.down("sm")]: {
+    height: TOP_BAR_HEIGHT_MOBILE,
+    padding: theme.spacing(1),
+  },
 }));
 
 export const LogoBox = styled(Box)(({ theme }) => ({
@@ -31,11 +36,18 @@ export const LogoBox = styled(Box)(({ theme }) => ({
     transform: "rotate(10deg) scale(1.05)",
     boxShadow: `0 6px 20px -2px ${theme.palette.primary.main}60`,
   },
+  [theme.breakpoints.down("sm")]: {
+    width: 30,
+    height: 30,
+  },
 }));
 
 export const LogoIcon = styled(Agriculture)(({ theme }) => ({
   color: theme.palette.text.primary,
   fontSize: 24,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: 17,
+  },
 }));
 
 // Logo Content Box
@@ -63,6 +75,9 @@ export const BrandTitle = styled(Typography)(({ theme }) => ({
   WebkitTextFillColor: "transparent",
   fontSize: "1.25rem",
   lineHeight: 1.2,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.7rem",
+  },
 }));
 
 export const BrandSubtitle = styled(Typography)(({ theme }) => ({
@@ -70,6 +85,9 @@ export const BrandSubtitle = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
   letterSpacing: "0.5px",
   fontSize: "0.75rem",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.5rem",
+  },
 }));
 
 export const ThemeToggleContainer = styled(Box)(({ theme }) => ({
@@ -80,4 +98,8 @@ export const ThemeToggleContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    right: theme.spacing(1),
+    gap: theme.spacing(0.5),
+  },
 }));

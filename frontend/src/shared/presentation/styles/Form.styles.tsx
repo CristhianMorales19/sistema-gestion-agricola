@@ -5,7 +5,7 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 export const FormContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(2),
+  gap: theme.spacing(1),
   "& .MuiGrid-container": {
     marginBottom: theme.spacing(1),
   },

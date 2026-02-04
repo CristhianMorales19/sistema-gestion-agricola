@@ -234,7 +234,7 @@ export const CrewManagementView = () => {
         <TextGeneric variant="h4">Gestión de Cuadrillas</TextGeneric>
         {currentView === "list" && (
           <ButtonGeneric startIcon={<AddIcon />} onClick={handleAddCrewClick}>
-            Crear Cuadrilla
+            Crear
           </ButtonGeneric>
         )}
       </HeaderGeneric>

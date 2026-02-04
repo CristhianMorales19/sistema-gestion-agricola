@@ -28,7 +28,7 @@ export const StatItem = styled(Grid)(() => ({
 // Tarjeta glass
 export const GlassCard = styled(Card)(({ theme }) => ({
   background: `${theme.palette.background.default}`,
-  borderRadius: theme.shape.borderRadius * 4,
+  borderRadius: theme.shape.borderRadius * 2,
   border: `1px solid ${theme.palette.surface.light}80`,
   boxShadow: `
       5px 5px 5px ${theme.palette.primary.main}30,
@@ -42,13 +42,20 @@ export const GlassCard = styled(Card)(({ theme }) => ({
 // Contenido de la tarjeta
 export const CardContentStyled = styled(CardContent)(({ theme }) => ({
   // padding: theme.spacing(2),
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Contenedor principal
-export const ContentBox = styled(Box)(() => ({
+export const ContentBox = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "start",
+  [theme.breakpoints.down("sm")]: {
+    alignItems: "center",
+  },
 }));
 
 // Contenedor de texto
@@ -65,6 +72,10 @@ export const TitleText = styled(Typography)(({ theme }) => ({
   letterSpacing: "0.5px",
   marginBottom: theme.spacing(0.5),
   opacity: 0.8,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.4rem",
+    marginBottom: theme.spacing(0.25),
+  },
 }));
 
 // Valor de la estadística
@@ -74,6 +85,10 @@ export const ValueText = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   marginBottom: theme.spacing(1),
   lineHeight: 1.2,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+    marginBottom: theme.spacing(0.5),
+  },
 }));
 
 // Contenedor de cambio
@@ -86,6 +101,10 @@ export const ChangeBox = styled(Box, {
   color: isPositive ? theme.palette.success.main : theme.palette.error.main,
   fontSize: "0.75rem",
   fontWeight: 500,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.4rem",
+    gap: theme.spacing(0.25),
+  },
 }));
 
 // Icono de tendencia
@@ -104,6 +123,10 @@ export const IconBox = styled(Box)(({ theme }) => ({
   justifyContent: "center",
   backgroundColor: `${theme.palette.surface.light}30`,
   border: `1px solid ${theme.palette.surface.light}40`,
+  [theme.breakpoints.down("sm")]: {
+    width: "10px",
+    height: "10px",
+  },
 }));
 
 // Iconos estilizados

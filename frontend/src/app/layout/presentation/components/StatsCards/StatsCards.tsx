@@ -38,7 +38,7 @@ const getStatIcon = (category: DashboardStatistic["category"]) => {
 
 // Componente tarjeta simple
 const StatCard = React.memo<{ stat: DashboardStatistic }>(({ stat }) => (
-  <StatItem item xs={12} sm={6} md={3}>
+  <StatItem item xs={6} sm={6} md={3}>
     <GlassCard>
       <CardContentStyled>
         <ContentBox>

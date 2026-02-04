@@ -11,7 +11,7 @@ import { Security, FiberManualRecord } from "@mui/icons-material";
 // Tarjeta glass
 export const GlassCard = styled(Card)(({ theme }) => ({
   background: `${theme.palette.background.default}`,
-  borderRadius: theme.shape.borderRadius * 4,
+  borderRadius: theme.shape.borderRadius * 2,
   border: `1px solid ${theme.palette.surface.light}80`,
   boxShadow: `
       5px 5px 5px ${theme.palette.primary.main}30,
@@ -22,6 +22,9 @@ export const GlassCard = styled(Card)(({ theme }) => ({
 // Contenido de la tarjeta
 export const CardContentStyled = styled(CardContent)(({ theme }) => ({
   padding: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Encabezado
@@ -30,12 +33,19 @@ export const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(0.75),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 // Icono de seguridad
 export const SecurityIcon = styled(Security)(({ theme }) => ({
   color: theme.palette.secondary.main,
   fontSize: "1.25rem",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "1rem",
+  },
 }));
 
 // Título
@@ -43,6 +53,9 @@ export const TitleText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   fontSize: "1rem",
   fontWeight: 600,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+  },
 }));
 
 // Chip de permiso
@@ -61,12 +74,25 @@ export const PermissionChip = styled(Chip)(({ theme }) => ({
     fontSize: "0.75rem",
     marginLeft: theme.spacing(0.5),
   },
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.5rem",
+    padding: theme.spacing(0.2, 0.5),
+
+    "& .MuiChip-icon": {
+      fontSize: "0.6rem",
+      marginLeft: theme.spacing(0.1),
+    },
+  },
 }));
 
 // Icono del punto
 export const DotIcon = styled(FiberManualRecord)(({ theme }) => ({
   fontSize: "0.75rem",
   color: theme.palette.warning.main,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+  },
 }));
 
 // Contenedor de permisos
@@ -75,4 +101,8 @@ export const PermissionsContainer = styled(Box)(({ theme }) => ({
   flexWrap: "wrap",
   gap: theme.spacing(1),
   marginTop: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(0.5),
+    marginTop: theme.spacing(0.5),
+  },
 }));

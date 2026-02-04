@@ -8,13 +8,13 @@ import {
   Box,
   styled,
 } from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import { Edit, Delete, Add, Padding } from "@mui/icons-material";
 
 // Contenedor de la tabla con efecto glass
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
   background: `${theme.palette.background.default}`,
 
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: theme.shape.borderRadius * 1,
   border: `1px solid ${theme.palette.surface.light}80`,
   boxShadow: `
       5px 5px 5px ${theme.palette.primary.main}30,
@@ -48,10 +48,6 @@ export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       transparent
     )`,
     zIndex: 1,
-  },
-
-  [theme.breakpoints.down("sm")]: {
-    borderRadius: theme.shape.borderRadius * 2,
   },
 }));
 
@@ -89,17 +85,9 @@ export const HeaderCell = styled(TableCell)(({ theme }) => ({
   borderBottom: "none",
   textAlign: "center",
 
-  "&:first-of-type": {
-    borderTopLeftRadius: theme.shape.borderRadius * 2,
-  },
-
-  "&:last-of-type": {
-    borderTopRightRadius: theme.shape.borderRadius * 2,
-  },
-
   [theme.breakpoints.down("sm")]: {
-    fontSize: "0.6rem",
-    padding: theme.spacing(0.5),
+    fontSize: "0.5rem",
+    padding: theme.spacing(0.2, 0.1),
   },
 }));
 
@@ -158,8 +146,9 @@ export const BodyCell = styled(TableCell)(({ theme }) => ({
   },
 
   [theme.breakpoints.down("sm")]: {
-    fontSize: "0.6rem",
-    padding: theme.spacing(0.5),
+    fontSize: "0.5rem",
+    padding: theme.spacing(0.4, 0.1),
+    whiteSpace: "nowrap",
   },
 }));
 
@@ -202,7 +191,7 @@ export const StatusChip = styled(Chip, {
 
     [theme.breakpoints.down("sm")]: {
       fontSize: "0.55rem",
-      padding: theme.spacing(0.1, 0.2),
+      padding: theme.spacing(0.1, 0.1),
     },
   };
 });
@@ -221,7 +210,7 @@ export const ActionsContainer = styled(Box)(({ theme }) => ({
     fontSize: "1.125rem",
 
     [theme.breakpoints.down("sm")]: {
-      fontSize: "0.8rem",
+      fontSize: "0.5rem",
     },
   },
 }));
@@ -326,5 +315,8 @@ export const EmptyRow = styled(TableRow)(({ theme }) => ({
     fontStyle: "italic",
     backgroundColor: `${theme.palette.surface.light}10`,
     borderRadius: theme.shape.borderRadius * 2,
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1),
+    },
   },
 }));

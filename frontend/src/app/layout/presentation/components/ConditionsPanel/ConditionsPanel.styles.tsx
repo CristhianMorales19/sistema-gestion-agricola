@@ -11,7 +11,7 @@ import { Cloud, Thermostat, WaterDrop, Air } from "@mui/icons-material";
 // Tarjeta glass
 export const GlassCard = styled(Card)(({ theme }) => ({
   background: `${theme.palette.background.default}`,
-  borderRadius: theme.shape.borderRadius * 4,
+  borderRadius: theme.shape.borderRadius * 2,
   border: `1px solid ${theme.palette.surface.light}80`,
   boxShadow: `
       5px 5px 5px ${theme.palette.primary.main}30,
@@ -26,6 +26,13 @@ export const CardContentStyled = styled(CardContent)(({ theme }) => ({
   "&:last-child": {
     paddingBottom: theme.spacing(3),
   },
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1.5),
+
+    "&:last-child": {
+      paddingBottom: theme.spacing(1.5),
+    },
+  },
 }));
 
 // Encabezado
@@ -34,6 +41,10 @@ export const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 // Icono de nube
@@ -47,11 +58,17 @@ export const TitleText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   fontSize: "1rem",
   fontWeight: 600,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.7rem",
+  },
 }));
 
 // Grid container
 export const ConditionsGrid = styled(Grid)(({ theme }) => ({
   gap: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(1),
+  },
 }));
 
 // Grid item
@@ -63,6 +80,9 @@ export const ConditionItemGrid = styled(Grid)(({ theme }) => ({
 export const ConditionItemBox = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.5),
+  },
 }));
 
 // Contenedor de icono
@@ -98,10 +118,17 @@ export const ConditionValue = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   marginBottom: theme.spacing(0.5),
   lineHeight: 1.2,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.9rem",
+  },
 }));
 
 // Etiqueta de condición
 export const ConditionLabel = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: "0.875rem",
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.7rem",
+  },
 }));

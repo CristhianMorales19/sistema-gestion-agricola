@@ -123,7 +123,7 @@ export const AdminDashboard = () => {
         return (
           <ContentContainer>
             {/* Stats Cards */}
-            <DashboardGrid container spacing={3}>
+            <DashboardGrid container spacing={1}>
               <DashboardGridItem item xs={12}>
                 <StatsCards stats={dashboardData?.stats || []} />
               </DashboardGridItem>

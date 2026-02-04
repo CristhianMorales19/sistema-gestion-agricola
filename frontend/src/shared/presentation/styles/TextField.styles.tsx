@@ -114,5 +114,39 @@ export const TextFieldGeneric = styled(TextField, {
         ? theme.palette.text.secondary
         : theme.palette.primary.light,
     },
+
+    [theme.breakpoints.down("sm")]: {
+      "& .MuiInputLabel-root": {
+        fontSize: "0.7rem",
+        top: "50%",
+        transform: "translate(12px, -50%) scale(1)",
+
+        "&.MuiInputLabel-shrink": {
+          top: 0,
+          transform: "translate(12px, -14px) scale(0.7)",
+        },
+      },
+
+      "& .MuiInputBase-input": {
+        padding: "6px 8px",
+        fontSize: "0.7rem",
+      },
+
+      "& .MuiOutlinedInput-root": {
+        borderRadius: theme.shape.borderRadius,
+      },
+
+      "& .MuiInputAdornment-root": {
+        marginRight: theme.spacing(0),
+      },
+
+      "& .MuiSelect-select": {
+        paddingRight: `${theme.spacing(1)} !important`,
+      },
+
+      "& .MuiInputAdornment-root svg": {
+        fontSize: "0.8rem",
+      },
+    },
   };
 });

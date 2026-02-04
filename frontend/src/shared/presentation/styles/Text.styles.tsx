@@ -17,6 +17,6 @@ export const TextGeneric = styled(Typography)<TypographyProps>(({ theme }) => ({
   textAlign: "center",
 
   [theme.breakpoints.down("sm")]: {
-    fontSize: "1.1rem",
+    fontSize: "0.9rem",
   },
 }));

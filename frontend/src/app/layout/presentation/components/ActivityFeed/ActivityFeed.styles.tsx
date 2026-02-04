@@ -13,7 +13,7 @@ import { Assessment } from "@mui/icons-material";
 // Tarjeta glass
 export const GlassCard = styled(Card)(({ theme }) => ({
   background: `${theme.palette.background.default}`,
-  borderRadius: theme.shape.borderRadius * 4,
+  borderRadius: theme.shape.borderRadius * 2,
   border: `1px solid ${theme.palette.surface.light}80`,
   boxShadow: `
       5px 5px 5px ${theme.palette.primary.main}20,
@@ -25,6 +25,10 @@ export const GlassCard = styled(Card)(({ theme }) => ({
 // Contenido de la tarjeta
 export const CardContentStyled = styled(CardContent)(({ theme }) => ({
   padding: theme.spacing(2),
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Encabezado
@@ -33,6 +37,10 @@ export const HeaderBox = styled(Box)(({ theme }) => ({
   alignItems: "center",
   gap: theme.spacing(1.5),
   marginBottom: theme.spacing(2),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 // Icono del título
@@ -46,6 +54,9 @@ export const TitleText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   fontSize: "1rem",
   fontWeight: 600,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.7rem",
+  },
 }));
 
 // Lista de actividades
@@ -64,6 +75,11 @@ export const ActivityItem = styled(ListItem, {
     border: `1px solid ${theme.palette.surface.light}40`,
     marginBottom: theme.spacing(1),
     padding: theme.spacing(1.5),
+
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1),
+      marginBottom: theme.spacing(0.5),
+    },
   };
 });
 
@@ -106,6 +122,9 @@ export const ActivityText = styled(Typography)(({ theme }) => ({
   fontSize: "0.875rem",
   fontWeight: 500,
   lineHeight: 1.4,
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+  },
 }));
 
 // Tiempo de la actividad
@@ -113,4 +132,7 @@ export const ActivityTime = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontSize: "0.75rem",
   marginTop: theme.spacing(0.5),
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+  },
 }));

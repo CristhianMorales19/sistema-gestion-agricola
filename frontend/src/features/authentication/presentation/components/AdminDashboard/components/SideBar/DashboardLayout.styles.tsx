@@ -11,7 +11,10 @@ import {
   Divider,
 } from "@mui/material";
 
-import { TOP_BAR_HEIGHT } from "../../../../../../../shared/presentation/components/ui/topBar/TopBar.styles";
+import {
+  TOP_BAR_HEIGHT,
+  TOP_BAR_HEIGHT_MOBILE,
+} from "../../../../../../../shared/presentation/components/ui/topBar/TopBar.styles";
 
 // Sidebar
 export const SidebarContainer = styled(Box)<{ open: boolean }>(
@@ -47,6 +50,12 @@ export const SidebarContainer = styled(Box)<{ open: boolean }>(
       backgroundColor: theme.palette.primary.main,
       borderRadius: 2,
     },
+
+    [theme.breakpoints.down("sm")]: {
+      width: 200,
+      top: TOP_BAR_HEIGHT_MOBILE,
+      height: `calc(100vh - ${TOP_BAR_HEIGHT_MOBILE}px)`,
+    },
   }),
 );
 
@@ -59,7 +68,7 @@ export const NavigationItem = styled(ListItem)(({ theme }) => ({
 export const NavigationButton = styled(ListItemButton, {
   shouldForwardProp: (prop) => prop !== "active",
 })<{ active?: boolean }>(({ theme, active }) => ({
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: theme.shape.borderRadius * 1,
   backgroundColor: active
     ? `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
     : "transparent",
@@ -92,6 +101,10 @@ export const NavigationButton = styled(ListItemButton, {
   "&:active": {
     transform: "translateX(2px) scale(0.98)",
   },
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.5),
+  },
 }));
 
 export const StyledListItemIcon = styled(ListItemIcon, {
@@ -103,6 +116,13 @@ export const StyledListItemIcon = styled(ListItemIcon, {
   "&:hover": {
     color: theme.palette.primary.light,
     transform: "scale(1.1)",
+  },
+
+  [theme.breakpoints.down("sm")]: {
+    minWidth: 32,
+    "& svg": {
+      fontSize: "0.9rem",
+    },
   },
 }));
 
@@ -116,6 +136,10 @@ export const StyledListItemText = styled(ListItemText, {
     transition: "all 0.3s ease",
     "&:hover": {
       color: theme.palette.text.primary,
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.6rem",
     },
   },
 }));
@@ -135,6 +159,10 @@ export const ActiveIndicator = styled(Box)(({ theme }) => ({
 export const NavigationListContainer = styled(Box)(({ theme }) => ({
   flex: 1,
   padding: theme.spacing(2),
+
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // User Profile Section
@@ -142,6 +170,9 @@ export const UserProfileSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   borderTop: `1px solid ${theme.palette.surface.light}`,
   background: `linear-gradient(135deg, ${theme.palette.surface.main} 0%, ${theme.palette.background.default} 100%)`,
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1.5),
+  },
 }));
 
 export const UserProfileContainer = styled(Box)(({ theme }) => ({
@@ -174,6 +205,11 @@ export const StyledAvatar = styled(Avatar)(({ theme }) => ({
     transform: "scale(1.05)",
     boxShadow: `0 6px 16px -2px ${theme.palette.primary.main}60`,
   },
+
+  [theme.breakpoints.down("sm")]: {
+    width: 36,
+    height: 36,
+  },
 }));
 
 export const UserInfoContainer = styled(Box)(() => ({
@@ -184,6 +220,9 @@ export const UserName = styled(Typography)(({ theme }) => ({
   fontWeight: 700,
   color: theme.palette.text.primary,
   fontSize: "0.95rem",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.75rem",
+  },
 }));
 
 export const UserRole = styled(Typography)(({ theme }) => ({
@@ -197,6 +236,11 @@ export const UserRole = styled(Typography)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   display: "inline-block",
   fontSize: "0.75rem",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.6rem",
+    paddingLeft: theme.spacing(0.5),
+    paddingRight: theme.spacing(0.5),
+  },
 }));
 
 // Role Buttons Container
@@ -219,7 +263,7 @@ export const RoleButton = styled(Button, {
   textTransform: "none",
   justifyContent: "flex-start",
   fontSize: "0.75rem",
-  borderRadius: theme.shape.borderRadius * 1.5,
+  borderRadius: theme.shape.borderRadius * 1,
   padding: theme.spacing(1),
   transition: "all 0.3s ease",
 
@@ -244,6 +288,11 @@ export const RoleButton = styled(Button, {
         : theme.palette.primary.main
     }30`,
   },
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.65rem",
+    padding: theme.spacing(0.5),
+  },
 }));
 
 // Action Buttons Container
@@ -264,6 +313,11 @@ export const ActionButton = styled(Button)(({ theme }) => ({
     backgroundColor: `${theme.palette.primary.main}10`,
     transform: "translateX(4px)",
   },
+
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.65rem",
+    padding: theme.spacing(0.5),
+  },
 }));
 
 export const LogoutButton = styled(Button)(({ theme }) => ({
@@ -277,6 +331,10 @@ export const LogoutButton = styled(Button)(({ theme }) => ({
     color: theme.palette.text.secondary,
     backgroundColor: `${theme.palette.text.secondary}10`,
     transform: "translateX(4px)",
+  },
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.65rem",
+    padding: theme.spacing(0.5),
   },
 }));
 
@@ -300,12 +358,19 @@ export const BackgroundContainer = styled(Box)(({ theme }) => ({
   position: "relative",
 }));
 
-export const MainContent = styled(Box)<{ open: boolean }>(({ open }) => ({
-  marginTop: TOP_BAR_HEIGHT,
-  marginLeft: open ? 280 : 0,
-  transition: "margin-left 0.3s ease",
-  minHeight: `calc(100vh - ${TOP_BAR_HEIGHT}px)`,
-  display: "flex",
-  flexDirection: "column",
-  width: "100%",
-}));
+export const MainContent = styled(Box)<{ open: boolean }>(
+  ({ open, theme }) => ({
+    marginTop: TOP_BAR_HEIGHT,
+    // marginLeft: open ? 280 : 0,
+    transition: "margin-left 0.3s ease",
+    minHeight: `calc(100vh - ${TOP_BAR_HEIGHT}px)`,
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: 0,
+      marginTop: TOP_BAR_HEIGHT_MOBILE,
+      minHeight: `calc(100vh - ${TOP_BAR_HEIGHT_MOBILE}px)`,
+    },
+  }),
+);

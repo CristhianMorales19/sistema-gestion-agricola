@@ -77,6 +77,7 @@ export const ButtonGeneric = styled(Button)<{ disabled?: boolean }>(
 
     [theme.breakpoints.down("sm")]: {
       fontSize: "0.60rem",
+      padding: theme.spacing(0.1, 0.1),
     },
   }),
 );

@@ -17,6 +17,7 @@ import {
   SectionContainer,
   SectionHeader,
 } from "./CrewMembersTable.styles";
+import { InputAdornment } from "@mui/material";
 
 interface CrewMembersTableProps {
   employees: Employee[];
@@ -66,7 +67,11 @@ export const CrewMembersTable = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             fullWidth
             InputProps={{
-              startAdornment: <Search />,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
             }}
           />
         </SearchInputContainer>

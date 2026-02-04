@@ -292,7 +292,7 @@ export const EmployeeManagementView = () => {
               startIcon={<AddIcon />}
               onClick={handleAddEmployeeClick}
             >
-              Crear Empleado
+              Crear
             </ButtonGeneric>
           </HeaderButtonContainer>
         )}
