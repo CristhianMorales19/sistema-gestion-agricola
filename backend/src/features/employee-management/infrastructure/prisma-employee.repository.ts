@@ -12,6 +12,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
 
   async findAll(): Promise<Employee[]> {
     const employees = await this.prisma.mom_trabajador.findMany({
+      where: { deleted_at: null },
       include: {
         mot_info_laboral: {
           select: {
@@ -70,7 +71,9 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
 
   async existsByIdentification(identification: string): Promise<boolean> {
     const t = await this.prisma.mom_trabajador.findUnique({
-      where: { documento_identidad: identification },
+      where: {
+        documento_identidad: identification,
+      },
     });
     return t !== null;
   }
@@ -103,27 +106,41 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       await tx.moh_trabajador_historial.deleteMany({
         where: { trabajador_id: id },
       });
-      await tx.mot_asignacion_cuadrilla.deleteMany({
-        where: { trabajador_id: id },
-      });
       await tx.mot_asignacion_tarea.deleteMany({
         where: { trabajador_id: id },
       });
-      await tx.mot_asistencia.deleteMany({ where: { trabajador_id: id } });
+      await tx.mot_asistencia.deleteMany({
+        where: { trabajador_id: id },
+      });
       await tx.mot_ausencia_justificada.deleteMany({
         where: { trabajador_id: id },
       });
       await tx.mot_deduccion_especial.deleteMany({
         where: { trabajador_id: id },
       });
-      await tx.mot_info_laboral.deleteMany({ where: { trabajador_id: id } });
-      await tx.mot_liquidacion.deleteMany({ where: { trabajador_id: id } });
+      await tx.mot_info_laboral.deleteMany({
+        where: { trabajador_id: id },
+      });
+      await tx.mot_liquidacion.deleteMany({
+        where: { trabajador_id: id },
+      });
       await tx.mot_registro_productividad.deleteMany({
         where: { trabajador_id: id },
       });
-      await tx.mot_usuario.deleteMany({ where: { trabajador_id: id } });
-      await tx.mom_trabajador.delete({
+      await tx.mot_usuario.deleteMany({
         where: { trabajador_id: id },
+      });
+      await tx.mot_asignacion_cuadrilla.deleteMany({
+        where: { trabajador_id: id },
+      });
+
+      await tx.mom_trabajador.update({
+        where: { trabajador_id: id },
+        data: {
+          deleted_at: new Date(),
+          activo: false,
+          cuadrilla_id: null,
+        },
       });
     });
   }
@@ -161,6 +178,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
     const employees = await this.prisma.mom_trabajador.findMany({
       where: {
         cuadrilla_id: null,
+        deleted_at: null,
       },
       include: {
         mot_info_laboral: {

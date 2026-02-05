@@ -45,7 +45,7 @@ export class EmployeeController {
       });
     } catch (error: any) {
       console.error(error);
-      if (error.message.includes("cédula")) {
+      if (error.message.includes("Cédula")) {
         return res.status(409).json({
           success: false,
           message: error.message,

@@ -47,7 +47,7 @@ export class CrewController {
         });
       }
 
-      if (error.message.includes("Ya existe")) {
+      if (error.message.includes("Código")) {
         return res.status(409).json({
           success: false,
           message: error.message,
@@ -108,7 +108,7 @@ export class CrewController {
 
     try {
       const userId = (_req as any).user.usuario_id;
-      await this.deleteCrew.execute(crewId, userId);
+      await this.deleteCrew.execute(userId, crewId);
 
       res.json({
         success: true,

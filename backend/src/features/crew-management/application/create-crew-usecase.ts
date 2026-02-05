@@ -7,7 +7,7 @@ export class CreateCrewUseCase {
   async execute(data: CreateCrewDTO, userId: number) {
     const existsCrew = await this.repo.existsByCode(data.code);
     if (existsCrew) {
-      throw new Error("Ya existe una cuadrilla con el código asignado");
+      throw new Error("Código no disponible");
     }
 
     if (data.workers?.length) {

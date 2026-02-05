@@ -36,7 +36,7 @@ router.get(
   "/",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission("trabajadores:delete"),
+  requirePermission("cuadrillas:read"),
   controller.getAll,
 );
 
@@ -44,7 +44,7 @@ router.get(
   "/:query",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission("trabajadores:delete"),
+  requirePermission("cuadrillas:read"),
   controller.search,
 );
 
@@ -52,7 +52,7 @@ router.post(
   "/",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission("trabajadores:delete"),
+  requirePermission("cuadrillas:create"),
   validateBody(CreateCrewSchema),
   controller.create,
 );
@@ -61,7 +61,7 @@ router.patch(
   "/:id",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission("trabajadores:delete"),
+  requirePermission("cuadrillas:update"),
   validateBody(UpdateCrewSchema),
   controller.update,
 );
@@ -70,7 +70,7 @@ router.delete(
   "/:id",
   checkJwt,
   agroManoAuthMiddleware,
-  requirePermission("trabajadores:delete"),
+
   controller.delete,
 );
 

@@ -94,7 +94,7 @@ router.put(
   "/:id",
   checkJwt,
   agroManoAuthMiddleware,
-  requireAnyPermission(["trabajadores:read:all", "trabajadores:read:own"]),
+  requireAnyPermission(["trabajadores:update:all", "trabajadores:update:own"]),
   validateBody(UpdateEmployeeSchema),
   controller.update,
 );

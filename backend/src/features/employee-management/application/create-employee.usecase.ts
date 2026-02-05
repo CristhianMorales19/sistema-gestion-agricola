@@ -26,7 +26,7 @@ export class CreateEmployeeUseCase {
     const exists = await this.repo.existsByIdentification(data.identification);
 
     if (exists) {
-      throw new Error("Ya existe un trabajador con esta cédula");
+      throw new Error("Cédula no disponible");
     }
 
     await this.repo.create(

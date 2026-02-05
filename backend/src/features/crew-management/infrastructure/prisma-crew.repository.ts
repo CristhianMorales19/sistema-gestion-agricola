@@ -7,6 +7,7 @@ export class PrimaCrewRepository implements CrewRepository {
 
   async findAll(): Promise<Crew[]> {
     const crews = await this.prisma.mom_cuadrilla.findMany({
+      where: { deleted_at: null },
       include: {
         mom_trabajador: {
           select: {
@@ -127,12 +128,12 @@ export class PrimaCrewRepository implements CrewRepository {
         const oldWorkersIds = oldWorkers.map((o) => o.trabajador_id);
 
         // 3. Si los antiguos empleados no aparecen en los nuevos empleados asignados
-        // desactivamos la relacion
+        // eliminamos la relacion
         const deleteWorkers = oldWorkersIds.filter(
           (w) => !data.workers?.includes(w),
         );
         if (deleteWorkers.length > 0) {
-          await tx.mot_asignacion_cuadrilla.updateMany({
+          await tx.mot_asignacion_cuadrilla.deleteMany({
             where: {
               AND: [
                 {
@@ -140,11 +141,6 @@ export class PrimaCrewRepository implements CrewRepository {
                   cuadrilla_id: crewId,
                 },
               ],
-            },
-            data: {
-              activa: false,
-              usuario_retiro: userId,
-              fecha_retiro_at: new Date(),
             },
           });
 
@@ -201,20 +197,21 @@ export class PrimaCrewRepository implements CrewRepository {
         },
       });
 
-      await tx.mot_asignacion_cuadrilla.updateMany({
+      await tx.mot_asignacion_cuadrilla.deleteMany({
         where: {
           cuadrilla_id: crewId,
           activa: true,
         },
-        data: {
-          activa: false,
-          usuario_retiro: userId,
-          fecha_retiro_at: new Date(),
-        },
       });
 
-      await tx.mom_cuadrilla.delete({
+      await tx.mom_cuadrilla.update({
         where: { cuadrilla_id: crewId },
+        data: {
+          deleted_at: new Date(),
+          activa: false,
+          updated_by: userId,
+          updated_at: new Date(),
+        },
       });
     });
   }
@@ -222,6 +219,7 @@ export class PrimaCrewRepository implements CrewRepository {
   async search(query: string): Promise<Crew[]> {
     const crews = await this.prisma.mom_cuadrilla.findMany({
       where: {
+        deleted_at: null,
         OR: [
           { codigo_identificador: { contains: query.toLowerCase() } },
           { area_trabajo: { contains: query.toLowerCase() } },

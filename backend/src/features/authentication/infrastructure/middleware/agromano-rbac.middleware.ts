@@ -166,7 +166,13 @@ export type AgroManoPermission =
   | "mobile:access"
   | "mobile:sync"
   | "gps:track"
-  | "photos:upload";
+  | "photos:upload"
+
+  // Cuadrillas
+  | "cuadrillas:create"
+  | "cuadrillas:read"
+  | "cuadrillas:update"
+  | "cuadrillas:delete";
 
 // Roles del sistema según la matriz
 export const AGROMANO_ROLES = {
@@ -245,6 +251,10 @@ export const ROLE_PERMISSIONS: Record<string, AgroManoPermission[]> = {
     "mobile:sync",
     "gps:track",
     "photos:upload",
+    "cuadrillas:create",
+    "cuadrillas:read",
+    "cuadrillas:update",
+    "cuadrillas:delete",
   ],
 
   [AGROMANO_ROLES.SUPERVISOR_CAMPO]: [
